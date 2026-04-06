@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Countdown from "@/components/Countdown";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import LiveSessionCounter from "@/components/LiveSessionCounter";
 
 const APRIL_18 = "2026-04-18T05:00:00-04:00";
 
@@ -91,6 +92,7 @@ export default function Home() {
             Download Non Magic ↗
           </a>
         </div>
+        <LiveSessionCounter />
       </section>
 
       {/* April 18 countdown bar */}
