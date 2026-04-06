@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Countdown from "@/components/Countdown";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const APRIL_18 = "2026-04-18T05:00:00-04:00";
 
@@ -217,27 +218,7 @@ export default function Home() {
       <section className="border-t border-[#222222] py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="max-w-xl">
-            <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-4">
-              Newsletter
-            </p>
-            <h2 className="text-2xl font-light mb-2">The WMG Weekly</h2>
-            <p className="text-[#888888] text-sm mb-6">
-              1 deep-dive article. 1 science note. 1 community spotlight. 1 NYC event.
-              Every Sunday.
-            </p>
-            <form className="flex gap-0">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="flex-1 bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666]"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors whitespace-nowrap"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterSignup variant="inline" />
           </div>
         </div>
       </section>
