@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wateringmygrass.com/sitemap.xml
