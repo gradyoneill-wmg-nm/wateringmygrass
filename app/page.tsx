@@ -62,12 +62,12 @@ export default function Home() {
         <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-8">
           Est. 2026 — NYC
         </p>
-        <h1 className="text-4xl md:text-7xl font-light leading-[1.05] tracking-[-0.02em] max-w-4xl mb-8">
+        <h1 className="text-5xl md:text-8xl font-bold leading-[1.0] tracking-[-0.03em] max-w-4xl mb-8">
           This is not magic.
           <br />
-          It&apos;s science.
+          It is science.
           <br />
-          <span className="text-[#888888]">And it&apos;s for all of us.</span>
+          <span className="text-[#888888]">And it is for all of us.</span>
         </h1>
         <p className="text-[#888888] text-lg md:text-xl font-light max-w-xl leading-relaxed mb-12">
           Everybody wants a village. No one wants to be a villager.
@@ -177,14 +177,38 @@ export default function Home() {
               Frequency-based meditation sessions — Gamma, Alpha, Theta, Delta. Built on
               the science WMG covers. Required for April 18 participants.
             </p>
-            <a
-              href="https://nonmagic.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors"
-            >
-              Download Non Magic ↗
-            </a>
+            <div className="flex flex-wrap gap-4">
+              {/* App Store button */}
+              <a
+                href="https://nonmagic.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-5 py-3 bg-white text-black hover:bg-[#e0e0e0] transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                </svg>
+                <div className="flex flex-col text-left">
+                  <span className="text-[9px] tracking-[0.1em] uppercase leading-none mb-0.5">Download on the</span>
+                  <span className="text-sm font-semibold leading-none">App Store</span>
+                </div>
+              </a>
+              {/* Google Play placeholder */}
+              <a
+                href="https://nonmagic.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-5 py-3 border border-[#333333] text-white hover:border-white transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3.18 23.76c.3.17.64.24.99.2l12.6-7.27-2.72-2.72-10.87 9.79zM.5 1.4C.19 1.74 0 2.28 0 2.98v18.04c0 .7.19 1.24.5 1.57l.08.08 10.1-10.1v-.24L.58 1.32.5 1.4zM20.4 10.37l-2.72-1.57-3.07 3.07 3.07 3.07 2.75-1.59c.78-.45.78-1.53-.03-1.98zM4.17.28L16.77 7.5l-2.72 2.72L3.18.43A1.17 1.17 0 014.17.28z" />
+                </svg>
+                <div className="flex flex-col text-left">
+                  <span className="text-[9px] tracking-[0.1em] uppercase leading-none mb-0.5 text-[#888888]">Get it on</span>
+                  <span className="text-sm font-semibold leading-none">Google Play</span>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
       </section>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Nav from "@/components/Nav";
+import Navigation from "@/components/Navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,11 +18,26 @@ export const metadata: Metadata = {
   description:
     "A community-driven wellness publication built around meditation and frequency science. NYC-based, globally accessible.",
   openGraph: {
-    title: "Watering My Grass",
+    title: "Watering My Grass — Science, Community, Practice",
     description:
-      "Everybody wants a village. No one wants to be a villager.",
+      "Everybody wants a village. No one wants to be a villager. This is not magic. It is science. And it is for all of us.",
     siteName: "Watering My Grass",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Watering My Grass",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Watering My Grass — Science, Community, Practice",
+    description:
+      "Everybody wants a village. No one wants to be a villager.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -37,7 +52,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#0a0a0a] text-white">
-        <Nav />
+        <Navigation />
         <main className="flex-1">{children}</main>
         <footer className="border-t border-[#222222] py-12 px-6 mt-20">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
