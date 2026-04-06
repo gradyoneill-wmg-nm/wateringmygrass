@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Articles — Watering My Grass",
@@ -165,9 +166,12 @@ export default function ArticlesPage() {
                 {/* Status / CTA */}
                 <div className="md:w-28 flex-shrink-0 flex md:justify-end">
                   {article.status === "available" ? (
-                    <button className="text-[9px] tracking-[0.2em] uppercase text-[#888888] hover:text-white transition-colors">
+                    <Link
+                      href={`/articles/${article.slug}`}
+                      className="text-[9px] tracking-[0.2em] uppercase text-[#888888] hover:text-white transition-colors"
+                    >
                       Read →
-                    </button>
+                    </Link>
                   ) : (
                     <span className="text-[9px] tracking-[0.2em] uppercase text-[#444444]">
                       Coming soon
