@@ -123,10 +123,10 @@ export default function ArticlesPage() {
           {tags.map((tag) => (
             <button
               key={tag}
-              className={`text-[9px] tracking-[0.2em] uppercase px-3 py-1.5 whitespace-nowrap transition-colors ${
+              className={`text-[9px] tracking-[0.2em] uppercase px-3 py-1.5 whitespace-nowrap transition-colors font-space-mono ${
                 tag === "All"
-                  ? "bg-white text-black"
-                  : "border border-[#333333] text-[#666666] hover:border-[#666666] hover:text-white"
+                  ? "bg-[#F5841F] text-black"
+                  : "border border-[#333333] text-[#666666] hover:border-[#F5841F]/50 hover:text-[#F5841F]"
               }`}
             >
               {tag}
@@ -143,11 +143,11 @@ export default function ArticlesPage() {
               <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
                 {/* Meta */}
                 <div className="md:w-40 flex-shrink-0 flex md:flex-col gap-3 md:gap-2">
-                  <span className="text-[9px] tracking-[0.25em] uppercase text-[#555555] border border-[#333333] px-2 py-0.5 self-start">
+                  <span className="text-[9px] tracking-[0.25em] uppercase text-[#F5841F] border border-[#F5841F]/30 px-2 py-0.5 self-start">
                     {article.tag}
                   </span>
-                  <span className="text-[9px] text-[#444444] md:mt-1">{article.date}</span>
-                  <span className="text-[9px] text-[#444444]">{article.readTime} read</span>
+                  <span className="text-[9px] text-[#444444] md:mt-1 font-space-mono">{article.date}</span>
+                  <span className="text-[9px] text-[#444444] font-space-mono">{article.readTime} read</span>
                 </div>
 
                 {/* Content */}
