@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watering My Grass</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--g:#4CBB17;--o:#F5841F;--k:#0C0C0A;--w:#F5F0E8;--b:#2D4E9E;}
+html{scroll-behavior:smooth;}
+body{background:var(--k);color:var(--w);font-family:'Space Mono',monospace;overflow-x:hidden;cursor:none;}
+
+/* CUSTOM CURSOR — Kelly green dot, grows on hover */
+#cursor{position:fixed;width:10px;height:10px;background:var(--g);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.15s,height 0.15s;mix-blend-mode:exclusion;}
+.cursor-large{width:44px!important;height:44px!important;}
+
+/* ANIMATED GRAIN — like real 16mm film */
+body::after{content:'';position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:9990;opacity:0.09;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+animation:grain 0.4s steps(1) infinite;mix-blend-mode:overlay;}
+@keyframes grain{
+0%{transform:translate(0,0)}8%{transform:translate(-3%,-1%)}17%{transform:translate(1%,3%)}25%{transform:translate(-2%,2%)}33%{transform:translate(3%,-2%)}42%{transform:translate(-1%,-3%)}50%{transform:translate(2%,1%)}58%{transform:translate(-3%,3%)}67%{transform:translate(1%,-1%)}75%{transform:translate(-2%,-2%)}83%{transform:translate(3%,2%)}92%{transform:translate(-1%,1%)}100%{transform:translate(0,0)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 48px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(76,187,23,0.08);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--g);text-decoration:none;}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#333;text-decoration:none;position:relative;transition:color 0.2s;}
+.nav-links a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--g);transition:width 0.3s ease;}
+.nav-links a:hover{color:var(--g);}
+.nav-links a:hover::after{width:100%;}
+
+/* ══════════════════════════════════════
+   HERO — laxspace.co energy
+   Pure color, theatrical, masks concept
+══════════════════════════════════════ */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden;}
+
+/* LEFT — pure type, kalypsodesigns energy */
+.hero-left{display:flex;flex-direction:column;justify-content:center;padding:120px 48px 80px;position:relative;z-index:2;}
+
+/* BASQUIAT SCRAWL LAYER */
+.basquiat-layer{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;}
+
+.hero-kicker{font-size:9px;letter-spacing:6px;color:var(--g);text-transform:uppercase;margin-bottom:28px;display:flex;align-items:center;gap:12px;opacity:0;animation:snapIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.3s forwards;}
+.hero-kicker::before{content:'';width:32px;height:1px;background:var(--g);}
+
+/* MASSIVE TYPE — kalypsodesigns pure type as design */
+.hero-headline{margin-bottom:0;}
+.h-line{display:block;font-family:'Playfair Display',serif;font-weight:900;line-height:0.88;letter-spacing:-5px;overflow:hidden;}
+.h-inner{display:block;transform:translateY(100%);opacity:0;}
+.h1{font-size:clamp(72px,10vw,148px);color:var(--w);}
+.h2{font-size:clamp(48px,6.5vw,96px);color:var(--g);font-style:italic;padding-left:40px;}
+.h3{font-size:clamp(72px,10vw,148px);color:var(--k);-webkit-text-stroke:2px var(--g);}
+
+/* Word broken across lines — @design4me_ */
+.break-word{display:block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#222;text-transform:uppercase;margin-top:20px;opacity:0;animation:snapIn 0.4s ease 1.4s forwards;}
+
+.hero-sub{max-width:400px;font-size:11px;color:#555;line-height:2;margin:32px 0;border-left:2px solid var(--g);padding-left:16px;opacity:0;animation:snapIn 0.4s ease 1.6s forwards;}
+
+.hero-cta-wrap{display:flex;gap:20px;align-items:center;opacity:0;animation:snapIn 0.4s ease 1.8s forwards;}
+.btn{background:var(--g);color:var(--k);padding:13px 28px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;border:none;cursor:none;text-decoration:none;display:inline-block;position:relative;overflow:hidden;transition:box-shadow 0.3s;}
+.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.15);transform:translateX(-100%);transition:transform 0.4s ease;}
+.btn:hover::before{transform:translateX(0);}
+.btn:hover{box-shadow:0 0 48px rgba(76,187,23,0.5);}
+
+/* RIGHT — dot painting + helmet */
+.hero-right{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+
+/* DOT PAINTING — aboriginal reference, concentric rings */
+#dot-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+/* HELMET */
+.helmet-scene{position:relative;z-index:3;width:320px;height:380px;}
+.helmet-outer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;animation:helmetBreathe 4s ease-in-out infinite;transform-origin:center;}
+@keyframes helmetBreathe{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.008) translateY(-4px)}}
+.helmet-outer{transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.5s;}
+.helmet-scene:hover .helmet-outer{transform:translateY(-120%) rotate(-10deg)!important;opacity:0;animation:none!important;}
+.roach-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.roach-scene svg{transform:scale(0.85) translateY(8px);transition:transform 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.1s;}
+.helmet-scene:hover .roach-scene svg{transform:scale(1) translateY(0);}
+/* Antennae wiggle after reveal */
+.helmet-scene:hover .antenna-l{animation:antennaL 0.8s ease 0.6s forwards;}
+.helmet-scene:hover .antenna-r{animation:antennaR 0.8s ease 0.6s forwards;}
+@keyframes antennaL{0%{transform:rotate(0)}30%{transform:rotate(-15deg)}60%{transform:rotate(8deg)}100%{transform:rotate(0)}}
+@keyframes antennaR{0%{transform:rotate(0)}30%{transform:rotate(15deg)}60%{transform:rotate(-8deg)}100%{transform:rotate(0)}}
+
+.reveal-hint{position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:4px;color:#222;text-transform:uppercase;white-space:nowrap;transition:opacity 0.3s;}
+.helmet-scene:hover .reveal-hint{opacity:0;}
+
+@keyframes snapIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════
+   MARQUEE — accelerates
+══════════════════════ */
+.marquee{background:var(--g);padding:10px 0;overflow:hidden;position:relative;}
+.marquee-inner{display:flex;white-space:nowrap;animation:ticker 22s linear infinite;}
+.marquee:hover .marquee-inner{animation-duration:8s;}
+.mi{font-size:9px;font-weight:700;letter-spacing:4px;color:rgba(0,0,0,0.4);text-transform:uppercase;padding:0 24px;flex-shrink:0;}
+.mi.bold{color:rgba(0,0,0,0.75);}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ══════════════════════════════════
+   STAT STRIP — @kalypsodesigns pure type
+   "N=24." one number. in orange.
+══════════════════════════════════ */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #1a1a18;border-bottom:1px solid #1a1a18;}
+.stat{padding:40px 48px;border-right:1px solid #1a1a18;position:relative;overflow:hidden;}
+.stat:last-child{border-right:none;}
+.stat-num{font-family:'Playfair Display',serif;font-size:clamp(56px,6vw,96px);font-weight:900;letter-spacing:-4px;line-height:1;color:var(--w);}
+.stat-num span{color:var(--o);}
+.stat-label{font-size:8px;letter-spacing:4px;color:#333;text-transform:uppercase;margin-top:8px;}
+.stat-cite{font-size:8px;color:#222;letter-spacing:1px;margin-top:12px;line-height:1.8;}
+.stat-cite b{color:var(--g);}
+/* Number counts up */
+.count-num{display:inline-block;}
+
+/* ══════════════════════════════════
+   ARTICLES — type as design (REF-008)
+══════════════════════════════════ */
+.articles-section{padding:80px 0;border-top:1px solid #1a1a18;}
+.articles-header{display:flex;justify-content:space-between;align-items:flex-end;padding:0 48px 0;border-bottom:2px solid #1a1a18;padding-bottom:16px;margin-bottom:0;}
+.section-hed{font-family:'Playfair Display',serif;font-size:clamp(40px,5vw,60px);font-weight:900;letter-spacing:-2px;line-height:1;}
+.section-hed em{color:var(--g);font-style:italic;}
+.article-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#1a1a18;}
+.ac{background:var(--k);padding:28px;display:flex;flex-direction:column;gap:10px;text-decoration:none;position:relative;overflow:hidden;transition:background 0.3s;}
+.ac:hover{background:#0e0e0c;}
+.ac::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);transform:scaleX(0);transform-origin:left;transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);}
+.ac:hover::before,.ac.feat::before{transform:scaleX(1);}
+.ac.feat{grid-column:span 2;grid-row:span 2;}
+.ac-kicker{font-size:8px;letter-spacing:3px;color:var(--g);text-transform:uppercase;}
+.ac-title{font-family:'Playfair Display',serif;font-weight:900;color:var(--w);line-height:1.15;font-size:17px;flex:1;}
+.ac-title.big{font-size:32px;letter-spacing:-1px;}
+.ac-title em{color:var(--g);font-style:italic;}
+.ac-body{font-size:11px;color:#444;line-height:1.7;}
+.ac-cite{font-size:8px;color:#222;letter-spacing:0.5px;border-top:1px solid #111;padding-top:10px;margin-top:auto;}
+.ac-cite b{color:var(--g);}
+
+/* ══════════════════════════════════
+   CLAIM REVEAL — laxspace "masks" energy
+   "stories converge / masks become"
+══════════════════════════════════ */
+.claims-section{background:#050504;border-top:1px solid #111;padding:80px 48px;}
+.claims-header{text-align:center;margin-bottom:64px;}
+.claims-header h2{font-family:'Playfair Display',serif;font-size:clamp(40px,5vw,64px);font-weight:900;font-style:italic;color:var(--w);letter-spacing:-2px;line-height:1.1;}
+.claims-header h2 span{color:var(--g);}
+.claims-header p{font-size:8px;color:#222;letter-spacing:4px;text-transform:uppercase;margin-top:12px;}
+.claims-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#111;}
+.claim-card{position:relative;height:300px;overflow:hidden;background:var(--k);}
+.claim-front,.claim-back{position:absolute;inset:0;padding:28px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform 0.6s cubic-bezier(0.4,0,0.2,1),opacity 0.5s;}
+.claim-front{z-index:2;border:0;}
+/* Front: the mask — dark, ominous */
+.cf-tag{font-size:7px;letter-spacing:4px;color:#1e1e1c;text-transform:uppercase;margin-bottom:10px;}
+.cf-claim{font-family:'Playfair Display',serif;font-size:19px;font-style:italic;color:var(--w);line-height:1.3;}
+/* Back: the science — Kelly green */
+.claim-back{background:var(--g);z-index:1;}
+.cb-tag{font-size:7px;letter-spacing:4px;color:rgba(0,0,0,0.3);text-transform:uppercase;margin-bottom:8px;}
+.cb-science{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--k);line-height:1.3;margin-bottom:12px;}
+.cb-cite{font-size:9px;color:rgba(0,0,0,0.4);line-height:1.9;}
+/* The lift — like visor rising */
+.claim-card:hover .claim-front{transform:translateY(-110%);opacity:0;}
+/* Subtle shine on back */
+.claim-back::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 60%);pointer-events:none;}
+
+/* ══════════════════════════════════
+   EVIDENCE MAP — @jesserurka node graph
+   Nodes appear, lines draw, all breathe
+══════════════════════════════════ */
+.evidence-section{background:#050504;padding:80px 48px;border-top:1px solid #111;}
+.evidence-top{display:grid;grid-template-columns:1fr 2fr;gap:64px;align-items:start;margin-bottom:48px;}
+.evidence-hed{font-family:'Playfair Display',serif;font-size:clamp(40px,5vw,60px);font-weight:900;color:var(--w);letter-spacing:-2px;line-height:1;}
+.evidence-hed em{color:var(--g);font-style:italic;}
+.evidence-desc{font-size:11px;color:#444;line-height:1.9;padding-top:8px;}
+.legend{display:flex;flex-direction:column;gap:10px;margin-top:24px;}
+.legend-item{display:flex;align-items:center;gap:10px;font-size:8px;letter-spacing:2px;color:#333;text-transform:uppercase;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+#evidence-svg{width:100%;height:480px;display:block;}
+
+/* ══════════════════════════════════
+   MANIFESTO — @milktreeagency
+   Raw. Unfinished. Almost broken.
+══════════════════════════════════ */
+.manifesto-section{padding:0;display:grid;grid-template-columns:1fr 1fr;min-height:60vh;border-top:1px solid #111;}
+.manifesto-left{background:var(--g);padding:80px 48px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+.manifesto-left::before{content:'"';font-family:'Playfair Display',serif;font-size:320px;color:rgba(0,0,0,0.06);position:absolute;top:-60px;left:10px;line-height:1;pointer-events:none;}
+.manifesto-quote{font-family:'Playfair Display',serif;font-size:clamp(20px,2.5vw,32px);font-weight:700;font-style:italic;color:var(--k);line-height:1.4;position:relative;z-index:1;}
+.manifesto-attr{font-family:'Space Mono',monospace;font-size:9px;color:rgba(0,0,0,0.4);letter-spacing:3px;margin-top:24px;text-transform:uppercase;}
+.manifesto-right{padding:80px 48px;display:flex;flex-direction:column;justify-content:center;background:#080807;}
+/* @kalypsodesigns — pure type. ONE word in orange. */
+.big-statement{font-family:'Playfair Display',serif;font-size:clamp(40px,5vw,72px);font-weight:900;color:var(--w);letter-spacing:-2px;line-height:1.1;margin-bottom:32px;}
+.big-statement .accent{color:var(--o);}
+.big-statement .break{display:block;}
+
+/* ══════════════════════
+   FOOTER
+══════════════════════ */
+footer{background:#030302;border-top:1px solid #111;padding:40px 48px;display:flex;justify-content:space-between;align-items:flex-end;}
+.f-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--g);letter-spacing:-1px;}
+.f-legal{font-size:8px;color:#111;letter-spacing:2px;margin-top:6px;text-transform:uppercase;}
+.f-nav{display:flex;gap:24px;}
+.f-nav a{font-size:9px;letter-spacing:2px;color:#1a1a18;text-decoration:none;text-transform:uppercase;transition:color 0.2s;}
+.f-nav a:hover{color:var(--g);}
+
+/* SCROLL ANIMATIONS */
+.sr{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s cubic-bezier(0.34,1.2,0.64,1);}
+.sr.on{opacity:1;transform:translateY(0);}
+.sr.d1{transition-delay:0.08s;}
+.sr.d2{transition-delay:0.16s;}
+.sr.d3{transition-delay:0.24s;}
+.sr.d4{transition-delay:0.32s;}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- BASQUIAT SVG SCRAWL LAYER over hero -->
+<svg class="basquiat-layer" viewBox="0 0 800 900" style="position:fixed;inset:0;width:50%;height:100vh;pointer-events:none;z-index:1;opacity:0.12;top:0;left:0;">
+  <!-- Crown -->
+  <polygon points="120,80 140,50 160,72 180,50 200,72 220,50 240,80" fill="none" stroke="#4CBB17" stroke-width="3" stroke-linejoin="round"/>
+  <line x1="120" y1="80" x2="240" y2="80" stroke="#4CBB17" stroke-width="3"/>
+  <!-- Crossed out words -->
+  <text x="60" y="700" font-family="monospace" font-size="28" fill="#F5841F" letter-spacing="3">WELLNESS</text>
+  <line x1="58" y1="692" x2="240" y2="692" stroke="#F5841F" stroke-width="4"/>
+  <text x="60" y="750" font-family="monospace" font-size="18" fill="#F5841F" letter-spacing="2" opacity="0.6">PSEUDOSCIENCE</text>
+  <line x1="58" y1="742" x2="240" y2="742" stroke="#F5841F" stroke-width="3"/>
+  <!-- ©WMG annotation -->
+  <text x="620" y="820" font-family="monospace" font-size="11" fill="#4CBB17" letter-spacing="3" opacity="0.5">©WMG 2026</text>
+  <!-- Bracket -->
+  <path d="M 680 200 L 660 200 L 660 400 L 680 400" stroke="#4CBB17" stroke-width="2" fill="none"/>
+  <!-- N=48 annotation -->
+  <text x="690" y="600" font-family="monospace" font-size="14" fill="#4CBB17" letter-spacing="2" transform="rotate(90,690,600)" opacity="0.4">PEER REVIEWED</text>
+</svg>
+
+<nav>
+  <a href="#" class="nav-logo">Watering My Grass</a>
+  <ul class="nav-links">
+    <li><a href="#articles">Articles</a></li>
+    <li><a href="#evidence">Evidence Map</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#" style="color:var(--g)">Subscribe →</a></li>
+  </ul>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-kicker">Nonprofit Journalism · New York City · Est. 2026</div>
+    <div class="hero-headline">
+      <div class="h-line h1"><span class="h-inner" id="w1">Watering</span></div>
+      <div class="h-line h2"><span class="h-inner" id="w2">My</span></div>
+      <div class="h-line h3"><span class="h-inner" id="w3">Grass.</span></div>
+    </div>
+    <!-- Broken word — @design4me_ -->
+    <div class="break-word">stories converge / <span style="color:var(--g)">masks</span> become</div>
+    <p class="hero-sub">We read the papers.<br><strong style="color:var(--g)">Here's what's real.</strong><br>Here's what's hype.</p>
+    <div class="hero-cta-wrap">
+      <a href="#articles" class="btn">Read the Evidence</a>
+      <a href="#evidence" style="font-size:9px;letter-spacing:3px;color:#333;text-decoration:none;text-transform:uppercase;">Evidence Map <span style="color:var(--g)">→</span></a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <canvas id="dot-canvas"></canvas>
+    <!-- HELMET REVEAL -->
+    <div class="helmet-scene">
+      <!-- ROACH underneath -->
+      <div class="roach-scene">
+        <svg width="280" height="320" viewBox="0 0 280 320">
+          <ellipse cx="140" cy="210" rx="52" ry="68" fill="#1e320e" stroke="#4CBB17" stroke-width="2.5"/>
+          <path d="M90 178 Q74 216 84 254 Q108 272 140 274 Q172 272 196 254 Q206 216 190 178 Q166 160 140 158 Q114 160 90 178Z" fill="#253d10" stroke="#4CBB17" stroke-width="2"/>
+          <ellipse cx="140" cy="158" rx="46" ry="30" fill="#2a4a12" stroke="#4CBB17" stroke-width="2"/>
+          <ellipse cx="140" cy="126" rx="44" ry="40" fill="#2a4a12" stroke="#4CBB17" stroke-width="2.5"/>
+          <!-- eyes -->
+          <ellipse cx="120" cy="120" rx="16" ry="18" fill="#F5F0E8" stroke="#4CBB17" stroke-width="2"/>
+          <ellipse cx="120" cy="121" rx="10" ry="11" fill="#0C0C0A"/>
+          <circle cx="124" cy="117" r="4" fill="white"/>
+          <circle cx="115" cy="125" r="2" fill="white" opacity="0.5"/>
+          <ellipse cx="160" cy="120" rx="16" ry="18" fill="#F5F0E8" stroke="#4CBB17" stroke-width="2"/>
+          <ellipse cx="160" cy="121" rx="10" ry="11" fill="#0C0C0A"/>
+          <circle cx="164" cy="117" r="4" fill="white"/>
+          <circle cx="155" cy="125" r="2" fill="white" opacity="0.5"/>
+          <!-- grin -->
+          <path d="M116 148 Q140 162 164 148" stroke="#4CBB17" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- antennae with animation classes -->
+          <g class="antenna-l" style="transform-origin:128px 90px">
+            <path d="M128 90 Q96 58 64 36" stroke="#4CBB17" stroke-width="2" fill="none"/>
+            <circle cx="64" cy="36" r="5" fill="#4CBB17"/>
+          </g>
+          <g class="antenna-r" style="transform-origin:152px 90px">
+            <path d="M152 90 Q184 58 216 36" stroke="#4CBB17" stroke-width="2" fill="none"/>
+            <circle cx="216" cy="36" r="5" fill="#4CBB17"/>
+          </g>
+          <!-- legs -->
+          <path d="M90 192 Q52 178 32 162" stroke="#4CBB17" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M88 220 Q46 216 24 212" stroke="#4CBB17" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <path d="M90 248 Q54 258 36 272" stroke="#4CBB17" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M190 192 Q228 178 248 162" stroke="#4CBB17" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M192 220 Q234 216 256 212" stroke="#4CBB17" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <path d="M190 248 Q226 258 244 272" stroke="#4CBB17" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <!-- orange WMG tag -->
+          <rect x="124" y="238" width="32" height="12" rx="1" fill="#F5841F" opacity="0.85"/>
+          <text x="140" y="247" font-family="monospace" font-size="7" fill="#0C0C0A" text-anchor="middle" font-weight="bold">WMG</text>
+        </svg>
+      </div>
+      <!-- HELMET on top -->
+      <div class="helmet-outer">
+        <svg width="280" height="320" viewBox="0 0 280 320">
+          <ellipse cx="140" cy="306" rx="78" ry="14" fill="rgba(0,0,0,0.4)"/>
+          <path d="M46 190 Q44 116 70 76 Q98 34 140 28 Q182 34 210 76 Q236 116 234 190 Q224 232 204 248 Q174 266 140 268 Q106 266 76 248 Q56 232 46 190Z" fill="#1a2a0a" stroke="#4CBB17" stroke-width="2.5"/>
+          <path d="M140 28 L138 268" stroke="#4CBB17" stroke-width="8"/>
+          <path d="M132 28 L130 268" stroke="#F5841F" stroke-width="3" opacity="0.8"/>
+          <path d="M148 28 L150 268" stroke="#F5841F" stroke-width="3" opacity="0.8"/>
+          <!-- dark visor -->
+          <path d="M58 166 Q62 132 80 114 Q102 96 140 95 Q178 96 200 114 Q218 132 222 166 Q216 194 200 206 Q174 218 140 220 Q106 218 80 206 Q64 194 58 166Z" fill="#0a1205" stroke="#4CBB17" stroke-width="2"/>
+          <!-- visor reflection — subtle -->
+          <path d="M78 134 Q106 118 174 122" stroke="rgba(76,187,23,0.2)" stroke-width="3" fill="none"/>
+          <!-- vents -->
+          <rect x="124" y="62" width="5" height="13" rx="1" fill="#0C0C0A"/>
+          <rect x="134" y="57" width="5" height="18" rx="1" fill="#0C0C0A"/>
+          <rect x="141" y="57" width="5" height="18" rx="1" fill="#0C0C0A"/>
+          <rect x="151" y="62" width="5" height="13" rx="1" fill="#0C0C0A"/>
+          <!-- number + logo -->
+          <text x="64" y="196" font-family="monospace" font-size="20" fill="#4CBB17" text-anchor="middle" opacity="0.5">7</text>
+          <text x="216" y="196" font-family="monospace" font-size="20" fill="#4CBB17" text-anchor="middle" opacity="0.5">7</text>
+          <text x="140" y="258" font-family="'Playfair Display',serif" font-size="13" fill="#4CBB17" text-anchor="middle" font-weight="900" font-style="italic">WMG</text>
+        </svg>
+      </div>
+      <div class="reveal-hint">HOVER →</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-inner">
+    <span class="mi bold">Watering My Grass</span><span class="mi">✦</span><span class="mi">Peer-Reviewed Only</span><span class="mi">✦</span><span class="mi">NYC · Est. 2026</span><span class="mi">✦</span><span class="mi">Named Researcher + Journal + Year + N=</span><span class="mi">✦</span><span class="mi">No Woo. No Hype. Just Science.</span><span class="mi">✦</span><span class="mi bold">Watering My Grass</span><span class="mi">✦</span><span class="mi">Peer-Reviewed Only</span><span class="mi">✦</span><span class="mi">NYC · Est. 2026</span><span class="mi">✦</span><span class="mi">Named Researcher + Journal + Year + N=</span><span class="mi">✦</span><span class="mi">No Woo. No Hype. Just Science.</span><span class="mi">✦</span>
+  </div>
+</div>
+
+<!-- STATS — @kalypsodesigns: one number, one color -->
+<div class="stat-strip sr">
+  <div class="stat">
+    <div class="stat-num"><span class="accent" style="color:var(--o)"><span class="count-num" data-target="40">0</span>Hz</span></div>
+    <div class="stat-label">Gamma Frequency</div>
+    <div class="stat-cite"><b>Iaccarino et al., Nature, 2016</b><br>~50% amyloid reduction · replicated MIT</div>
+  </div>
+  <div class="stat d1">
+    <div class="stat-num">N=<span class="accent" style="color:var(--o)"><span class="count-num" data-target="24">0</span></span></div>
+    <div class="stat-label">Sample size that changed immunology</div>
+    <div class="stat-cite"><b>Kox et al., PNAS, 2014</b><br>Voluntary immune modulation · confirmed</div>
+  </div>
+  <div class="stat d2">
+    <div class="stat-num"><span class="count-num" data-target="7" style="color:var(--o)">0</span><span style="font-size:0.5em;color:#333">.83Hz</span></div>
+    <div class="stat-label">Earth's fundamental resonance</div>
+    <div class="stat-cite"><b>Schumann, 1952</b><br>Predicted. Confirmed. Misused ever since.</div>
+  </div>
+</div>
+
+<!-- ARTICLES -->
+<section class="articles-section" id="articles">
+  <div class="articles-header sr">
+    <div class="section-hed">Latest <em>Evidence</em></div>
+    <a href="#" style="font-size:9px;letter-spacing:3px;color:#333;text-decoration:none;text-transform:uppercase;" class="sr d2">All articles →</a>
+  </div>
+  <div class="article-grid">
+    <a href="#" class="ac feat sr">
+      <div class="ac-kicker">🪳 Investigation · Neuroscience</div>
+      <div class="ac-title big">The Earth Has a<br>Heartbeat.<br><em>Here's what the<br>science says.</em></div>
+      <div class="ac-body">Physics confirmed. Biology speculative. 7.83Hz is real. The wellness industry's claims about what it does to your brain are not.</div>
+      <div class="ac-cite"><b>Schumann, 1952</b> · Pobachenko et al., Biophysics, 2006 · N=48 · Observational</div>
+    </a>
+    <a href="#" class="ac sr d1">
+      <div class="ac-kicker">Breathwork</div>
+      <div class="ac-title">Wim Hof Did Not Invent Breathing.<br><em>Neither Did You.</em></div>
+      <div class="ac-cite"><b>Kox et al., PNAS, 2014</b> · N=24</div>
+    </a>
+    <a href="#" class="ac sr d2">
+      <div class="ac-kicker">Neuroscience</div>
+      <div class="ac-title">40Hz. The One Frequency With Real Evidence.</div>
+      <div class="ac-cite"><b>Iaccarino et al., Nature, 2016</b> · MIT 2019, 2021</div>
+    </a>
+    <a href="#" class="ac sr d3">
+      <div class="ac-kicker">Minerals</div>
+      <div class="ac-title"><em>Does copper reduce inflammation?</em> We checked.</div>
+      <div class="ac-cite"><b>Walker et al., 2013</b> · Double-blind · N=70</div>
+    </a>
+  </div>
+</section>
+
+<!-- CLAIM REVEAL — masks concept from laxspace -->
+<section class="claims-section" id="claims">
+  <div class="claims-header sr">
+    <h2>What they sell you.<br><span>What the science says.</span></h2>
+    <p>Hover to reveal · The truth is underneath · Always</p>
+  </div>
+  <div class="claims-grid sr d1">
+    <div class="claim-card">
+      <div class="claim-back">
+        <div class="cb-tag">✓ What the science says</div>
+        <div class="cb-science">"Correlation exists. Causal mechanism: unproven at ambient field strength."</div>
+        <div class="cb-cite">Pobachenko et al. · Biophysics · 2006 · N=<span class="count-num" data-target="48">0</span></div>
+      </div>
+      <div class="claim-front">
+        <div class="cf-tag">✦ What they're selling you</div>
+        <div class="cf-claim">"7.83Hz syncs your consciousness to Earth's frequency. Heal your nervous system. $89/month."</div>
+      </div>
+    </div>
+    <div class="claim-card">
+      <div class="claim-back">
+        <div class="cb-tag">✓ What the science says</div>
+        <div class="cb-science">"Immune modulation confirmed. The method works. Hof didn't invent it."</div>
+        <div class="cb-cite">Kox et al. · PNAS · 2014 · N=<span class="count-num" data-target="24">0</span></div>
+      </div>
+      <div class="claim-front">
+        <div class="cf-tag">✦ What they're selling you</div>
+        <div class="cf-claim">"The Wim Hof Method unlocks your immune system. $199 online course."</div>
+      </div>
+    </div>
+    <div class="claim-card">
+      <div class="claim-back">
+        <div class="cb-tag">✓ What the science says</div>
+        <div class="cb-science">"~50% amyloid reduction in mice. MIT replicated. Strong evidence base."</div>
+        <div class="cb-cite">Iaccarino et al. · Nature · 2016 · replicated MIT <span class="count-num" data-target="2019">0</span></div>
+      </div>
+      <div class="claim-front">
+        <div class="cf-tag">✦ What they're selling you</div>
+        <div class="cf-claim">"Science-backed frequencies heal your brain. Download now. $12.99/month."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVIDENCE MAP — @jesserurka node graph -->
+<section class="evidence-section sr" id="evidence">
+  <div class="evidence-top">
+    <div>
+      <div class="evidence-hed">Evidence <em>Map.</em></div>
+      <p class="evidence-desc">Every wellness claim we've investigated, mapped by strength of peer-reviewed evidence. Updated as we publish. Click any node.</p>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--g)"></div>Strong evidence</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--o)"></div>Preliminary</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--b)"></div>Plausible, untested</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2a2a28"></div>Not supported</div>
+      </div>
+    </div>
+    <div></div>
+  </div>
+  <svg id="evidence-svg"></svg>
+</section>
+
+<!-- MANIFESTO — @milktreeagency + @kalypsodesigns -->
+<section class="manifesto-section">
+  <div class="manifesto-left sr">
+    <div class="manifesto-quote">"The wellness industry's response — to monetize the uncertainty rather than resolve it — is not a research program. It is a business model."</div>
+    <div class="manifesto-attr">WMG Editorial Standard · 2026</div>
+  </div>
+  <div class="manifesto-right sr d1">
+    <!-- @kalypsodesigns: giant type, ONE word in orange -->
+    <div class="big-statement">
+      <span class="break">We read</span>
+      <span class="break">the <span class="accent">papers.</span></span>
+    </div>
+    <div style="font-size:9px;letter-spacing:3px;color:#222;text-transform:uppercase;line-height:2.2;">
+      Named researcher.<br>Journal name.<br>Year published.<br><span style="color:var(--g)">N= sample size.</span><br>Every time. No exceptions.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <div class="f-logo">WMG</div>
+    <div class="f-legal">NONPROFIT · READER SUPPORTED · NO ADVERTISING</div>
+  </div>
+  <nav class="f-nav">
+    <a href="#">Articles</a><a href="#">Evidence Map</a><a href="#">About</a><a href="#">Subscribe</a>
+  </nav>
+  <div style="text-align:right;font-size:8px;color:#111;letter-spacing:1px;line-height:2.2;">wateringmygrass.com<br>New York City · 2026</div>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+let mx = -100, my = -100;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function moveCursor() {
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+  requestAnimationFrame(moveCursor);
+}
+moveCursor();
+document.querySelectorAll('a,button,.claim-card,.helmet-scene').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('cursor-large'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-large'));
+});
+
+// HERO WORDS SNAP IN
+setTimeout(() => {
+  ['w1','w2','w3'].forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      el.style.transition = 'transform 0.7s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s';
+      el.style.transform = 'translateY(0)';
+      el.style.opacity = '1';
+    }, 700 + i * 180);
+  });
+}, 100);
+
+// DOT PAINTING CANVAS — aboriginal concentric rings
+const dotCanvas = document.getElementById('dot-canvas');
+const dCtx = dotCanvas.getContext('2d');
+function resizeDot() {
+  dotCanvas.width = dotCanvas.parentElement.offsetWidth;
+  dotCanvas.height = dotCanvas.parentElement.offsetHeight;
+  drawDots();
+}
+function drawDots() {
+  const W = dotCanvas.width, H = dotCanvas.height;
+  const cx = W * 0.55, cy = H * 0.5;
+  dCtx.clearRect(0, 0, W, H);
+  // Concentric rings — breathing
+  const t = Date.now() / 2000;
+  [160, 120, 80, 45, 20].forEach((r, i) => {
+    const pulse = r + Math.sin(t + i * 0.8) * 3;
+    dCtx.beginPath();
+    dCtx.arc(cx, cy, pulse, 0, Math.PI * 2);
+    dCtx.strokeStyle = `rgba(76,187,23,${0.06 + i * 0.02})`;
+    dCtx.lineWidth = 1;
+    dCtx.stroke();
+  });
+  // Dot scatter clusters
+  const dots = [
+    [cx-80,cy-60,3,0.18],[cx-60,cy-80,2,0.12],[cx+70,cy-70,3,0.16],
+    [cx+90,cy-40,2,0.1],[cx+80,cy+60,3,0.14],[cx-70,cy+80,2.5,0.15],
+    [cx-100,cy+20,2,0.1],[cx+110,cy+20,2.5,0.12],[cx-20,cy-120,3,0.1],
+    [cx+30,cy+130,2,0.08],[cx-130,cy-20,2.5,0.1],[cx+140,cy-50,2,0.08],
+    // outer scatter
+    [cx+180,cy-120,2,0.06],[cx+160,cy+140,2.5,0.07],[cx-160,cy+120,2,0.06],
+    [cx-180,cy-80,2,0.05],[cx+200,cy+60,1.5,0.05],[cx-200,cy+60,1.5,0.04],
+  ];
+  dots.forEach(([x,y,r,a]) => {
+    dCtx.beginPath();
+    dCtx.arc(x, y, r + Math.sin(t * 1.5 + x) * 0.5, 0, Math.PI * 2);
+    dCtx.fillStyle = `rgba(76,187,23,${a})`;
+    dCtx.fill();
+  });
+  // Orange micro dots
+  [[cx+50,cy-100,3,0.15],[cx-80,cy+50,2.5,0.12],[cx+120,cy+40,2,0.1]].forEach(([x,y,r,a]) => {
+    dCtx.beginPath();
+    dCtx.arc(x, y, r, 0, Math.PI * 2);
+    dCtx.fillStyle = `rgba(245,132,31,${a})`;
+    dCtx.fill();
+  });
+}
+setInterval(drawDots, 50);
+window.addEventListener('resize', resizeDot);
+resizeDot();
+
+// SCROLL REVEAL
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('on');
+      // trigger count-ups
+      e.target.querySelectorAll('.count-num[data-target]').forEach(countUp);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.sr').forEach(el => observer.observe(el));
+
+// COUNT UP
+function countUp(el) {
+  const target = parseInt(el.dataset.target);
+  if (el.dataset.counted) return;
+  el.dataset.counted = '1';
+  let current = 0;
+  const duration = 1200;
+  const steps = 40;
+  const step = target / steps;
+  const interval = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = Math.floor(current);
+    if (current >= target) clearInterval(interval);
+  }, duration / steps);
+}
+
+// Trigger stats count-up when visible
+const statObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.count-num[data-target]').forEach(countUp);
+      e.target.classList.add('on');
+    }
+  });
+}, { threshold: 0.2 });
+document.querySelectorAll('.stat').forEach(el => statObserver.observe(el));
+
+// CLAIM CARDS — count up on hover
+document.querySelectorAll('.claim-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    card.querySelectorAll('.count-num[data-target]').forEach(el => {
+      delete el.dataset.counted;
+      countUp(el);
+    });
+  });
+});
+
+// EVIDENCE MAP — D3-style force graph built manually
+const svg = document.getElementById('evidence-svg');
+const W = svg.getBoundingClientRect().width || 900;
+const H = 480;
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+const nodes = [
+  {id:'40hz',label:'40Hz Gamma',tier:'strong',x:W*0.38,y:200},
+  {id:'delta',label:'Deep Sleep',tier:'strong',x:W*0.25,y:320},
+  {id:'wim',label:'Wim Hof',tier:'strong',x:W*0.52,y:340},
+  {id:'alpha',label:'Alpha Waves',tier:'strong',x:W*0.62,y:190},
+  {id:'schumann',label:'7.83Hz',tier:'moderate',x:W*0.18,y:170},
+  {id:'432',label:'432Hz',tier:'moderate',x:W*0.70,y:340},
+  {id:'theta',label:'Theta',tier:'moderate',x:W*0.55,y:420},
+  {id:'copper',label:'Copper',tier:'weak',x:W*0.30,y:420},
+  {id:'earthing',label:'Earthing',tier:'none',x:W*0.12,y:340},
+  {id:'crystals',label:'Crystals',tier:'none',x:W*0.78,y:160},
+  {id:'dna528',label:'528Hz DNA',tier:'none',x:W*0.85,y:280},
+];
+const links = [
+  {s:'40hz',t:'delta'},{s:'40hz',t:'alpha'},{s:'40hz',t:'wim'},
+  {s:'schumann',t:'alpha'},{s:'432',t:'alpha'},{s:'wim',t:'theta'},
+  {s:'copper',t:'delta'},{s:'schumann',t:'earthing'},
+];
+const tierColor = {strong:'#4CBB17',moderate:'#F5841F',weak:'#2D4E9E',none:'#2a2a28'};
+const tierR = {strong:18,moderate:14,weak:11,none:9};
+
+// Draw links first
+links.forEach((l,i) => {
+  const s = nodes.find(n=>n.id===l.s), t = nodes.find(n=>n.id===l.t);
+  const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',s.x); line.setAttribute('y1',s.y);
+  line.setAttribute('x2',s.x); line.setAttribute('y2',s.y);
+  line.setAttribute('stroke','#1a1a18'); line.setAttribute('stroke-width','1.5');
+  line.setAttribute('stroke-dasharray','3 9');
+  svg.insertBefore(line, svg.firstChild);
+  setTimeout(()=>{
+    const len = Math.hypot(t.x-s.x, t.y-s.y);
+    line.style.transition = `all ${0.6+i*0.05}s ease`;
+    line.setAttribute('x2',t.x); line.setAttribute('y2',t.y);
+  }, 600 + i*120);
+});
+
+// Draw nodes
+nodes.forEach((n,i) => {
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('transform',`translate(${n.x},${n.y})`);
+  g.style.opacity='0'; g.style.cursor='none';
+
+  const glow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  glow.setAttribute('r',tierR[n.tier]+10);
+  glow.setAttribute('fill',tierColor[n.tier]); glow.setAttribute('opacity','0');
+
+  const ring = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  ring.setAttribute('r','0'); ring.setAttribute('fill','none');
+  ring.setAttribute('stroke',tierColor[n.tier]); ring.setAttribute('stroke-width','1');
+  ring.setAttribute('opacity','0.3');
+
+  const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dot.setAttribute('r','0');
+  dot.setAttribute('fill',tierColor[n.tier]); dot.setAttribute('opacity','0.9');
+
+  const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+  label.setAttribute('text-anchor','middle'); label.setAttribute('y',tierR[n.tier]+16);
+  label.setAttribute('font-family','Space Mono, monospace'); label.setAttribute('font-size','8');
+  label.setAttribute('fill',tierColor[n.tier]); label.setAttribute('letter-spacing','2');
+  label.setAttribute('opacity','0.7');
+  label.textContent = n.label.toUpperCase();
+
+  g.appendChild(glow); g.appendChild(ring); g.appendChild(dot); g.appendChild(label);
+  svg.appendChild(g);
+
+  setTimeout(()=>{
+    g.style.transition='opacity 0.4s';
+    g.style.opacity='1';
+    dot.style.transition='r 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+    ring.style.transition='r 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s';
+    dot.setAttribute('r', String(tierR[n.tier]));
+    ring.setAttribute('r', String(tierR[n.tier]+8));
+
+    // Continuous pulse — all offset
+    let phase = i * 0.7;
+    setInterval(()=>{
+      phase += 0.04;
+      const s = 1 + Math.sin(phase) * 0.06;
+      g.setAttribute('transform', `translate(${n.x},${n.y}) scale(${s})`);
+    }, 30);
+
+    g.addEventListener('mouseenter', ()=>{
+      glow.style.transition='opacity 0.3s'; glow.setAttribute('opacity','0.12');
+      dot.setAttribute('r', String(tierR[n.tier]+4));
+      cursor.classList.add('cursor-large');
+    });
+    g.addEventListener('mouseleave', ()=>{
+      glow.setAttribute('opacity','0');
+      dot.setAttribute('r', String(tierR[n.tier]));
+      cursor.classList.remove('cursor-large');
+    });
+  }, 900 + i*90);
+});
+</script>
+</body>
+</html>
