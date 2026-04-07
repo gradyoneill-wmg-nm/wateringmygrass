@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMG — Watering My Grass</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --gray-100: #fafafa;
+    --gray-400: #888888;
+    --gray-600: #444444;
+    --gray-700: #333333;
+    --gray-800: #1a1a1a;
+    --gray-900: #0a0a0a;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  }
+
+  @import url('data:text/css,'); /* no external deps — Inter via system fallback */
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ────────────────────────────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 56px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-700);
+  }
+
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    color: var(--gray-400);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  /* ── HERO ───────────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 24px 80px;
+  }
+
+  .hero-headline {
+    font-size: clamp(52px, 9vw, 80px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+
+  .hero-headline span {
+    display: block;
+  }
+
+  .hero-headline .word-plain {
+    color: var(--white);
+  }
+
+  .word-gradient {
+    background: linear-gradient(90deg, #ff6b00, #22c55e, #ff6b00);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 5s linear infinite;
+  }
+
+  @keyframes gradientShift {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--gray-400);
+    letter-spacing: 0.02em;
+    margin-bottom: 40px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--white);
+    color: var(--black);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.15s;
+    margin-bottom: 48px;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+
+  .badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--gray-400);
+    border: 1px solid var(--gray-700);
+    padding: 5px 12px;
+    text-transform: uppercase;
+  }
+
+  /* ── FEATURES ───────────────────────────────────────────── */
+  .section {
+    padding: 100px 40px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--gray-700);
+    border: 1px solid var(--gray-700);
+  }
+
+  .feature-card {
+    background: var(--black);
+    padding: 36px 32px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .feature-card:hover {
+    background: var(--gray-900);
+    box-shadow: 0 0 0 1px #444, 0 8px 32px rgba(255,255,255,0.04);
+    transform: translateY(-2px);
+    z-index: 1;
+    position: relative;
+  }
+
+  .feature-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 20px;
+    color: var(--gray-400);
+  }
+
+  .feature-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    color: var(--gray-400);
+    line-height: 1.55;
+  }
+
+  /* ── NUMBERS ────────────────────────────────────────────── */
+  .numbers-section {
+    padding: 100px 40px;
+    border-top: 1px solid var(--gray-700);
+    border-bottom: 1px solid var(--gray-700);
+  }
+
+  .numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    max-width: 1080px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .stat-item {
+    padding: 40px 24px;
+    border-right: 1px solid var(--gray-700);
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-number {
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--gray-400);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── CODE BLOCK ─────────────────────────────────────────── */
+  .code-section {
+    padding: 100px 40px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .code-card {
+    background: var(--gray-900);
+    border: 1px solid var(--gray-700);
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-700);
+    background: var(--gray-800);
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .code-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gray-600);
+  }
+
+  .code-filename {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gray-400);
+    letter-spacing: 0.04em;
+  }
+
+  .code-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gray-600);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--gray-700);
+    padding: 2px 8px;
+  }
+
+  .code-body {
+    padding: 24px 28px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .code-body .ln { color: var(--gray-600); user-select: none; margin-right: 20px; display: inline-block; width: 18px; text-align: right; }
+  .code-body .key { color: #7dd3fc; }
+  .code-body .str { color: #86efac; }
+  .code-body .num { color: #fda4af; }
+  .code-body .punc { color: var(--gray-400); }
+  .code-body .comment { color: var(--gray-600); }
+
+  /* ── FOOTER ─────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--gray-700);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--gray-400);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 13px;
+    color: var(--gray-600);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: var(--gray-400); }
+
+  /* ── DIVIDERS ───────────────────────────────────────────── */
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--gray-700);
+  }
+
+  /* ── SCROLL FADE ────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .numbers-grid { grid-template-columns: 1fr; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--gray-700); }
+    .stat-item:last-child { border-bottom: none; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .section { padding: 60px 20px; }
+    .code-section { padding: 60px 20px; }
+    .numbers-section { padding: 60px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">WMG</a>
+  <ul class="nav-links">
+    <li><a href="#">Research</a></li>
+    <li><a href="#">Frequencies</a></li>
+    <li><a href="#">Data</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1 class="hero-headline">
+    <span class="word-plain">Develop.</span>
+    <span class="word-plain">Publish.</span>
+    <span class="word-gradient">Practice.</span>
+  </h1>
+  <p class="hero-sub">The frequency science publication.</p>
+  <a href="#" class="btn-primary">Start Reading &rarr;</a>
+  <div class="badges">
+    <span class="badge">MIT Cited</span>
+    <span class="badge">40Hz Gamma</span>
+    <span class="badge">HRV Verified</span>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FEATURES -->
+<div class="section reveal">
+  <p class="section-label">Capabilities</p>
+  <div class="features-grid">
+
+    <div class="feature-card">
+      <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+      </svg>
+      <div class="feature-title">Peer-Level Research</div>
+      <div class="feature-desc">Original studies on neural oscillation, HRV coherence, and acoustic entrainment.</div>
+    </div>
+
+    <div class="feature-card">
+      <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <div class="feature-title">Live Session Data</div>
+      <div class="feature-desc">Real-time biometric feedback integrated across thousands of active practitioners.</div>
+    </div>
+
+    <div class="feature-card">
+      <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+      </svg>
+      <div class="feature-title">Frequency Mapping</div>
+      <div class="feature-desc">Twelve discrete therapeutic frequencies cross-referenced with clinical outcome data.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NUMBERS -->
+<section class="numbers-section">
+  <div class="numbers-grid">
+    <div class="stat-item reveal">
+      <div class="stat-number" data-target="2847" data-suffix="">0</div>
+      <div class="stat-label">sessions today</div>
+    </div>
+    <div class="stat-item reveal" style="transition-delay: 0.1s">
+      <div class="stat-number" data-target="73" data-suffix="ms">0ms</div>
+      <div class="stat-label">avg HRV improvement</div>
+    </div>
+    <div class="stat-item reveal" style="transition-delay: 0.2s">
+      <div class="stat-number" data-target="12" data-suffix="">0</div>
+      <div class="stat-label">frequencies mapped</div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE BLOCK -->
+<div class="code-section reveal">
+  <p class="section-label" style="text-align:left; margin-bottom: 24px;">Research API &mdash; Response Preview</p>
+  <div class="code-card">
+    <div class="code-header">
+      <div class="code-dots">
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+        <div class="code-dot"></div>
+      </div>
+      <span class="code-filename">GET /api/v2/sessions/latest</span>
+      <span class="code-tag">200 OK</span>
+    </div>
+    <div class="code-body">
+      <div><span class="ln">1</span><span class="punc">{</span></div>
+      <div><span class="ln">2</span>  <span class="key">"session_id"</span><span class="punc">: </span><span class="str">"wmg_s_9f2a3c1d"</span><span class="punc">,</span></div>
+      <div><span class="ln">3</span>  <span class="key">"frequency_hz"</span><span class="punc">: </span><span class="num">40</span><span class="punc">,</span></div>
+      <div><span class="ln">4</span>  <span class="key">"band"</span><span class="punc">: </span><span class="str">"gamma"</span><span class="punc">,</span></div>
+      <div><span class="ln">5</span>  <span class="key">"duration_ms"</span><span class="punc">: </span><span class="num">1200000</span><span class="punc">,</span></div>
+      <div><span class="ln">6</span>  <span class="key">"hrv_delta"</span><span class="punc">: </span><span class="num">+73.4</span><span class="punc">,</span></div>
+      <div><span class="ln">7</span>  <span class="key">"coherence_score"</span><span class="punc">: </span><span class="num">0.91</span><span class="punc">,</span></div>
+      <div><span class="ln">8</span>  <span class="key">"eeg_sync"</span><span class="punc">: {</span></div>
+      <div><span class="ln">9</span>    <span class="key">"frontal_theta"</span><span class="punc">: </span><span class="num">6.2</span><span class="punc">,</span></div>
+      <div><span class="ln">10</span>   <span class="key">"parietal_alpha"</span><span class="punc">: </span><span class="num">10.8</span><span class="punc">,</span></div>
+      <div><span class="ln">11</span>   <span class="key">"occipital_gamma"</span><span class="punc">: </span><span class="num">39.7</span></div>
+      <div><span class="ln">12</span> <span class="punc">},</span></div>
+      <div><span class="ln">13</span> <span class="key">"verified"</span><span class="punc">: </span><span class="num">true</span><span class="punc">,</span></div>
+      <div><span class="ln">14</span> <span class="key">"citation"</span><span class="punc">: </span><span class="str">"MIT-NL-2024-0882"</span></div>
+      <div><span class="ln">15</span><span class="punc">}</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">WMG</span>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Count-up animation
+  function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1800;
+    const start = performance.now();
+
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const val = Math.floor(easeOutQuart(progress) * target);
+      el.textContent = val.toLocaleString() + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target.toLocaleString() + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateCounter(e.target);
+        statObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-target]').forEach(el => statObserver.observe(el));
+</script>
+
+</body>
+</html>
