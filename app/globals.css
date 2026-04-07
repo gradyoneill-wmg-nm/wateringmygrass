@@ -72,3 +72,163 @@ p {
 .btn-orange:hover {
   background: #e0751a;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOMEPAGE ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Custom cursor ──────────────────────────────────────────────────────── */
+@media (pointer: fine) {
+  body.wmg-no-cursor,
+  body.wmg-no-cursor * { cursor: none !important; }
+}
+
+.wmg-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: #4CBB17;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.18s ease, height 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  will-change: left, top;
+}
+.wmg-cursor.is-expanded {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 2px solid #4CBB17;
+}
+
+/* ── 2. Page wipe — oscilloscope sweep ────────────────────────────────────── */
+@keyframes wmg-wipe-out {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+.wmg-page-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  background: #0C0C0A;
+  animation: wmg-wipe-out 0.85s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+.wmg-page-wipe::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #4CBB17;
+  box-shadow: 0 0 18px 5px #4CBB17, 0 0 40px 8px rgba(76, 187, 23, 0.45);
+}
+
+/* ── 3. Hero headline word snap-in ────────────────────────────────────────── */
+@keyframes wmg-word-snap {
+  0%   { opacity: 0; transform: translateY(28px) scale(0.82); }
+  62%  { opacity: 1; transform: translateY(-6px) scale(1.04); }
+  80%  { transform: translateY(2px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.wmg-word {
+  display: inline-block;
+  opacity: 0;
+  animation: wmg-word-snap 0.48s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── 4. Roach mascot ──────────────────────────────────────────────────────── */
+@keyframes wmg-roach-breathe {
+  0%, 100% { transform: scale(1.0); }
+  50%       { transform: scale(1.005); }
+}
+.roach-container {
+  position: relative;
+}
+.roach-scale-wrapper {
+  transform: scale(0.9);
+  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.roach-container:hover .roach-scale-wrapper {
+  transform: scale(1.0);
+}
+.roach-inner {
+  animation: wmg-roach-breathe 3s ease-in-out infinite;
+}
+.roach-helmet {
+  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top center;
+}
+.roach-container:hover .roach-helmet {
+  transform: translateY(-110%) rotate(-8deg);
+}
+
+/* ── 5. Claim reveal cards ────────────────────────────────────────────────── */
+@keyframes wmg-card-entry {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.claim-card {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+  opacity: 0;
+  animation: wmg-card-entry 0.55s ease both;
+}
+.claim-card-front {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+  z-index: 2;
+}
+.claim-card:hover .claim-card-front {
+  transform: translateY(-100%);
+}
+.claim-card-back {
+  position: absolute;
+  inset: 0;
+  background: #4CBB17;
+  color: #0C0C0A;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+}
+
+/* ── 6. Articles page ─────────────────────────────────────────────────────── */
+@keyframes wmg-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes wmg-kenburns {
+  from { transform: scale(1.0); }
+  to   { transform: scale(1.02); }
+}
+
+@keyframes wmg-tag-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(245,132,31,0.5); }
+  50%       { box-shadow: 0 0 14px rgba(245,132,31,0.9), 0 0 4px rgba(245,132,31,0.5); }
+}
+
+.wmg-tag:hover {
+  animation: wmg-tag-pulse 0.8s ease-in-out infinite;
+}
+
+/* ── Reduced motion overrides ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .wmg-cursor,
+  .wmg-page-wipe { display: none !important; }
+  .wmg-word { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .roach-scale-wrapper { transform: scale(1) !important; transition: none !important; }
+  .roach-inner { animation: none !important; }
+  .roach-helmet { transition: none !important; }
+  .claim-card { animation: none !important; opacity: 1 !important; }
+  .claim-card-front { transition: none !important; }
+  .wmg-tag:hover { animation: none !important; }
+}
