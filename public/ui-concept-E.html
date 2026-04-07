@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATERING MY GRASS — April 2026</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --kelly: #4caf1a;
+    --white: #ffffff;
+    --black: #000000;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    cursor: none;
+    background: #000;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #fff;
+  }
+
+  /* ── Custom cursor ── */
+  #cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    mix-blend-mode: difference;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.08s ease, width 0.15s ease, height 0.15s ease;
+  }
+  #cursor.big {
+    width: 28px; height: 28px;
+  }
+
+  /* ── Scroll container ── */
+  #scene {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Photo placeholder ── */
+  #cover-bg {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    background:
+      /* subtle grain via repeating SVG noise */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
+      /* deep dark gradient simulating studio photo */
+      radial-gradient(ellipse 80% 70% at 60% 40%, #1a1a1a 0%, #0a0a0a 55%, #000 100%);
+    background-size: 200px 200px, 100% 100%;
+  }
+
+  /* subtle vignette */
+  #cover-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.7) 100%);
+  }
+
+  /* ── Text layer (parallax 1x = stays fixed relative to viewport) ── */
+  #text-layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 6vh 6vw 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .headline {
+    font-size: 22vw;
+    line-height: 0.88;
+    letter-spacing: -0.02em;
+    color: #fff;
+    mix-blend-mode: normal;
+    display: block;
+    pointer-events: all;
+    cursor: none;
+    user-select: none;
+    transition: text-shadow 0.2s;
+  }
+  .headline.bold {
+    font-weight: 700;
+  }
+  .headline:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--kelly);
+    text-decoration-thickness: 4px;
+    text-underline-offset: 6px;
+  }
+
+  #issue-info {
+    margin-top: 2.4vh;
+    font-size: clamp(10px, 1.1vw, 16px);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    font-family: Georgia, serif;
+    pointer-events: none;
+  }
+
+  /* ── Pull quote ── */
+  #pull-quote {
+    position: absolute;
+    bottom: 18vh;
+    left: 6vw;
+    max-width: 38vw;
+    font-size: clamp(13px, 1.5vw, 22px);
+    font-style: italic;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    z-index: 20;
+    pointer-events: none;
+  }
+  #pull-quote.visible { opacity: 1; }
+  #pull-quote::before {
+    content: '\201C';
+    font-size: 3em;
+    line-height: 0;
+    vertical-align: -0.45em;
+    color: var(--kelly);
+    margin-right: 0.1em;
+  }
+
+  /* ── Nav overlay ── */
+  #nav {
+    position: absolute;
+    bottom: 18vh;
+    right: 5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6em;
+    z-index: 20;
+  }
+  #nav a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-family: Georgia, serif;
+    font-size: clamp(11px, 1vw, 15px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.2s, letter-spacing 0.2s;
+    cursor: none;
+  }
+  #nav a:hover {
+    color: var(--kelly);
+    letter-spacing: 0.35em;
+  }
+
+  /* ── Ticker tape ── */
+  #ticker-wrap {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    background: #fff;
+    color: #000;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+    border-top: 1px solid rgba(0,0,0,0.15);
+  }
+  #ticker-inner {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 28s linear infinite;
+  }
+  .ticker-text {
+    font-family: Georgia, serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding-right: 6vw;
+    color: #000;
+  }
+  .ticker-dot {
+    color: var(--kelly);
+    margin: 0 0.3em;
+  }
+
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── Scroll hint ── */
+  #scroll-hint {
+    position: absolute;
+    bottom: 7vh;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.45;
+    z-index: 20;
+    pointer-events: none;
+    animation: hint-fade 1s ease 3s both;
+  }
+  #scroll-hint span {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  #scroll-hint .arrow {
+    width: 1px;
+    height: 32px;
+    background: #fff;
+    animation: arrow-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes arrow-pulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50%       { opacity: 1;   transform: scaleY(1.2); }
+  }
+  @keyframes hint-fade {
+    from { opacity: 0; } to { opacity: 0.45; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Scene: cover image + all overlays -->
+<div id="scene">
+
+  <!-- Parallax background photo -->
+  <div id="cover-bg"></div>
+
+  <!-- Text layer -->
+  <div id="text-layer">
+    <span class="headline" id="word-watering">WATERING</span>
+    <span class="headline bold" id="word-mygrass">MY GRASS</span>
+    <p id="issue-info">April 2026 &nbsp;&bull;&nbsp; Frequency Science Edition</p>
+  </div>
+
+  <!-- Pull quote -->
+  <blockquote id="pull-quote" aria-label="Pull quote">
+    Your brain is an electrical system.<br>Give it the right signal.
+  </blockquote>
+
+  <!-- Nav -->
+  <nav id="nav">
+    <a href="#">About</a>
+    <a href="#">Sessions</a>
+    <a href="#">Science</a>
+    <a href="#">Download</a>
+    <a href="#">Community</a>
+  </nav>
+
+  <!-- Scroll hint -->
+  <div id="scroll-hint">
+    <div class="arrow"></div>
+    <span>Scroll</span>
+  </div>
+
+</div>
+
+<!-- Ticker -->
+<div id="ticker-wrap" role="marquee" aria-label="Upcoming events and stats">
+  <div id="ticker-inner">
+    <!-- duplicated for seamless loop -->
+    <span class="ticker-text">
+      April 18 Global Session
+      <span class="ticker-dot">◆</span>
+      HRV +23%
+      <span class="ticker-dot">◆</span>
+      40Hz Gamma
+      <span class="ticker-dot">◆</span>
+      7.83Hz Schumann
+      <span class="ticker-dot">◆</span>
+      Download Non Magic
+      <span class="ticker-dot">◆</span>
+      April 18 Global Session
+      <span class="ticker-dot">◆</span>
+      HRV +23%
+      <span class="ticker-dot">◆</span>
+      40Hz Gamma
+      <span class="ticker-dot">◆</span>
+      7.83Hz Schumann
+      <span class="ticker-dot">◆</span>
+      Download Non Magic
+      <span class="ticker-dot">◆</span>
+    </span>
+    <span class="ticker-text" aria-hidden="true">
+      April 18 Global Session
+      <span class="ticker-dot">◆</span>
+      HRV +23%
+      <span class="ticker-dot">◆</span>
+      40Hz Gamma
+      <span class="ticker-dot">◆</span>
+      7.83Hz Schumann
+      <span class="ticker-dot">◆</span>
+      Download Non Magic
+      <span class="ticker-dot">◆</span>
+      April 18 Global Session
+      <span class="ticker-dot">◆</span>
+      HRV +23%
+      <span class="ticker-dot">◆</span>
+      40Hz Gamma
+      <span class="ticker-dot">◆</span>
+      7.83Hz Schumann
+      <span class="ticker-dot">◆</span>
+      Download Non Magic
+      <span class="ticker-dot">◆</span>
+    </span>
+  </div>
+</div>
+
+<script>
+  // ── Custom cursor ──
+  const cursor = document.getElementById('cursor');
+  let mx = -100, my = -100;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+  document.querySelectorAll('a, .headline').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+
+  // ── Pull quote fade in after 2s ──
+  setTimeout(() => {
+    document.getElementById('pull-quote').classList.add('visible');
+  }, 2000);
+
+  // ── Parallax on scroll ──
+  // bg moves at 0.5x, text stays at 1x (natural)
+  const bg   = document.getElementById('cover-bg');
+  const hint = document.getElementById('scroll-hint');
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const sy = window.scrollY;
+        // bg shifts up at half speed → lags behind = depth
+        bg.style.transform = `translateY(${sy * 0.5}px)`;
+        // fade scroll hint
+        hint.style.opacity = Math.max(0, 0.45 - sy * 0.005);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // ── Make the page scrollable enough to feel the parallax ──
+  // We extend body height so user can scroll, but scene stays vh-based
+  document.body.style.height = '200vh';
+  // Keep the scene pinned during scroll via position:sticky feel
+  // (achieved by the fixed ticker + the scene being position:relative 100vh)
+</script>
+</body>
+</html>
