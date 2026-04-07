@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
+import "../styles/WMGGrain.css";
 import Navigation from "@/components/Navigation";
 
 const inter = Inter({
@@ -54,8 +55,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${spaceMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#0C0C0A] text-white">
-        <div className="grain-overlay" aria-hidden="true" />
+      <body className="wmg-grain wmg-vignette min-h-full flex flex-col bg-[#0C0C0A] text-white">
         <Navigation />
         <main className="flex-1">{children}</main>
         <footer className="border-t border-[#222222] pt-16 pb-10 px-6 mt-20">
