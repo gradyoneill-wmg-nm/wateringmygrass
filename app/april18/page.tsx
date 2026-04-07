@@ -13,32 +13,59 @@ const APRIL_18 = "2026-04-18T05:00:00-04:00";
 export default function April18Page() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 md:pt-32">
-        <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-6">
-          Global Event
+      {/* Hero — centered, full impact */}
+      <section className="max-w-5xl mx-auto px-6 pt-24 pb-20 md:pt-36 md:pb-28 text-center">
+        <p className="text-[10px] tracking-[0.4em] uppercase text-[#444444] mb-8">
+          Global Event · April 18, 2026
         </p>
-        <h1 className="text-4xl md:text-6xl font-light leading-[1.05] tracking-[-0.02em] mb-6">
-          April 18, 2026
+
+        <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-light leading-[1.0] tracking-[-0.03em] mb-6">
+          5:00 AM EST
           <br />
-          <span className="text-[#888888]">5:00 AM EST</span>
+          <span className="text-[#444444]">Every Timezone.</span>
+          <br />
+          One Frequency.
         </h1>
-        <p className="text-xl font-light text-[#888888] mb-12 max-w-xl leading-relaxed">
-          A synchronized global meditation session. Every timezone. One frequency.
+
+        <p className="text-[#666666] text-base md:text-lg font-light max-w-xl mx-auto leading-relaxed mb-16">
+          A synchronized global meditation session. Thousands of nervous systems
+          tuning to the same frequency at the same moment.
         </p>
-        <Countdown targetDate={APRIL_18} label="Time until the session" />
+
+        {/* Large monospace countdown */}
+        <div className="flex justify-center mb-14">
+          <Countdown targetDate={APRIL_18} large />
+        </div>
+
+        {/* Primary CTA */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a
+            href="#register"
+            className="px-10 py-4 border border-white text-white text-xs tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all"
+          >
+            Join Remotely — Register Free
+          </a>
+          <a
+            href="https://nonmagic.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-10 py-4 border border-[#333333] text-[#888888] text-xs tracking-[0.2em] uppercase hover:border-white hover:text-white transition-all"
+          >
+            Download Non Magic ↗
+          </a>
+        </div>
       </section>
 
       {/* Divider */}
-      <div className="border-t border-[#222222]" />
+      <div className="border-t border-[#1a1a1a]" />
 
       {/* Event details */}
-      <section className="max-w-4xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 gap-16">
+      <section className="max-w-4xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-16">
         <div>
-          <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-6">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-[#444444] mb-6">
             What&apos;s Happening
           </p>
-          <div className="space-y-6 text-sm text-[#888888] leading-relaxed">
+          <div className="space-y-5 text-sm text-[#666666] leading-relaxed">
             <p>
               On April 18 at exactly 5:00 AM Eastern, people around the world will open
               Non Magic and complete a 20-minute Gamma frequency session simultaneously.
@@ -53,99 +80,86 @@ export default function April18Page() {
             </p>
           </div>
 
-          <div className="mt-10 space-y-4">
-            <div className="border border-[#222222] p-4">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-1">
-                Session
-              </p>
-              <p className="text-white text-sm">20-minute Gamma (40Hz)</p>
-            </div>
-            <div className="border border-[#222222] p-4">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-1">
-                Host
-              </p>
-              <p className="text-white text-sm">Grady O&apos;Neill</p>
-            </div>
-            <div className="border border-[#222222] p-4">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-1">
-                Cost
-              </p>
-              <p className="text-white text-sm">Free</p>
-            </div>
+          <div className="mt-10 space-y-3">
+            {[
+              { label: "Session", value: "20-minute Gamma (40Hz)" },
+              { label: "Host", value: "Grady O\u2019Neill" },
+              { label: "Cost", value: "Free" },
+            ].map((item) => (
+              <div key={item.label} className="border border-[#1a1a1a] p-4 flex items-center justify-between gap-4">
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[#444444]">
+                  {item.label}
+                </p>
+                <p className="text-white text-sm font-light">{item.value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         <div>
-          <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-6">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-[#444444] mb-6">
             NYC In-Person
           </p>
-          <div className="space-y-6 text-sm text-[#888888] leading-relaxed">
+          <div className="space-y-5 text-sm text-[#666666] leading-relaxed">
             <p>
               New York City participants will gather at a Central Park location (details
               sent to registered NYC attendees 48 hours before the event).
             </p>
             <p>
               After the session, we move to a nearby coffee shop for the first WMG
-              community meetup. Bring your questions, bring your practice, leave the
-              corporate wellness pitch at home.
+              community meetup.
             </p>
           </div>
 
-          <div className="mt-10 space-y-4">
-            <div className="border border-[#222222] p-4">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-1">
-                Location
-              </p>
-              <p className="text-white text-sm">Central Park, NYC</p>
-              <p className="text-[#555555] text-xs mt-0.5">
-                Exact location sent to registrants
-              </p>
-            </div>
-            <div className="border border-[#222222] p-4">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-1">
-                After
-              </p>
-              <p className="text-white text-sm">Coffee + community</p>
-              <p className="text-[#555555] text-xs mt-0.5">Location TBD near park</p>
-            </div>
+          <div className="mt-10 space-y-3">
+            {[
+              { label: "Location", value: "Central Park, NYC", sub: "Exact location sent to registrants" },
+              { label: "After", value: "Coffee + community", sub: "Location TBD near park" },
+            ].map((item) => (
+              <div key={item.label} className="border border-[#1a1a1a] p-4">
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[#444444] mb-1">
+                  {item.label}
+                </p>
+                <p className="text-white text-sm font-light">{item.value}</p>
+                {item.sub && (
+                  <p className="text-[#444444] text-xs mt-0.5">{item.sub}</p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Non Magic requirement */}
-      <section className="border-y border-[#222222] bg-[#0d0d0d] py-12">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
-            <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-2">
-                Required for Remote Participants
-              </p>
-              <h3 className="text-lg font-light mb-2">Download Non Magic</h3>
-              <p className="text-[#888888] text-sm max-w-md">
-                The session runs through Non Magic. All remote participants must have the
-                app installed and a free account created before April 18.
-              </p>
-            </div>
-            <a
-              href="https://nonmagic.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors whitespace-nowrap"
-            >
-              Get Non Magic ↗
-            </a>
-          </div>
+      <section className="border-y border-[#1a1a1a] bg-[#060606] py-14">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-[#444444] mb-4">
+            Required for Remote Participants
+          </p>
+          <h3 className="text-2xl md:text-3xl font-light mb-4">Download Non Magic</h3>
+          <p className="text-[#666666] text-sm max-w-md mx-auto mb-8">
+            The session runs through Non Magic. All remote participants must have the
+            app installed and a free account created before April 18.
+          </p>
+          <a
+            href="https://nonmagic.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-10 py-4 border border-white text-white text-xs tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all"
+          >
+            Get Non Magic Free ↗
+          </a>
         </div>
       </section>
 
       {/* Registration */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
-        <div className="max-w-lg">
-          <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-4">
+      <section id="register" className="max-w-4xl mx-auto px-6 py-24">
+        <div className="max-w-lg mx-auto text-center">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-[#444444] mb-4">
             Register
           </p>
-          <h2 className="text-2xl font-light mb-2">Save your spot</h2>
-          <p className="text-[#888888] text-sm mb-8">
+          <h2 className="text-3xl font-light mb-3">Save your spot</h2>
+          <p className="text-[#666666] text-sm mb-10">
             Free for everyone. NYC-specific logistics sent to local registrants.
           </p>
           <RegistrationForm />
@@ -153,9 +167,9 @@ export default function April18Page() {
       </section>
 
       {/* FAQ */}
-      <section className="border-t border-[#222222] py-20">
+      <section className="border-t border-[#1a1a1a] py-20">
         <div className="max-w-4xl mx-auto px-6">
-          <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555] mb-10">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-[#444444] mb-12 text-center">
             Questions
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -177,9 +191,9 @@ export default function April18Page() {
                 a: "Register anyway. We'll share the session recording and you can practice on your own schedule.",
               },
             ].map((item) => (
-              <div key={item.q} className="border-t border-[#222222] pt-6">
-                <h4 className="text-sm font-light mb-2">{item.q}</h4>
-                <p className="text-[#888888] text-sm leading-relaxed">{item.a}</p>
+              <div key={item.q} className="border-t border-[#1a1a1a] pt-6">
+                <h4 className="text-sm font-light mb-2 text-white">{item.q}</h4>
+                <p className="text-[#666666] text-sm leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
