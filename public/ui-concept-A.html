@@ -14,6 +14,9 @@
     --green-glow: rgba(0,255,65,0.4);
     --black: #000000;
     --dark: #050505;
+    --amber: #ffaa00;
+    --red: #ff003c;
+    --cyan: #00f0ff;
   }
 
   html, body {
@@ -42,25 +45,24 @@
     50% { opacity: 0; }
   }
 
-  /* === SCANLINES === */
-  body::before {
-    content: '';
+  /* === SCANLINES (moving) === */
+  #scanlines {
     position: fixed;
     inset: 0;
+    z-index: 100;
+    pointer-events: none;
     background: repeating-linear-gradient(
       0deg,
       transparent,
-      transparent 2px,
-      rgba(0,0,0,0.15) 2px,
-      rgba(0,0,0,0.15) 4px
+      transparent 3px,
+      rgba(0,0,0,0.18) 3px,
+      rgba(0,0,0,0.18) 4px
     );
-    pointer-events: none;
-    z-index: 100;
-    animation: scanlineShift 8s linear infinite;
+    animation: scanMove 12s linear infinite;
   }
-  @keyframes scanlineShift {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 100px; }
+  @keyframes scanMove {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 200px; }
   }
 
   /* === SCREEN FLICKER === */
@@ -68,21 +70,18 @@
     content: '';
     position: fixed;
     inset: 0;
-    background: rgba(0,255,65,0.015);
+    background: rgba(0,255,65,0.013);
     pointer-events: none;
     z-index: 99;
     animation: flicker 0.15s infinite;
   }
   @keyframes flicker {
     0%   { opacity: 1; }
-    7%   { opacity: 0.98; }
+    7%   { opacity: 0.97; }
     10%  { opacity: 1; }
-    13%  { opacity: 0.97; }
     43%  { opacity: 1; }
     50%  { opacity: 0.99; }
     70%  { opacity: 1; }
-    80%  { opacity: 0.98; }
-    90%  { opacity: 1; }
     93%  { opacity: 0.97; }
     100% { opacity: 1; }
   }
@@ -92,7 +91,7 @@
     position: fixed;
     inset: 0;
     z-index: 0;
-    opacity: 0.12;
+    opacity: 0.09;
   }
 
   /* === MAIN LAYOUT === */
@@ -120,43 +119,49 @@
     justify-content: center;
     align-items: flex-start;
     padding: 60px;
-    gap: 4px;
-    transition: opacity 0.5s ease;
+    gap: 0;
+    transition: opacity 0.6s ease;
   }
   #boot-sequence.fade-out {
     opacity: 0;
     pointer-events: none;
   }
 
+  #boot-header {
+    font-size: clamp(9px, 1vw, 12px);
+    color: rgba(0,255,65,0.35);
+    letter-spacing: 0.12em;
+    margin-bottom: 20px;
+  }
+
   .boot-line {
-    font-size: clamp(10px, 1.2vw, 14px);
+    font-size: clamp(11px, 1.3vw, 15px);
     color: var(--green-dim);
     opacity: 0;
-    white-space: nowrap;
-    animation: bootAppear 0.1s ease forwards;
+    white-space: pre;
+    line-height: 1.7;
+    overflow: hidden;
+    max-width: 700px;
   }
-  .boot-line.ok {
-    color: var(--green);
-  }
-  .boot-line.warn {
-    color: #ffaa00;
-  }
-  @keyframes bootAppear {
-    to { opacity: 1; }
-  }
+  .boot-line.ok   { color: var(--green); }
+  .boot-line.warn { color: var(--amber); }
+  .boot-line.err  { color: var(--red); }
+  .boot-line.visible { opacity: 1; }
 
   /* === PROGRESS BAR === */
   #boot-progress-wrap {
-    margin-top: 16px;
-    width: 400px;
+    margin-top: 20px;
+    width: 500px;
     max-width: 80vw;
     opacity: 0;
+    transition: opacity 0.3s;
   }
   #boot-progress-wrap.visible { opacity: 1; }
   #boot-progress-label {
-    font-size: 12px;
+    font-size: clamp(10px, 1.1vw, 13px);
     color: var(--green-dim);
-    margin-bottom: 4px;
+    margin-bottom: 5px;
+    letter-spacing: 0.1em;
   }
   #boot-progress-bar-outer {
     width: 100%;
@@ -169,7 +174,7 @@
     height: 100%;
     background: var(--green);
     width: 0%;
-    transition: width 0.05s linear;
+    transition: width 0.04s linear;
     box-shadow: 0 0 10px var(--green);
     position: relative;
   }
@@ -185,6 +190,7 @@
     color: var(--green);
     margin-top: 4px;
     text-align: right;
+    letter-spacing: 0.1em;
   }
 
   /* === TERMINAL LINES === */
@@ -218,31 +224,31 @@
       0 0 10px var(--green),
       0 0 20px var(--green-glow),
       0 0 40px rgba(0,255,65,0.2);
-    animation: glitch 5s infinite;
+    animation: glitchAuto 6s infinite;
     margin-bottom: 4px;
   }
-  @keyframes glitch {
-    0%, 89%, 100% {
+  @keyframes glitchAuto {
+    0%, 88%, 100% {
       text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow), 0 0 40px rgba(0,255,65,0.2);
       transform: translate(0);
+      clip-path: none;
+    }
+    89% {
+      text-shadow: -3px 0 var(--red), 3px 0 var(--cyan), 0 0 10px var(--green);
+      transform: translate(-2px, 0);
+      clip-path: inset(20% 0 40% 0);
     }
     90% {
-      text-shadow: -2px 0 #ff003c, 2px 0 #00f0ff, 0 0 10px var(--green);
-      transform: translate(-2px, 0);
+      text-shadow: 3px 0 var(--red), -3px 0 var(--cyan);
+      transform: translate(2px, 1px);
+      clip-path: inset(60% 0 10% 0);
     }
     91% {
-      text-shadow: 2px 0 #ff003c, -2px 0 #00f0ff, 0 0 10px var(--green);
-      transform: translate(2px, 0);
+      text-shadow: -2px 0 var(--red), 2px 0 var(--cyan), 0 0 10px var(--green);
+      transform: translate(-1px, 0);
+      clip-path: none;
     }
     92% {
-      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow);
-      transform: translate(0);
-    }
-    93% {
-      text-shadow: -3px 0 #ff003c, 3px 0 #00f0ff;
-      transform: translate(-1px, 1px);
-    }
-    94% {
       text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow), 0 0 40px rgba(0,255,65,0.2);
       transform: translate(0);
     }
@@ -253,7 +259,7 @@
     font-size: clamp(12px, 1.6vw, 20px);
     color: var(--green-dim);
     letter-spacing: 0.15em;
-    margin-bottom: clamp(24px, 4vw, 48px);
+    margin-bottom: clamp(20px, 3vw, 36px);
     text-shadow: 0 0 8px var(--green-glow);
   }
 
@@ -262,7 +268,7 @@
     font-size: clamp(10px, 1.1vw, 14px);
     color: rgba(0,255,65,0.3);
     letter-spacing: 0.05em;
-    margin: clamp(8px, 1.5vw, 16px) 0;
+    margin: clamp(6px, 1.2vw, 14px) 0;
     animation: pulse 3s ease infinite;
   }
   @keyframes pulse {
@@ -270,18 +276,64 @@
     50% { opacity: 0.7; }
   }
 
+  /* === SESSION COUNTER === */
+  #session-counter {
+    font-size: clamp(11px, 1.3vw, 15px);
+    color: var(--green-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: clamp(10px, 1.5vw, 18px);
+  }
+  #session-counter .session-num {
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green-glow);
+    font-weight: bold;
+  }
+  #session-counter .session-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    box-shadow: 0 0 6px var(--green);
+    animation: sessionPulse 1.4s ease infinite;
+  }
+  @keyframes sessionPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  /* === SIGNAL STRENGTH === */
+  #signal-wrap {
+    font-size: clamp(10px, 1.2vw, 14px);
+    color: var(--green-dim);
+    letter-spacing: 0.08em;
+    margin-bottom: clamp(10px, 1.5vw, 18px);
+    line-height: 1.6;
+  }
+  #signal-bar {
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green-glow);
+    font-weight: bold;
+  }
+  #signal-pct {
+    color: var(--green);
+    font-weight: bold;
+  }
+
   /* === NAV ITEMS === */
   #nav {
     display: flex;
     flex-direction: column;
-    gap: clamp(8px, 1.5vw, 16px);
-    margin-bottom: clamp(24px, 4vw, 48px);
+    gap: clamp(6px, 1.2vw, 14px);
+    margin-bottom: clamp(16px, 3vw, 36px);
   }
 
   .nav-item {
     position: relative;
     cursor: none;
-    padding: 6px 0;
+    padding: 5px 0;
   }
 
   .nav-cmd {
@@ -347,7 +399,7 @@
 
   /* === COUNTDOWN === */
   #countdown-wrap {
-    margin-top: clamp(8px, 1.5vw, 16px);
+    margin-top: clamp(6px, 1.2vw, 14px);
   }
   #countdown-label {
     font-size: clamp(10px, 1.1vw, 13px);
@@ -366,7 +418,6 @@
   }
   @keyframes countdownFlash {
     0%, 100% { opacity: 1; }
-    95% { opacity: 1; }
     96% { opacity: 0.6; }
     97% { opacity: 1; }
   }
@@ -382,7 +433,7 @@
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: clamp(22px, 2.5vw, 30px);
-    background: rgba(0,255,65,0.06);
+    background: rgba(0,255,65,0.05);
     border-top: 1px solid rgba(0,255,65,0.2);
     display: flex;
     align-items: center;
@@ -404,9 +455,7 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
   }
-  #status-clock {
-    font-variant-numeric: tabular-nums;
-  }
+  #status-clock { font-variant-numeric: tabular-nums; }
 
   /* === TOP BAR === */
   #topbar {
@@ -440,7 +489,7 @@
     inset: 0;
     z-index: 101;
     pointer-events: none;
-    opacity: 0.03;
+    opacity: 0.025;
     animation: noiseAnim 0.1s steps(1) infinite;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-size: 200px 200px;
@@ -464,15 +513,15 @@
     position: fixed;
     left: 0; right: 0;
     height: 2px;
-    background: rgba(0,255,65,0.6);
+    background: rgba(0,255,65,0.55);
     pointer-events: none;
     z-index: 102;
     opacity: 0;
-    animation: glitchLine 0.1s ease forwards;
+    animation: glitchLine 0.12s ease forwards;
   }
   @keyframes glitchLine {
-    0% { opacity: 0.8; transform: scaleX(1); }
-    100% { opacity: 0; transform: scaleX(0.3); }
+    0% { opacity: 0.9; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(0.2); }
   }
 
   /* === SIDE DECORATION === */
@@ -486,7 +535,7 @@
     gap: 6px;
     z-index: 20;
     opacity: 0;
-    transition: opacity 1s ease 3s;
+    transition: opacity 1s ease;
   }
   #side-deco.visible { opacity: 1; }
   .side-bar {
@@ -520,53 +569,164 @@
   }
   .corner-tl { top: 36px; left: 16px; }
   .corner-tl::before { top: 0; left: 0; width: 100%; height: 2px; }
-  .corner-tl::after { top: 0; left: 0; width: 2px; height: 100%; }
-
+  .corner-tl::after  { top: 0; left: 0; width: 2px; height: 100%; }
   .corner-tr { top: 36px; right: 16px; }
   .corner-tr::before { top: 0; right: 0; width: 100%; height: 2px; }
-  .corner-tr::after { top: 0; right: 0; width: 2px; height: 100%; }
-
+  .corner-tr::after  { top: 0; right: 0; width: 2px; height: 100%; }
   .corner-bl { bottom: 36px; left: 16px; }
   .corner-bl::before { bottom: 0; left: 0; width: 100%; height: 2px; }
-  .corner-bl::after { bottom: 0; left: 0; width: 2px; height: 100%; }
-
+  .corner-bl::after  { bottom: 0; left: 0; width: 2px; height: 100%; }
   .corner-br { bottom: 36px; right: 16px; }
   .corner-br::before { bottom: 0; right: 0; width: 100%; height: 2px; }
-  .corner-br::after { bottom: 0; right: 0; width: 2px; height: 100%; }
+  .corner-br::after  { bottom: 0; right: 0; width: 2px; height: 100%; }
 
   /* === HORIZONTAL SCAN === */
   #hscan {
     position: fixed;
     left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(0,255,65,0.4), transparent);
+    background: linear-gradient(to right, transparent, rgba(0,255,65,0.35), transparent);
     z-index: 50;
     pointer-events: none;
-    animation: hscan 4s linear infinite;
-    opacity: 0.6;
+    animation: hscan 5s linear infinite;
+    opacity: 0.5;
   }
   @keyframes hscan {
-    0% { top: 0%; }
+    0%   { top: 0%; }
     100% { top: 100%; }
   }
 
-  /* === RANDOM CHARACTERS BG === */
-  #char-rain {
+  /* === HOVER GLITCH === */
+  .glitch-hover {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch-hover.glitching {
+    animation: hoverGlitch 0.35s steps(1) forwards;
+  }
+  @keyframes hoverGlitch {
+    0%   { text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); transform: translate(-1px, 0); filter: brightness(1.5); }
+    15%  { text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); transform: translate(2px, -1px); }
+    30%  { text-shadow: -1px 0 var(--red), 1px 0 var(--cyan); transform: translate(0, 1px); }
+    45%  { text-shadow: 3px 0 var(--red), -3px 0 var(--cyan); transform: translate(-2px, 0); filter: brightness(2); }
+    60%  { text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); transform: translate(1px, 0); }
+    75%  { text-shadow: 1px 0 var(--red), -1px 0 var(--cyan); transform: translate(0); filter: brightness(1.2); }
+    100% { text-shadow: none; transform: translate(0); filter: none; }
+  }
+
+  /* === FILE PANEL (modal terminal) === */
+  #file-panel-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    overflow: hidden;
-    opacity: 0;
-    transition: opacity 1s ease 3.5s;
+    z-index: 300;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
   }
-  #char-rain.visible { opacity: 1; }
+  #file-panel-overlay.open {
+    display: flex;
+    animation: panelFadeIn 0.15s ease;
+  }
+  @keyframes panelFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  #file-panel {
+    width: min(820px, 90vw);
+    max-height: 75vh;
+    background: #000;
+    border: 1px solid rgba(0,255,65,0.5);
+    box-shadow:
+      0 0 0 1px rgba(0,255,65,0.1),
+      0 0 40px rgba(0,255,65,0.15),
+      inset 0 0 40px rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    animation: panelSlideIn 0.2s ease;
+  }
+  @keyframes panelSlideIn {
+    from { transform: translateY(12px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  #file-panel-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(0,255,65,0.25);
+    background: rgba(0,255,65,0.04);
+    flex-shrink: 0;
+  }
+  #file-panel-title {
+    font-size: clamp(11px, 1.2vw, 14px);
+    color: var(--green);
+    letter-spacing: 0.15em;
+    font-weight: bold;
+  }
+  #file-panel-close {
+    font-size: 14px;
+    color: var(--green-dim);
+    cursor: none;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border: 1px solid rgba(0,255,65,0.2);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #file-panel-close:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+
+  #file-panel-prompt {
+    padding: 8px 16px 4px;
+    font-size: clamp(10px, 1.1vw, 13px);
+    color: var(--green-dim);
+    border-bottom: 1px solid rgba(0,255,65,0.1);
+    flex-shrink: 0;
+    letter-spacing: 0.08em;
+  }
+
+  #file-panel-body {
+    padding: 16px;
+    overflow-y: auto;
+    font-size: clamp(11px, 1.2vw, 14px);
+    color: var(--green-dim);
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,255,65,0.3) transparent;
+  }
+  #file-panel-body::-webkit-scrollbar { width: 4px; }
+  #file-panel-body::-webkit-scrollbar-track { background: transparent; }
+  #file-panel-body::-webkit-scrollbar-thumb { background: rgba(0,255,65,0.3); }
+
+  .panel-line { display: block; white-space: pre-wrap; }
+  .panel-line.hl  { color: var(--green); font-weight: bold; }
+  .panel-line.dim { color: rgba(0,255,65,0.35); }
+  .panel-line.warn { color: var(--amber); }
+  .panel-line.ok  { color: var(--green); }
+  .panel-line.sep { color: rgba(0,255,65,0.25); }
+
+  #file-panel-footer {
+    padding: 6px 16px;
+    border-top: 1px solid rgba(0,255,65,0.15);
+    font-size: 10px;
+    color: rgba(0,255,65,0.3);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
 
   /* === RESPONSIVE === */
   @media (max-width: 600px) {
     #terminal { padding: 20px; }
     #side-deco { display: none; }
     .corner { display: none; }
+    #file-panel { width: 95vw; }
   }
 </style>
 </head>
@@ -577,6 +737,9 @@
 
 <!-- Noise overlay -->
 <div id="noise"></div>
+
+<!-- Scanlines overlay -->
+<div id="scanlines"></div>
 
 <!-- Horizontal scan line -->
 <div id="hscan"></div>
@@ -592,12 +755,13 @@
 
 <!-- Top bar -->
 <div id="topbar">
-  <span class="status-item">WATERINGMYGRASS.COM // TERMINAL v2.0.4</span>
+  <span class="status-item">ROOT@WMG-NODE-07 ~ // BASH 5.2.26 // AES-256-GCM</span>
   <span class="status-item active" id="topbar-status">● SYSTEM ONLINE</span>
 </div>
 
 <!-- Boot sequence -->
 <div id="boot-sequence">
+  <div id="boot-header">WATERINGMYGRASS SYSTEMS INC. // NODE-07 TERMINAL INIT</div>
   <div id="boot-lines"></div>
   <div id="boot-progress-wrap">
     <div id="boot-progress-label">LOADING FREQUENCY DATABASE...</div>
@@ -617,16 +781,29 @@
   <div class="side-bar"></div>
 </div>
 
+<!-- File panel overlay -->
+<div id="file-panel-overlay">
+  <div id="file-panel">
+    <div id="file-panel-titlebar">
+      <span id="file-panel-title">// FILE VIEWER</span>
+      <span id="file-panel-close">[ ESC / CLOSE ]</span>
+    </div>
+    <div id="file-panel-prompt"></div>
+    <div id="file-panel-body"></div>
+    <div id="file-panel-footer">// USE SCROLL TO NAVIGATE // ESC TO CLOSE</div>
+  </div>
+</div>
+
 <!-- Main terminal content -->
 <div id="terminal">
 
   <div class="t-line" id="line-system">
-    <span class="status-item" style="font-size:clamp(9px,1vw,12px);letter-spacing:0.12em;color:rgba(0,255,65,0.5)">
-      SYSTEM: ROOT@WMG — BASH 5.2.26 — CONNECTED
+    <span style="font-size:clamp(9px,1vw,12px);letter-spacing:0.12em;color:rgba(0,255,65,0.45)">
+      SSH root@wmg-node-07 — SESSION AUTHENTICATED — UPTIME: <span id="uptime-val">00:00:00</span>
     </span>
   </div>
 
-  <div class="t-line" id="line-spacer1" style="height:clamp(16px,3vw,40px)"></div>
+  <div class="t-line" id="line-spacer1" style="height:clamp(14px,2.5vw,36px)"></div>
 
   <div class="t-line" id="line-headline">
     <span id="headline"><span class="prompt"></span><span id="headline-text"></span><span class="type-cursor" id="headline-cursor"></span></span>
@@ -640,9 +817,27 @@
     <span class="t-divider" id="divider-text"></span>
   </div>
 
+  <!-- Session counter -->
+  <div class="t-line" id="line-sessions">
+    <div id="session-counter">
+      <span class="session-dot"></span><span class="prompt"></span>ACTIVE SESSIONS: <span class="session-num" id="session-num">2,847</span>
+    </div>
+  </div>
+
+  <!-- Signal strength -->
+  <div class="t-line" id="line-signal">
+    <div id="signal-wrap">
+      <span class="prompt"></span>SIGNAL STRENGTH: <span id="signal-bar">[==========&gt;   ]</span> <span id="signal-pct">73%</span>
+    </div>
+  </div>
+
+  <div class="t-line" id="line-div1b">
+    <span class="t-divider" id="divider1b-text"></span>
+  </div>
+
   <div id="nav">
     <div class="t-line" id="line-nav1">
-      <div class="nav-item" data-desc="// browse the signal archive. truth in the frequencies." data-url="/articles">
+      <div class="nav-item glitch-hover" data-desc="// browse the signal archive. truth in the frequencies." data-file="articles">
         <div class="nav-cmd">
           <span class="nav-status"></span>
           <span class="prompt"></span><span class="nav-cmd-text"></span><span class="type-cursor nav-cursor"></span>
@@ -653,7 +848,7 @@
     </div>
 
     <div class="t-line" id="line-nav2">
-      <div class="nav-item" data-desc="// forensic data. visualized. undeniable." data-url="/evidence">
+      <div class="nav-item glitch-hover" data-desc="// forensic data. visualized. undeniable." data-file="evidence-map">
         <div class="nav-cmd">
           <span class="nav-status"></span>
           <span class="prompt"></span><span class="nav-cmd-text"></span><span class="type-cursor nav-cursor"></span>
@@ -664,7 +859,7 @@
     </div>
 
     <div class="t-line" id="line-nav3">
-      <div class="nav-item" data-desc="// plug into the network. become the signal." data-url="/join">
+      <div class="nav-item glitch-hover" data-desc="// plug into the network. april 18. become the signal." data-file="join-april-18">
         <div class="nav-cmd">
           <span class="nav-status"></span>
           <span class="prompt"></span><span class="nav-cmd-text"></span><span class="type-cursor nav-cursor"></span>
@@ -691,10 +886,10 @@
 
 <!-- Status bar -->
 <div id="statusbar">
-  <span class="status-item">WMG-TERMINAL // BUILD 2026.04.07</span>
+  <span class="status-item">WMG-TERMINAL // BUILD 2026.04.07 // NODE-07</span>
   <span class="status-item active">● REC</span>
   <span class="status-item" id="status-clock">00:00:00</span>
-  <span class="status-item">MEM: 4.2GB FREE</span>
+  <span class="status-item active">ENC: AES-256</span>
   <span class="status-item active">SIGNAL: LOCKED</span>
 </div>
 
@@ -708,43 +903,45 @@ function typeText(el, text, speed = 40) {
   return new Promise(resolve => {
     let i = 0;
     el.textContent = '';
-    const interval = setInterval(() => {
-      el.textContent += text[i];
-      i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        resolve();
-      }
+    const iv = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) { clearInterval(iv); resolve(); }
     }, speed);
   });
 }
 
 function showLine(id) {
   const el = document.getElementById(id);
-  if (el) {
-    el.classList.add('visible');
-  }
+  if (el) el.classList.add('visible');
 }
 
 // ============================================================
 // CURSOR
 // ============================================================
 const cursor = document.getElementById('cursor');
-let mx = -100, my = -100;
-let cx = -100, cy = -100;
-
-document.addEventListener('mousemove', e => {
-  mx = e.clientX;
-  my = e.clientY;
-});
-
-(function animateCursor() {
+let mx = -100, my = -100, cx = -100, cy = -100;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
   cx += (mx - cx) * 0.35;
   cy += (my - cy) * 0.35;
   cursor.style.left = cx + 'px';
-  cursor.style.top = cy + 'px';
-  requestAnimationFrame(animateCursor);
+  cursor.style.top  = cy + 'px';
+  requestAnimationFrame(animCursor);
 })();
+
+// ============================================================
+// UPTIME
+// ============================================================
+let uptimeStart = Date.now();
+function updateUptime() {
+  const s = Math.floor((Date.now() - uptimeStart) / 1000);
+  const h = String(Math.floor(s / 3600)).padStart(2, '0');
+  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const sec = String(s % 60).padStart(2, '0');
+  const el = document.getElementById('uptime-val');
+  if (el) el.textContent = h + ':' + m + ':' + sec;
+}
+setInterval(updateUptime, 1000);
 
 // ============================================================
 // MATRIX RAIN
@@ -753,8 +950,7 @@ document.addEventListener('mousemove', e => {
   const canvas = document.getElementById('matrix-canvas');
   const ctx = canvas.getContext('2d');
   let cols, drops, W, H;
-
-  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ0123456789ABCDEF!@#$%^&*';
 
   function resize() {
     W = canvas.width = window.innerWidth;
@@ -762,24 +958,20 @@ document.addEventListener('mousemove', e => {
     cols = Math.floor(W / 16);
     drops = new Array(cols).fill(1);
   }
-
   resize();
   window.addEventListener('resize', resize);
 
-  function draw() {
+  setInterval(() => {
     ctx.fillStyle = 'rgba(0,0,0,0.05)';
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#00ff41';
-    ctx.font = '14px Courier New';
+    ctx.font = '13px Courier New';
     for (let i = 0; i < drops.length; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)];
-      ctx.fillText(char, i * 16, drops[i] * 16);
+      ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 16, drops[i] * 16);
       if (drops[i] * 16 > H && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
-  }
-
-  setInterval(draw, 50);
+  }, 50);
 })();
 
 // ============================================================
@@ -789,25 +981,22 @@ function spawnGlitchLine() {
   const el = document.createElement('div');
   el.className = 'glitch-line';
   el.style.top = Math.random() * 100 + 'vh';
-  el.style.width = (30 + Math.random() * 70) + '%';
-  el.style.left = (Math.random() * 30) + '%';
+  el.style.width = (20 + Math.random() * 60) + '%';
+  el.style.left = (Math.random() * 40) + '%';
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 200);
 }
-
-setInterval(() => {
-  if (Math.random() > 0.7) spawnGlitchLine();
-}, 800);
+setInterval(() => { if (Math.random() > 0.65) spawnGlitchLine(); }, 900);
 
 // ============================================================
 // CLOCK
 // ============================================================
 function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('status-clock').textContent = h + ':' + m + ':' + s;
+  const n = new Date();
+  document.getElementById('status-clock').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
 }
 setInterval(updateClock, 1000);
 updateClock();
@@ -817,104 +1006,346 @@ updateClock();
 // ============================================================
 function updateCountdown() {
   const eventDate = new Date('2026-04-18T00:00:00');
-  const now = new Date();
-  let diff = eventDate - now;
-
+  let diff = eventDate - new Date();
   if (diff <= 0) {
-    document.getElementById('countdown-text').textContent = 'EVENT IN: 00d 00h 00m 00s -- TRANSMISSION LIVE';
+    document.getElementById('countdown-text').textContent = 'TRANSMISSION LIVE NOW // ACCESS GRANTED';
     return;
   }
-
-  const days = Math.floor(diff / 86400000);
-  diff -= days * 86400000;
-  const hours = Math.floor(diff / 3600000);
-  diff -= hours * 3600000;
-  const mins = Math.floor(diff / 60000);
-  diff -= mins * 60000;
-  const secs = Math.floor(diff / 1000);
-
+  const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+  const h = Math.floor(diff / 3600000);  diff -= h * 3600000;
+  const m = Math.floor(diff / 60000);    diff -= m * 60000;
+  const s = Math.floor(diff / 1000);
   document.getElementById('countdown-text').textContent =
-    'EVENT IN: ' +
-    String(days).padStart(2, '0') + 'd ' +
-    String(hours).padStart(2, '0') + 'h ' +
-    String(mins).padStart(2, '0') + 'm ' +
-    String(secs).padStart(2, '0') + 's';
+    'EVENT IN: ' + String(d).padStart(2,'0') + 'd ' +
+    String(h).padStart(2,'0') + 'h ' +
+    String(m).padStart(2,'0') + 'm ' +
+    String(s).padStart(2,'0') + 's';
 }
 setInterval(updateCountdown, 1000);
 updateCountdown();
 
 // ============================================================
+// SESSION COUNTER
+// ============================================================
+let sessionCount = 2847;
+function formatSessions(n) {
+  return n.toLocaleString('en-US');
+}
+function tickSessions() {
+  sessionCount += Math.floor(Math.random() * 3) + 1;
+  const el = document.getElementById('session-num');
+  if (el) el.textContent = formatSessions(sessionCount);
+}
+setInterval(tickSessions, 2200 + Math.random() * 1600);
+
+// ============================================================
+// SIGNAL STRENGTH METER
+// ============================================================
+let sigPct = 73;
+let sigDir = 1;
+function updateSignal() {
+  sigPct += (Math.random() * 4 - 1.5) * sigDir;
+  if (sigPct > 94) { sigDir = -1; sigPct = 94; }
+  if (sigPct < 54) { sigDir = 1;  sigPct = 54; }
+  const p = Math.round(sigPct);
+  const total = 14;
+  const filled = Math.round((p / 100) * total);
+  const bar = '='.repeat(Math.max(0, filled - 1)) + (filled > 0 ? '>' : '') + ' '.repeat(total - filled);
+  const barEl = document.getElementById('signal-bar');
+  const pctEl = document.getElementById('signal-pct');
+  if (barEl) barEl.textContent = '[' + bar + ']';
+  if (pctEl) pctEl.textContent = p + '%';
+}
+setInterval(updateSignal, 1800);
+
+// ============================================================
+// TOPBAR CYCLING STATUS
+// ============================================================
+const statusMessages = [
+  '● SYSTEM ONLINE',
+  '● FREQUENCIES ACTIVE',
+  '● 847K ENTRIES LOADED',
+  '● SIGNAL LOCKED',
+  '● TOR CIRCUIT: ACTIVE',
+  '● TRANSMISSION READY',
+  '● ENCRYPTION: AES-256',
+];
+let statusIdx = 0;
+setInterval(() => {
+  statusIdx = (statusIdx + 1) % statusMessages.length;
+  const el = document.getElementById('topbar-status');
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = statusMessages[statusIdx]; el.style.opacity = '1'; }, 200);
+}, 3200);
+
+// ============================================================
+// DIVIDER GLITCH
+// ============================================================
+setInterval(() => {
+  const ids = ['divider-text', 'divider1b-text', 'divider2-text'];
+  const target = ids[Math.floor(Math.random() * ids.length)];
+  const el = document.getElementById(target);
+  if (!el || !el.textContent) return;
+  const pos = Math.floor(Math.random() * el.textContent.length);
+  const gc = '!@#$%^&*<>?/\\|~`';
+  const orig = el.textContent;
+  el.textContent = orig.slice(0, pos) + gc[Math.floor(Math.random() * gc.length)] + orig.slice(pos + 1);
+  setTimeout(() => { el.textContent = orig; }, 80);
+}, 1100);
+
+// ============================================================
+// HOVER GLITCH EFFECT
+// ============================================================
+function attachHoverGlitch() {
+  document.querySelectorAll('.glitch-hover').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      el.classList.remove('glitching');
+      void el.offsetWidth; // reflow
+      el.classList.add('glitching');
+    });
+    el.addEventListener('animationend', () => {
+      el.classList.remove('glitching');
+    });
+  });
+}
+
+// ============================================================
+// FILE PANEL DATA
+// ============================================================
+const fileData = {
+  'articles': {
+    title: '// CAT ./articles — SIGNAL ARCHIVE',
+    prompt: 'root@wmg-node-07:~$ cat ./articles | head -80',
+    lines: [
+      { cls: 'hl',  text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'hl',  text: ' SIGNAL ARCHIVE // 847,221 INDEXED ENTRIES' },
+      { cls: 'hl',  text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'dim', text: '' },
+      { cls: 'hl',  text: ' [PINNED] LATEST TRANSMISSIONS:' },
+      { cls: 'dim', text: '' },
+      { cls: '',    text: '  001 // THE SCHUMANN RESONANCE SUPPRESSION — WHAT THEY BURIED' },
+      { cls: 'dim', text: '        Published 2026-03-14 // 7,842 reads // VERIFIED' },
+      { cls: '',    text: '  002 // HRV BASELINE COLLAPSE: FREQUENCY EXPOSURE DATA (2019-2025)' },
+      { cls: 'dim', text: '        Published 2026-02-28 // 12,441 reads // PEER-REVIEWED' },
+      { cls: '',    text: '  003 // 7.83Hz AND THE IMMUNE RESPONSE: META-ANALYSIS' },
+      { cls: 'dim', text: '        Published 2026-01-11 // 4,209 reads // TECHNICAL' },
+      { cls: '',    text: '  004 // GROUNDING PROTOCOLS — REPLICATED ACROSS 6 FACILITIES' },
+      { cls: 'dim', text: '        Published 2025-12-30 // 9,118 reads // FIELD STUDY' },
+      { cls: '',    text: '  005 // THE CELLULAR RESONANCE THEORY: COMPLETE BREAKDOWN' },
+      { cls: 'dim', text: '        Published 2025-11-22 // 21,003 reads // DEEP DIVE' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '  ─────────────────────────────────────────────────────────' },
+      { cls: 'dim', text: '' },
+      { cls: 'hl',  text: ' [CATEGORIES]:' },
+      { cls: '',    text: '  ./articles/schumann         [312 files]' },
+      { cls: '',    text: '  ./articles/hrv              [189 files]' },
+      { cls: '',    text: '  ./articles/emf-exposure     [441 files]' },
+      { cls: '',    text: '  ./articles/grounding        [276 files]' },
+      { cls: '',    text: '  ./articles/cell-resonance   [209 files]' },
+      { cls: '',    text: '  ./articles/suppressed       [098 files]  [RESTRICTED]' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '  ─────────────────────────────────────────────────────────' },
+      { cls: 'dim', text: '' },
+      { cls: 'warn',text: '  [!] 3 entries currently under review by external parties.' },
+      { cls: 'warn',text: '  [!] Mirror archives active on 4 independent nodes.' },
+      { cls: 'dim', text: '' },
+      { cls: 'ok',  text: '  [OK] ARCHIVE INTEGRITY: VERIFIED // SHA-256 CHECKSUM PASS' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'dim', text: ' >> type ./articles/<name> to open a specific entry' },
+    ]
+  },
+  'evidence-map': {
+    title: '// CAT ./evidence-map — FORENSIC DATA',
+    prompt: 'root@wmg-node-07:~$ cat ./evidence-map --render=ascii',
+    lines: [
+      { cls: 'hl',  text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'hl',  text: ' FORENSIC EVIDENCE MAP // v4.1.0 // LAST UPDATED: 2026-04-06' },
+      { cls: 'hl',  text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'dim', text: '' },
+      { cls: 'warn',text: '  SCHUMANN DISRUPTION EVENT TIMELINE:' },
+      { cls: 'dim', text: '' },
+      { cls: '',    text: '  2019 ──[BASELINE RECORDED]──────────────── 7.83 Hz ±0.5' },
+      { cls: '',    text: '  2020 ──[ANOMALY SPIKE]─────────────────── 36.0 Hz DETECTED' },
+      { cls: '',    text: '  2021 ──[SUPPRESSION WINDOW]─────────────── DATA GAP (14mo)' },
+      { cls: 'warn',text: '  2022 ──[!] CIVILIAN HRV DECLINE —————————  -18% NATIONWIDE' },
+      { cls: 'warn',text: '  2023 ──[!] CORRELATED SLEEP DISRUPTION ——  +34% REPORTED' },
+      { cls: 'warn',text: '  2024 ──[!] CELLULAR STRESS MARKERS ———————  ELEVATED x2.7' },
+      { cls: 'ok',  text: '  2025 ──[GROUNDING PROTOCOL ROLLOUT]─────── PARTIAL RECOVERY' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '  ─────────────────────────────────────────────────────────' },
+      { cls: 'dim', text: '' },
+      { cls: 'hl',  text: '  NODE CONNECTIONS [47 VERIFIED]:' },
+      { cls: 'dim', text: '' },
+      { cls: '',    text: '   FACILITY-A ◄──────► SUPPRESSED-STUDY-114' },
+      { cls: '',    text: '   SUPPRESSED-STUDY-114 ◄──► FREQUENCY-PATENT-7829-C' },
+      { cls: '',    text: '   FREQUENCY-PATENT-7829-C ◄──► REGULATORY-MEMO-2021' },
+      { cls: 'warn',text: '   REGULATORY-MEMO-2021 ◄──► [REDACTED NODE] // ACCESS DENIED' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '  ─────────────────────────────────────────────────────────' },
+      { cls: 'dim', text: '' },
+      { cls: 'hl',  text: '  CONFIDENCE RATINGS:' },
+      { cls: '',    text: '   HRV-DECLINE CORRELATION .............. 94.2%  [STRONG]' },
+      { cls: '',    text: '   SCHUMANN SUPPRESSION WINDOW .......... 87.6%  [STRONG]' },
+      { cls: '',    text: '   INSTITUTIONAL COORDINATION ........... 71.3%  [MODERATE]' },
+      { cls: 'warn',text: '   REDACTED NODE IDENTITY ............... 12.1%  [UNVERIFIED]' },
+      { cls: 'dim', text: '' },
+      { cls: 'ok',  text: '  [OK] INTERACTIVE MAP AVAILABLE AT ./evidence-map/interactive' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+    ]
+  },
+  'join-april-18': {
+    title: '// CAT ./join-april-18 — TRANSMISSION EVENT',
+    prompt: 'root@wmg-node-07:~$ cat ./join-april-18 && echo "AUTHORIZED"',
+    lines: [
+      { cls: 'hl',  text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'hl',  text: ' TRANSMISSION EVENT: APRIL 18 2026 // FREQUENCY UNLOCK' },
+      { cls: 'hl',  text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'dim', text: '' },
+      { cls: 'ok',  text: '  [ACCESS GRANTED] // WELCOME TO THE NETWORK.' },
+      { cls: 'dim', text: '' },
+      { cls: '',    text: '  On April 18, 2026, we go live.' },
+      { cls: '',    text: '  What has been suppressed will be broadcast.' },
+      { cls: '',    text: '  What has been buried will surface.' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '  ─────────────────────────────────────────────────────────' },
+      { cls: 'dim', text: '' },
+      { cls: 'hl',  text: '  EVENT STRUCTURE:' },
+      { cls: 'dim', text: '' },
+      { cls: '',    text: '  00:00 UTC — SIGNAL BROADCAST BEGINS' },
+      { cls: '',    text: '  00:15 UTC — EVIDENCE ARCHIVE UNLOCKED' },
+      { cls: '',    text: '  01:00 UTC — LIVE FREQUENCY SESSION (7.83 Hz protocol)' },
+      { cls: '',    text: '  02:00 UTC — COMMUNITY SYNC // ALL NODES ACTIVE' },
+      { cls: '',    text: '  03:00 UTC — Q&A // DIRECT LINE OPEN' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '  ─────────────────────────────────────────────────────────' },
+      { cls: 'dim', text: '' },
+      { cls: 'hl',  text: '  HOW TO REGISTER:' },
+      { cls: 'dim', text: '' },
+      { cls: '',    text: '  1. CONFIRM YOUR NODE ID (provided at signup)' },
+      { cls: '',    text: '  2. SUBMIT EMAIL TO JOIN ENCRYPTED MAILING LIST' },
+      { cls: '',    text: '  3. RECEIVE ACCESS TOKEN 24H BEFORE BROADCAST' },
+      { cls: '',    text: '  4. CONNECT VIA SECURE LINK ON APR 18 00:00 UTC' },
+      { cls: 'dim', text: '' },
+      { cls: 'warn',text: '  [!] CAPACITY: 10,000 NODES MAXIMUM' },
+      { cls: 'warn',text: '  [!] SPOTS REMAINING: APPROX 2,104' },
+      { cls: 'dim', text: '' },
+      { cls: 'ok',  text: '  > JOIN NOW: ./join-april-18/register' },
+      { cls: 'dim', text: '' },
+      { cls: 'sep', text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' },
+      { cls: 'ok',  text: ' AUTHORIZED' },
+    ]
+  }
+};
+
+// ============================================================
+// FILE PANEL
+// ============================================================
+function openFile(fileKey) {
+  const data = fileData[fileKey];
+  if (!data) return;
+
+  document.getElementById('file-panel-title').textContent = data.title;
+  document.getElementById('file-panel-prompt').textContent = data.prompt;
+
+  const body = document.getElementById('file-panel-body');
+  body.innerHTML = '';
+  data.lines.forEach(l => {
+    const span = document.createElement('span');
+    span.className = 'panel-line' + (l.cls ? ' ' + l.cls : '');
+    span.textContent = l.text || '\u00A0';
+    body.appendChild(span);
+  });
+  body.scrollTop = 0;
+
+  document.getElementById('file-panel-overlay').classList.add('open');
+}
+
+function closeFilePanel() {
+  document.getElementById('file-panel-overlay').classList.remove('open');
+}
+
+document.getElementById('file-panel-close').addEventListener('click', closeFilePanel);
+document.getElementById('file-panel-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeFilePanel();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeFilePanel();
+});
+
+// ============================================================
 // BOOT SEQUENCE
 // ============================================================
 const bootLines = [
-  { text: 'BIOS v2.0.4 // WATERINGMYGRASS SYSTEMS INC.', delay: 0, cls: '' },
-  { text: 'CPU: TRUTH ENGINE 3.7GHz x16 CORES', delay: 80, cls: '' },
-  { text: 'RAM: 64GB FREQ-DDR5 // ECC ENABLED', delay: 160, cls: '' },
-  { text: 'STORAGE: 48TB NVMe ARRAY // RAID-6', delay: 240, cls: '' },
-  { text: '---', delay: 320, cls: '' },
-  { text: 'CHECKING FREQUENCY DATABASES...', delay: 400, cls: '' },
-  { text: '[OK] DATABASE ALPHA: LOADED (847,221 ENTRIES)', delay: 520, cls: 'ok' },
-  { text: '[OK] DATABASE BETA: LOADED (1,204,847 ENTRIES)', delay: 640, cls: 'ok' },
-  { text: '[OK] EVIDENCE MATRIX: ONLINE', delay: 760, cls: 'ok' },
-  { text: '[OK] SIGNAL ROUTER: CONNECTED', delay: 880, cls: 'ok' },
-  { text: '[WARN] 3 RESTRICTED FREQUENCIES DETECTED', delay: 960, cls: 'warn' },
-  { text: '[OK] ENCRYPTION: AES-256-GCM ACTIVE', delay: 1060, cls: 'ok' },
-  { text: '[OK] NETWORK: TOR CIRCUIT ESTABLISHED', delay: 1160, cls: 'ok' },
-  { text: '---', delay: 1240, cls: '' },
-  { text: 'INITIALIZING TERMINAL INTERFACE...', delay: 1340, cls: '' },
+  { text: 'BIOS v3.1.7 // WATERINGMYGRASS SYSTEMS INC.',           cls: '',     delay: 0 },
+  { text: 'CPU: TRUTH ENGINE 3.7GHz x16 CORES // HYPERTHREADING ON', cls: '',   delay: 300 },
+  { text: 'RAM: 64GB FREQ-DDR5 // ECC ENABLED // PARITY OK',        cls: '',    delay: 600 },
+  { text: 'STORAGE: 48TB NVMe ARRAY // RAID-6 // INTEGRITY: PASS',  cls: '',    delay: 900 },
+  { text: 'INITIALIZING FREQUENCY PROTOCOLS...',                     cls: '',    delay: 1200 },
+  { text: 'LOADING SCHUMANN DATABASE...',                            cls: '',    delay: 1500 },
+  { text: '[OK] SCHUMANN DB: LOADED (1,204,847 ENTRIES)',            cls: 'ok',  delay: 1800 },
+  { text: 'HRV CALIBRATION: COMPLETE',                              cls: 'ok',  delay: 2100 },
+  { text: '[OK] EVIDENCE MATRIX: ONLINE',                           cls: 'ok',  delay: 2400 },
+  { text: '[OK] SIGNAL ROUTER: CONNECTED // TOR CIRCUIT ACTIVE',    cls: 'ok',  delay: 2700 },
+  { text: '[WARN] 3 RESTRICTED FREQUENCIES DETECTED — LOGGING',     cls: 'warn',delay: 3000 },
+  { text: '[OK] ENCRYPTION: AES-256-GCM ACTIVE',                   cls: 'ok',  delay: 3300 },
+  { text: 'AUTHENTICATING SESSION...',                              cls: '',    delay: 3600 },
+  { text: '[OK] SESSION AUTHENTICATED // ACCESS LEVEL: ROOT',       cls: 'ok',  delay: 3900 },
+  { text: 'ESTABLISHING SECURE TERMINAL INTERFACE...',              cls: '',    delay: 4200 },
 ];
+
+async function typeBootLine(el, text) {
+  el.classList.add('visible');
+  el.textContent = '';
+  const speed = 18;
+  for (let i = 0; i < text.length; i++) {
+    el.textContent += text[i];
+    await sleep(speed);
+  }
+}
 
 async function runBoot() {
   const container = document.getElementById('boot-lines');
   const progressWrap = document.getElementById('boot-progress-wrap');
-  const progressBar = document.getElementById('boot-progress-bar-inner');
-  const progressPct = document.getElementById('boot-progress-pct');
+  const progressBar  = document.getElementById('boot-progress-bar-inner');
+  const progressPct  = document.getElementById('boot-progress-pct');
 
   for (const line of bootLines) {
-    await sleep(line.delay ? 80 : 80);
+    await sleep(300);
     const el = document.createElement('div');
     el.className = 'boot-line' + (line.cls ? ' ' + line.cls : '');
-    el.textContent = line.text;
     container.appendChild(el);
-    el.style.animationDelay = '0ms';
-    if (container.children.length > 12) {
+    if (container.children.length > 14) {
       container.removeChild(container.firstChild);
     }
+    await typeBootLine(el, line.text);
   }
 
-  await sleep(200);
+  await sleep(300);
   progressWrap.classList.add('visible');
 
-  // Animate progress bar
   let pct = 0;
   await new Promise(resolve => {
-    const interval = setInterval(() => {
-      pct += Math.random() * 8 + 2;
+    const iv = setInterval(() => {
+      pct += Math.random() * 6 + 2;
       if (pct >= 100) pct = 100;
       progressBar.style.width = pct + '%';
       progressPct.textContent = Math.floor(pct) + '%';
-      if (pct >= 100) {
-        clearInterval(interval);
-        setTimeout(resolve, 300);
-      }
+      if (pct >= 100) { clearInterval(iv); setTimeout(resolve, 400); }
     }, 40);
   });
 
-  // Final boot line
   const finalEl = document.createElement('div');
   finalEl.className = 'boot-line ok';
-  finalEl.textContent = '[OK] SYSTEM READY. WELCOME TO WATERINGMYGRASS.';
   container.appendChild(finalEl);
-
-  await sleep(600);
-
-  // Fade out boot sequence
-  document.getElementById('boot-sequence').classList.add('fade-out');
-  setTimeout(() => {
-    document.getElementById('boot-sequence').style.display = 'none';
-  }, 600);
+  await typeBootLine(finalEl, '[OK] SYSTEM READY. WELCOME TO WATERINGMYGRASS.');
 
   await sleep(700);
+  document.getElementById('boot-sequence').classList.add('fade-out');
+  setTimeout(() => { document.getElementById('boot-sequence').style.display = 'none'; }, 700);
+
+  await sleep(800);
   startMain();
 }
 
@@ -924,37 +1355,45 @@ async function runBoot() {
 async function startMain() {
   document.getElementById('side-deco').classList.add('visible');
 
-  // System line
   showLine('line-system');
   await sleep(300);
   showLine('line-spacer1');
   await sleep(200);
 
-  // Headline
   showLine('line-headline');
   await sleep(100);
   await typeText(document.getElementById('headline-text'), 'WATERING MY GRASS', 55);
   document.getElementById('headline-cursor').classList.add('hidden');
   await sleep(400);
 
-  // Subline
   showLine('line-subline');
   await sleep(80);
   await typeText(document.getElementById('subline-text'), 'frequency science. evidence. community.', 30);
   document.getElementById('subline-cursor').classList.add('hidden');
   await sleep(300);
 
-  // Divider
   showLine('line-div1');
-  document.getElementById('divider-text').textContent =
-    '─'.repeat(60);
+  document.getElementById('divider-text').textContent = '─'.repeat(60);
+  await sleep(200);
+
+  // Session counter
+  showLine('line-sessions');
+  await sleep(200);
+
+  // Signal strength
+  showLine('line-signal');
+  updateSignal();
+  await sleep(200);
+
+  showLine('line-div1b');
+  document.getElementById('divider1b-text').textContent = '─'.repeat(60);
   await sleep(200);
 
   // Nav items
   const navData = [
-    { lineId: 'line-nav1', text: './articles', speed: 40 },
-    { lineId: 'line-nav2', text: './evidence', speed: 40 },
-    { lineId: 'line-nav3', text: './join', speed: 40 },
+    { lineId: 'line-nav1', text: './articles',     file: 'articles' },
+    { lineId: 'line-nav2', text: './evidence-map', file: 'evidence-map' },
+    { lineId: 'line-nav3', text: './join-april-18',file: 'join-april-18' },
   ];
 
   for (const item of navData) {
@@ -962,34 +1401,31 @@ async function startMain() {
     await sleep(80);
     const lineEl = document.getElementById(item.lineId);
     const textEl = lineEl.querySelector('.nav-cmd-text');
-    const cursorEl = lineEl.querySelector('.nav-cursor');
-    await typeText(textEl, item.text, item.speed);
-    cursorEl.classList.add('hidden');
+    const cursEl = lineEl.querySelector('.nav-cursor');
+    await typeText(textEl, item.text, 40);
+    cursEl.classList.add('hidden');
     await sleep(180);
   }
 
   await sleep(200);
-
-  // Second divider
   showLine('line-div2');
-  document.getElementById('divider2-text').textContent =
-    '─'.repeat(60);
+  document.getElementById('divider2-text').textContent = '─'.repeat(60);
   await sleep(200);
 
-  // Countdown
   showLine('line-countdown');
 
-  // Attach nav hover effects
-  attachNavHovers();
+  attachNavBehaviors();
+  attachHoverGlitch();
 }
 
 // ============================================================
-// NAV HOVER TYPEOUTS
+// NAV HOVER + CLICK
 // ============================================================
-function attachNavHovers() {
+function attachNavBehaviors() {
   document.querySelectorAll('.nav-item').forEach(item => {
-    const desc = item.querySelector('.nav-desc');
-    const descText = item.dataset.desc;
+    const desc    = item.querySelector('.nav-desc');
+    const descTxt = item.dataset.desc;
+    const fileKey = item.dataset.file;
     let typing = null;
     let isOver = false;
 
@@ -1001,9 +1437,8 @@ function attachNavHovers() {
       if (typing) clearInterval(typing);
       typing = setInterval(() => {
         if (!isOver) { clearInterval(typing); return; }
-        desc.textContent += descText[i];
-        i++;
-        if (i >= descText.length) clearInterval(typing);
+        desc.textContent += descTxt[i++];
+        if (i >= descTxt.length) clearInterval(typing);
       }, 22);
     });
 
@@ -1014,55 +1449,17 @@ function attachNavHovers() {
     });
 
     item.addEventListener('click', () => {
-      // terminal-style navigation with a little flicker
-      document.body.style.opacity = '0.7';
-      setTimeout(() => document.body.style.opacity = '1', 80);
-      setTimeout(() => document.body.style.opacity = '0.5', 140);
-      setTimeout(() => document.body.style.opacity = '1', 200);
+      // terminal flicker
+      document.body.style.opacity = '0.6';
+      setTimeout(() => { document.body.style.opacity = '1'; }, 80);
+      setTimeout(() => { document.body.style.opacity = '0.5'; }, 140);
+      setTimeout(() => {
+        document.body.style.opacity = '1';
+        if (fileKey) openFile(fileKey);
+      }, 210);
     });
   });
 }
-
-// ============================================================
-// TOPBAR CYCLING STATUS
-// ============================================================
-const statusMessages = [
-  '● SYSTEM ONLINE',
-  '● FREQUENCIES ACTIVE',
-  '● 847K ENTRIES LOADED',
-  '● SIGNAL LOCKED',
-  '● ENCRYPTED',
-  '● TRANSMISSION READY',
-];
-let statusIdx = 0;
-setInterval(() => {
-  statusIdx = (statusIdx + 1) % statusMessages.length;
-  const el = document.getElementById('topbar-status');
-  el.style.opacity = '0';
-  setTimeout(() => {
-    el.textContent = statusMessages[statusIdx];
-    el.style.opacity = '1';
-  }, 200);
-}, 3000);
-
-// ============================================================
-// RANDOM TERMINAL NOISE IN DIVIDERS
-// ============================================================
-setInterval(() => {
-  const dividers = ['divider-text', 'divider2-text'];
-  const target = dividers[Math.floor(Math.random() * dividers.length)];
-  const el = document.getElementById(target);
-  if (!el || !el.textContent) return;
-  const pos = Math.floor(Math.random() * el.textContent.length);
-  const glitchChars = '!@#$%^&*<>?/\\|~`';
-  const original = el.textContent;
-  el.textContent = original.slice(0, pos) +
-    glitchChars[Math.floor(Math.random() * glitchChars.length)] +
-    original.slice(pos + 1);
-  setTimeout(() => {
-    el.textContent = original;
-  }, 80);
-}, 1200);
 
 // ============================================================
 // START
