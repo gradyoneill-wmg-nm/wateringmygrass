@@ -32,10 +32,10 @@ export default function Navigation() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-[11px] tracking-[0.1em] text-white transition-all ${
+              className={`text-[11px] tracking-[0.1em] transition-all ${
                 pathname === link.href
-                  ? "underline underline-offset-4"
-                  : "hover:underline hover:underline-offset-4 opacity-60 hover:opacity-100"
+                  ? "text-[#F5841F]"
+                  : "text-white opacity-60 hover:opacity-100 hover:underline hover:underline-offset-4"
               }`}
             >
               {link.label}
@@ -45,7 +45,7 @@ export default function Navigation() {
             href="https://nonmagic.app"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] tracking-[0.1em] border border-white px-3 py-1 text-white hover:bg-white hover:text-black transition-all"
+            className="text-[11px] tracking-[0.1em] border border-[#F5841F] px-3 py-1 text-[#F5841F] hover:bg-[#F5841F] hover:text-black transition-all"
           >
             Non Magic ↗
           </a>
@@ -76,8 +76,8 @@ export default function Navigation() {
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
-              className={`text-xs tracking-[0.1em] text-white ${
-                pathname === "/" ? "underline underline-offset-4" : "opacity-60"
+              className={`text-xs tracking-[0.1em] ${
+                pathname === "/" ? "text-[#F5841F]" : "text-white opacity-60"
               }`}
             >
               Home
@@ -87,8 +87,8 @@ export default function Navigation() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className={`text-xs tracking-[0.1em] text-white ${
-                  pathname === link.href ? "underline underline-offset-4" : "opacity-60"
+                className={`text-xs tracking-[0.1em] ${
+                  pathname === link.href ? "text-[#F5841F]" : "text-white opacity-60"
                 }`}
               >
                 {link.label}
