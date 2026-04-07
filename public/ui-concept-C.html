@@ -35,6 +35,8 @@ canvas {
   transform: translate(-50%, -50%);
   text-align: center;
   white-space: nowrap;
+  pointer-events: auto;
+  cursor: default;
 }
 
 #t1 {
@@ -104,12 +106,68 @@ nav a {
   font-family: 'Courier New', Courier, monospace;
   cursor: pointer;
   transition: color 0.3s ease;
-  position: relative;
 }
 
 nav a:hover {
   color: #F5841F;
   text-shadow: 0 0 12px rgba(245,132,31,0.5);
+}
+
+/* ── FREQUENCY PILLS ────────────────────────────── */
+#freq-pills {
+  position: absolute;
+  bottom: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.freq-pill {
+  font-size: 8px;
+  letter-spacing: 0.28em;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  font-family: 'Courier New', Courier, monospace;
+  cursor: pointer;
+  padding: 5px 13px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  background: transparent;
+  user-select: none;
+}
+
+.freq-pill:hover {
+  color: rgba(255,255,255,0.65);
+  border-color: rgba(255,255,255,0.35);
+}
+
+.freq-pill.active {
+  color: #F5841F;
+  border-color: rgba(245,132,31,0.7);
+  text-shadow: 0 0 8px rgba(245,132,31,0.5);
+  box-shadow: 0 0 14px rgba(245,132,31,0.15), inset 0 0 8px rgba(245,132,31,0.05);
+}
+
+/* ── CONSTELLATION LABEL ────────────────────────── */
+#const-label {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  font-size: 7px;
+  letter-spacing: 0.4em;
+  color: rgba(180,200,255,0);
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: color 1.2s ease;
+}
+
+#const-label.active {
+  color: rgba(180,200,255,0.3);
 }
 
 /* ── OVERLAY ─────────────────────────────────────── */
@@ -134,13 +192,21 @@ nav a:hover {
 <canvas id="c"></canvas>
 
 <div class="ui">
-  <div class="center">
+  <div class="center" id="center-text">
     <div id="t1">NON MAGIC</div>
     <div id="t2">WATERING MY GRASS</div>
     <div id="t3">— frequency science. evidence. community. —</div>
   </div>
 
   <div id="date-el">APRIL 18</div>
+  <div id="const-label">CONSTELLATION MODE</div>
+
+  <div id="freq-pills">
+    <div class="freq-pill" data-freq="40hz">40Hz</div>
+    <div class="freq-pill active" data-freq="7.83hz">7.83Hz</div>
+    <div class="freq-pill" data-freq="6hz">6Hz</div>
+    <div class="freq-pill" data-freq="2hz">2Hz</div>
+  </div>
 
   <nav id="nav-el">
     <a href="#" data-nav="frequencies">FREQUENCIES</a>
@@ -165,207 +231,344 @@ function resize() {
   H = canvas.height = window.innerHeight;
 }
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => { resize(); rebuildClusters(); });
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
-const N            = 200;
-const CONNECT_DIST = 130;
+const N            = 400;
+const CONNECT_DIST = 95;
 const PUSH_DIST    = 110;
 const FOV          = 400;
+const TRAIL_LEN    = 14;
+
+// Heartbeat: every 4 s at ~60 fps = 240 ticks
+const HB_INTERVAL  = 240;
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  FREQUENCY MODE
+// ─────────────────────────────────────────────────────────────────────────────
+let freqMode = '7.83hz';
+
+// Cluster centres for 40Hz mode
+const CLUSTER_CENTERS = [];
+function rebuildClusters() {
+  CLUSTER_CENTERS.length = 0;
+  const nc = 6 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < nc; i++) {
+    CLUSTER_CENTERS.push({
+      x: (Math.random() - 0.5) * W * 0.72,
+      y: (Math.random() - 0.5) * H * 0.72,
+      spin: (Math.random() - 0.5) * 0.006
+    });
+  }
+}
+rebuildClusters();
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────────────────────────────────────
-let mouse   = { x: -9999, y: -9999 };
-let hoverNav  = null;   // which nav data-nav is hovered
-let hoverDate = false;
-let vortex    = null;   // { cx, cy, t }
-let phase     = 'exploding';  // exploding → drifting → settled
-let tick      = 0;
+const mouse = { x: -9999, y: -9999, lx: -9999, ly: -9999 };
+
+let hoverNav       = null;
+let hoverDate      = false;
+let hoverHeadline  = false;
+let headlineCX     = 0;
+let headlineCY     = 0;
+
+let vortex         = null;
+let phase          = 'exploding';
+let tick           = 0;
+
+// Constellation
+let mouseStillTick   = 0;
+let constellationOn  = false;
+let constShapes      = [];
+let constRebuildClock = 0;
+
+// Heartbeat
+let hbTimer          = 0;
+let hbRingRadius     = 0;
+let hbRingAlpha      = 0;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  COLOUR HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 function hexToRgb(hex) {
-  const h = parseInt(hex.replace('#',''), 16);
+  const h = parseInt(hex.replace('#', ''), 16);
   return [(h >> 16) & 255, (h >> 8) & 255, h & 255];
 }
 
-function lerpColor(hexA, hexB, t) {
-  const [ar,ag,ab] = hexToRgb(hexA);
-  const [br,bg,bb] = hexToRgb(hexB);
-  return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
+function lerpColor(ra, ga, ba, rb, gb, bb, t) {
+  return `rgb(${Math.round(ra+(rb-ra)*t)},${Math.round(ga+(gb-ga)*t)},${Math.round(ba+(bb-ba)*t)})`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  PARTICLE
 // ─────────────────────────────────────────────────────────────────────────────
 class Particle {
-  constructor() {
-    // Start at screen centre (world space)
-    this.x = 0;
-    this.y = 0;
-    this.z = (Math.random() - 0.5) * 200;
+  constructor(idx) {
+    // Depth layer: 0=far, 1=mid, 2=near
+    this.layer     = idx % 3;
+    this.layerMult = [0.30, 0.70, 1.00][this.layer];
 
-    // Target world position
+    // Color assignment: 85% white/gray, 10% orange, 5% green
+    const roll = Math.random();
+    if (roll < 0.05) {
+      this.cr = 76;  this.cg = 187; this.cb = 23;   // Kelly green
+      this.glowR = 76; this.glowG = 187; this.glowB = 23;
+    } else if (roll < 0.15) {
+      this.cr = 245; this.cg = 132; this.cb = 31;   // Marty orange
+      this.glowR = 245; this.glowG = 132; this.glowB = 31;
+    } else {
+      const g = 175 + Math.floor(Math.random() * 80);
+      this.cr = g; this.cg = g; this.cb = g;
+      this.glowR = 245; this.glowG = 132; this.glowB = 31; // orange glow on push
+    }
+
+    this._initPos();
+
+    // Frequency helpers
+    this.clusterIdx  = Math.floor(Math.random() * 10);
+    this.orbitAngle  = Math.random() * Math.PI * 2;
+    this.orbitRadius = 25 + Math.random() * 90;
+    this.spiralAngle = Math.random() * Math.PI * 2;
+    this.spiralR     = 40 + Math.random() * Math.min(W, H) * 0.38;
+
+    // Trail (screen-space recent positions)
+    this.trail = [];
+
+    // Heartbeat kick
+    this.hbVx = 0;
+    this.hbVy = 0;
+  }
+
+  _initPos() {
+    this.x  = 0; this.y  = 0;
+    this.z  = (Math.random() - 0.5) * 200;
     this.tx = (Math.random() - 0.5) * W * 1.2;
     this.ty = (Math.random() - 0.5) * H * 1.2;
     this.tz = (Math.random() - 0.5) * 600;
 
-    // Explosion burst
     const a = Math.random() * Math.PI * 2;
     const s = 5 + Math.random() * 10;
     this.vx = Math.cos(a) * s;
     this.vy = Math.sin(a) * s;
     this.vz = (Math.random() - 0.5) * 4;
 
-    // Idle drift (used after settle)
     this.dx = (Math.random() - 0.5) * 0.18;
     this.dy = (Math.random() - 0.5) * 0.18;
     this.dz = (Math.random() - 0.5) * 0.08;
 
-    this.baseR      = 0.8 + Math.random() * 1.8;
-    this.r          = this.baseR;
-    this.pulse      = Math.random() * Math.PI * 2;
-
-    this.glow       = 0;       // 0‥1
-    this.glowCol    = '#F5841F';
+    this.baseR = 0.55 + Math.random() * 1.6;
+    this.r     = this.baseR;
+    this.pulse = Math.random() * Math.PI * 2;
+    this.glow  = 0;
   }
 
-  // World → screen projection
   project() {
-    const scale = FOV / (FOV + this.z + 300);
-    return {
-      sx: this.x * scale + W * 0.5,
-      sy: this.y * scale + H * 0.5,
-      sc: scale
-    };
+    const sc = FOV / (FOV + this.z + 300);
+    return { sx: this.x * sc + W * 0.5, sy: this.y * sc + H * 0.5, sc };
   }
 
   update(t) {
-    // ── Phase-driven movement ──────────────────────────
+    const sm = this.layerMult;
+
+    // ── Phase movement ───────────────────────────────
     if (phase === 'exploding') {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.z += this.vz;
-      this.vx *= 0.96;
-      this.vy *= 0.96;
-      this.vz *= 0.96;
+      this.x += this.vx * sm; this.y += this.vy * sm; this.z += this.vz * sm;
+      this.vx *= 0.96; this.vy *= 0.96; this.vz *= 0.96;
 
     } else if (phase === 'drifting') {
-      this.x += (this.tx - this.x) * 0.018;
-      this.y += (this.ty - this.y) * 0.018;
+      this.x += (this.tx - this.x) * 0.018 * (0.4 + sm * 0.6);
+      this.y += (this.ty - this.y) * 0.018 * (0.4 + sm * 0.6);
       this.z += (this.tz - this.z) * 0.018;
 
     } else {
-      // settled idle drift
-      this.x += this.dx;
-      this.y += this.dy;
-      this.z += this.dz;
+      // settled — frequency behavior
+      switch (freqMode) {
+        case '40hz': {
+          // Tight fast orbiting clusters
+          const cidx = this.clusterIdx % CLUSTER_CENTERS.length;
+          const cc   = CLUSTER_CENTERS[cidx];
+          this.orbitAngle += 0.048 * sm;
+          const tx = cc.x + Math.cos(this.orbitAngle) * this.orbitRadius;
+          const ty = cc.y + Math.sin(this.orbitAngle) * this.orbitRadius;
+          this.x  += (tx - this.x) * 0.08 * sm;
+          this.y  += (ty - this.y) * 0.08 * sm;
+          this.z  += this.dz * sm;
+          break;
+        }
+        case '7.83hz': {
+          // Slow breathing rings — Schumann resonance
+          const breathe = Math.sin(t * 0.0028) * 0.5 + 0.5;
+          const ringR   = 55 + breathe * Math.min(W, H) * 0.30;
+          const d       = Math.sqrt(this.x * this.x + this.y * this.y) || 1;
+          const pull    = (ringR - d) * 0.0028 * sm;
+          this.x += (this.x / d) * pull + this.dx * sm;
+          this.y += (this.y / d) * pull + this.dy * sm;
+          this.z += this.dz * sm;
+          break;
+        }
+        case '6hz': {
+          // Spiral galaxy arms
+          this.spiralAngle += 0.0085 * sm;
+          const tx = Math.cos(this.spiralAngle) * this.spiralR * 0.52;
+          const ty = Math.sin(this.spiralAngle) * this.spiralR * 0.28;
+          this.x  += (tx - this.x) * 0.005 * sm;
+          this.y  += (ty - this.y) * 0.005 * sm;
+          this.z  += this.dz * sm;
+          break;
+        }
+        case '2hz': {
+          // Slow cosmic rain
+          this.y += 0.55 * sm;
+          this.x += this.dx * 0.18 * sm;
+          this.z += this.dz * sm;
+          if (this.y > H * 0.65) this.y = -H * 0.65;
+          break;
+        }
+      }
 
-      // soft wrap
-      const hw = W * 0.65, hh = H * 0.65;
+      // Boundary wrap (skip y-wrap for rain mode)
+      const hw = W * 0.66, hh = H * 0.66;
+      if (freqMode !== '2hz') {
+        if (this.y >  hh) this.y = -hh;
+        if (this.y < -hh) this.y =  hh;
+      }
       if (this.x >  hw) this.x = -hw;
       if (this.x < -hw) this.x =  hw;
-      if (this.y >  hh) this.y = -hh;
-      if (this.y < -hh) this.y =  hh;
       if (this.z >  320) this.z = -320;
       if (this.z < -320) this.z =  320;
     }
 
-    // ── Vortex pull ────────────────────────────────────
+    // ── Heartbeat decay ──────────────────────────────
+    this.x   += this.hbVx;
+    this.y   += this.hbVy;
+    this.hbVx *= 0.89;
+    this.hbVy *= 0.89;
+
+    // ── Vortex ───────────────────────────────────────
     if (vortex) {
-      const { cx, cy } = vortex;
       const { sx, sy } = this.project();
-      const edx = cx - sx;
-      const edy = cy - sy;
+      const edx = vortex.cx - sx, edy = vortex.cy - sy;
       const ed  = Math.sqrt(edx*edx + edy*edy) || 1;
       const f   = Math.max(0, (1 - vortex.t / 55)) * 6;
-      // radial pull
-      this.x += (edx / ed) * f * 0.5;
-      this.y += (edy / ed) * f * 0.5;
-      // tangential swirl
+      this.x   += (edx / ed) * f * 0.5;
+      this.y   += (edy / ed) * f * 0.5;
       const ang = Math.atan2(edy, edx) + 0.25;
-      this.x += Math.cos(ang) * f * 0.4;
-      this.y += Math.sin(ang) * f * 0.4;
+      this.x   += Math.cos(ang) * f * 0.4;
+      this.y   += Math.sin(ang) * f * 0.4;
     }
 
-    // ── Mouse push ─────────────────────────────────────
-    const { sx, sy } = this.project();
-    const mdx  = sx - mouse.x;
-    const mdy  = sy - mouse.y;
-    const mdst = Math.sqrt(mdx*mdx + mdy*mdy);
-
-    if (phase === 'settled' && mdst < PUSH_DIST && mdst > 0.1) {
-      const f = (PUSH_DIST - mdst) / PUSH_DIST;
-      this.x += (mdx / mdst) * f * 3;
-      this.y += (mdy / mdst) * f * 3;
-      this.glow     = Math.min(1, this.glow + 0.12);
-      this.glowCol  = '#F5841F';
-    } else {
-      this.glow = Math.max(0, this.glow - 0.035);
+    // ── Headline swirl ───────────────────────────────
+    if (hoverHeadline && phase === 'settled') {
+      const { sx, sy } = this.project();
+      const hdx = headlineCX - sx, hdy = headlineCY - sy;
+      const hd  = Math.sqrt(hdx*hdx + hdy*hdy) || 1;
+      if (hd < 400) {
+        const f   = ((400 - hd) / 400) * 2.5;
+        this.x   += (hdx / hd) * f * 0.32;
+        this.y   += (hdy / hd) * f * 0.32;
+        const ang = Math.atan2(hdy, hdx) + 0.1;
+        this.x   += Math.cos(ang) * f * 0.75;
+        this.y   += Math.sin(ang) * f * 0.75;
+        this.glow = Math.min(1, this.glow + 0.035);
+      }
     }
 
-    // ── Nav hover ripple (orange) ──────────────────────
+    // ── Mouse push ───────────────────────────────────
+    {
+      const { sx, sy } = this.project();
+      const mdx = sx - mouse.x, mdy = sy - mouse.y;
+      const md  = Math.sqrt(mdx*mdx + mdy*mdy);
+      if (phase === 'settled' && md < PUSH_DIST && md > 0.1) {
+        const f = (PUSH_DIST - md) / PUSH_DIST;
+        this.x  += (mdx / md) * f * 3;
+        this.y  += (mdy / md) * f * 3;
+        this.glow = Math.min(1, this.glow + 0.12);
+      } else {
+        this.glow = Math.max(0, this.glow - 0.032);
+      }
+    }
+
+    // ── Nav ripple ───────────────────────────────────
     if (hoverNav) {
       const el = document.querySelector(`[data-nav="${hoverNav}"]`);
       if (el) {
-        const rc   = el.getBoundingClientRect();
-        const nx   = rc.left + rc.width  * 0.5;
-        const ny   = rc.top  + rc.height * 0.5;
-        const dx   = sx - nx;
-        const dy   = sy - ny;
-        const d    = Math.sqrt(dx*dx + dy*dy);
+        const rc = el.getBoundingClientRect();
+        const nx = rc.left + rc.width * 0.5, ny = rc.top + rc.height * 0.5;
+        const { sx, sy } = this.project();
+        const d = Math.sqrt((sx-nx)*(sx-nx) + (sy-ny)*(sy-ny));
         if (d < 160) {
-          const ripple = (1 - d / 160) * 0.85;
-          if (ripple > this.glow) {
-            this.glow    = ripple;
-            this.glowCol = '#F5841F';
-          }
+          const rpl = (1 - d / 160) * 0.85;
+          if (rpl > this.glow) this.glow = rpl;
         }
       }
     }
 
-    // ── Date hover ripple (green) ──────────────────────
+    // ── Date ripple ──────────────────────────────────
     if (hoverDate) {
       const el = document.getElementById('date-el');
       const rc = el.getBoundingClientRect();
-      const nx = rc.left + rc.width  * 0.5;
-      const ny = rc.top  + rc.height * 0.5;
-      const dx = sx - nx;
-      const dy = sy - ny;
-      const d  = Math.sqrt(dx*dx + dy*dy);
+      const nx = rc.left + rc.width * 0.5, ny = rc.top + rc.height * 0.5;
+      const { sx, sy } = this.project();
+      const d = Math.sqrt((sx-nx)*(sx-nx) + (sy-ny)*(sy-ny));
       if (d < 190) {
-        const ripple = (1 - d / 190) * 0.92;
-        if (ripple > this.glow) {
-          this.glow    = ripple;
-          this.glowCol = '#00ff88';
+        const rpl = (1 - d / 190) * 0.92;
+        if (rpl > this.glow) {
+          this.glow    = rpl;
+          this.glowR   = 0; this.glowG = 255; this.glowB = 136;
         }
       }
     }
 
-    // ── Pulse radius ───────────────────────────────────
-    this.r = this.baseR + Math.sin(t * 0.018 + this.pulse) * 0.4;
+    // ── Pulse radius ─────────────────────────────────
+    this.r = this.baseR + Math.sin(t * 0.018 + this.pulse) * 0.38;
+
+    // ── Record trail ─────────────────────────────────
+    const { sx, sy } = this.project();
+    this.trail.push({ x: sx, y: sy });
+    if (this.trail.length > TRAIL_LEN) this.trail.shift();
   }
 
   draw() {
     const { sx, sy, sc } = this.project();
-    const r = Math.max(0.4, this.r * sc);
+    const r = Math.max(0.35, this.r * sc);
 
-    ctx.save();
-
-    if (this.glow > 0.05) {
-      ctx.shadowBlur  = 10 + 14 * this.glow;
-      ctx.shadowColor = this.glowCol;
+    // ── Trail ────────────────────────────────────────
+    if (this.trail.length > 2) {
+      const n = this.trail.length;
+      for (let i = 1; i < n; i++) {
+        const t0 = this.trail[i - 1];
+        const t1 = this.trail[i];
+        const prog  = i / n;
+        const alpha = prog * 0.28 * (0.15 + sc * 0.85) * (1 + this.glow * 0.6);
+        ctx.beginPath();
+        ctx.moveTo(t0.x, t0.y);
+        ctx.lineTo(t1.x, t1.y);
+        ctx.strokeStyle = `rgba(${this.cr},${this.cg},${this.cb},${Math.min(alpha, 0.7)})`;
+        ctx.lineWidth   = Math.max(0.25, r * 0.55 * prog);
+        ctx.stroke();
+      }
     }
 
-    const baseAlpha = 0.35 + sc * 0.65;
+    // ── Dot ──────────────────────────────────────────
+    ctx.save();
     if (this.glow > 0.05) {
-      ctx.fillStyle = lerpColor('#ffffff', this.glowCol, this.glow);
+      ctx.shadowBlur  = 9 + 13 * this.glow;
+      ctx.shadowColor = `rgb(${this.glowR},${this.glowG},${this.glowB})`;
+    }
+
+    const baseA = 0.38 + sc * 0.62;
+    if (this.glow > 0.05) {
+      ctx.fillStyle = lerpColor(
+        this.cr, this.cg, this.cb,
+        this.glowR, this.glowG, this.glowB,
+        this.glow * 0.55
+      );
     } else {
-      ctx.fillStyle = `rgba(255,255,255,${baseAlpha})`;
+      ctx.fillStyle = `rgba(${this.cr},${this.cg},${this.cb},${baseA})`;
     }
 
     ctx.beginPath();
@@ -378,38 +581,29 @@ class Particle {
 // ─────────────────────────────────────────────────────────────────────────────
 //  BUILD PARTICLE ARRAY
 // ─────────────────────────────────────────────────────────────────────────────
-const particles = Array.from({ length: N }, () => new Particle());
+const particles = Array.from({ length: N }, (_, i) => new Particle(i));
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  CONNECTIONS
 // ─────────────────────────────────────────────────────────────────────────────
-function drawConnections() {
-  // Cache projected positions to avoid double-projecting per pair
-  const proj = particles.map(p => p.project());
-
+function drawConnections(projCache) {
   for (let i = 0; i < N - 1; i++) {
-    const { sx: ax, sy: ay } = proj[i];
+    const { sx: ax, sy: ay } = projCache[i];
+    const pi = particles[i];
     for (let j = i + 1; j < N; j++) {
-      const { sx: bx, sy: by } = proj[j];
-      const dx   = ax - bx;
-      const dy   = ay - by;
+      const { sx: bx, sy: by } = projCache[j];
+      const dx   = ax - bx, dy = ay - by;
       const dist = Math.sqrt(dx*dx + dy*dy);
-
       if (dist >= CONNECT_DIST) continue;
 
-      const baseA = (1 - dist / CONNECT_DIST) * 0.18;
-      const gi    = Math.max(particles[i].glow, particles[j].glow);
-      const gc    = particles[i].glow >= particles[j].glow
-                      ? particles[i].glowCol
-                      : particles[j].glowCol;
+      const baseA = (1 - dist / CONNECT_DIST) * 0.12;
+      const pj    = particles[j];
+      const gi    = Math.max(pi.glow, pj.glow);
+      const pr    = pi.glow >= pj.glow ? pi : pj;
 
       let stroke;
       if (gi > 0.05) {
-        if (gc === '#00ff88') {
-          stroke = `rgba(0,255,136,${baseA + gi * 0.35})`;
-        } else {
-          stroke = `rgba(245,132,31,${baseA + gi * 0.35})`;
-        }
+        stroke = `rgba(${pr.glowR},${pr.glowG},${pr.glowB},${baseA + gi * 0.32})`;
       } else {
         stroke = `rgba(255,255,255,${baseA})`;
       }
@@ -418,10 +612,116 @@ function drawConnections() {
       ctx.moveTo(ax, ay);
       ctx.lineTo(bx, by);
       ctx.strokeStyle = stroke;
-      ctx.lineWidth   = 0.5;
+      ctx.lineWidth   = 0.45;
       ctx.stroke();
     }
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CONSTELLATION MODE
+// ─────────────────────────────────────────────────────────────────────────────
+function buildConstellations(projCache) {
+  constShapes = [];
+  const CDIST = 170;
+  const used  = new Set();
+
+  // Random pass — try to form shapes from random seed particles
+  const order = Array.from({ length: N }, (_, i) => i).sort(() => Math.random() - 0.5);
+
+  for (const i of order) {
+    if (used.has(i) || constShapes.length >= 12) break;
+    const { sx: ax, sy: ay } = projCache[i];
+
+    const nearby = [];
+    for (let j = 0; j < N; j++) {
+      if (j === i || used.has(j)) continue;
+      const { sx: bx, sy: by } = projCache[j];
+      const d = Math.sqrt((ax-bx)*(ax-bx) + (ay-by)*(ay-by));
+      if (d < CDIST) nearby.push({ idx: j, d });
+    }
+    nearby.sort((a, b) => a.d - b.d);
+
+    // Alternate between triangle (3) and pentagon (5)
+    const want = (constShapes.length % 3 === 0 && nearby.length >= 4) ? 5 : 3;
+    if (nearby.length < want - 1) continue;
+
+    const shape = [i];
+    for (let k = 0; k < want - 1; k++) shape.push(nearby[k].idx);
+    shape.forEach(idx => used.add(idx));
+    constShapes.push(shape);
+  }
+}
+
+function drawConstellations(projCache) {
+  if (!constellationOn || constShapes.length === 0) return;
+
+  ctx.save();
+  for (const shape of constShapes) {
+    if (shape.length < 3) continue;
+
+    ctx.strokeStyle = 'rgba(180,205,255,0.28)';
+    ctx.lineWidth   = 0.65;
+    ctx.shadowBlur  = 5;
+    ctx.shadowColor = 'rgba(160,190,255,0.18)';
+
+    ctx.beginPath();
+    const f = projCache[shape[0]];
+    ctx.moveTo(f.sx, f.sy);
+    for (let i = 1; i < shape.length; i++) {
+      const p = projCache[shape[i]];
+      ctx.lineTo(p.sx, p.sy);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    // Vertex dots
+    ctx.shadowBlur = 0;
+    for (const idx of shape) {
+      const p = projCache[idx];
+      ctx.beginPath();
+      ctx.arc(p.sx, p.sy, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(190,215,255,0.45)';
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  HEARTBEAT
+// ─────────────────────────────────────────────────────────────────────────────
+function triggerHeartbeat() {
+  // Kick each particle radially outward from screen centre
+  for (const p of particles) {
+    const { sx, sy } = p.project();
+    const dx = sx - W * 0.5, dy = sy - H * 0.5;
+    const d  = Math.sqrt(dx*dx + dy*dy) || 1;
+    const f  = (3.5 + Math.random() * 3) * p.layerMult;
+    p.hbVx   = (dx / d) * f;
+    p.hbVy   = (dy / d) * f;
+  }
+  hbRingRadius = 5;
+  hbRingAlpha  = 0.55;
+}
+
+function drawHeartbeatRing() {
+  if (hbRingAlpha < 0.01) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(W * 0.5, H * 0.5, hbRingRadius, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(245,132,31,${hbRingAlpha})`;
+  ctx.lineWidth   = 1.5;
+  ctx.shadowBlur  = 18;
+  ctx.shadowColor = `rgba(245,132,31,${hbRingAlpha * 0.5})`;
+  ctx.stroke();
+  ctx.restore();
+
+  hbRingRadius += hbRingRadius < Math.max(W, H) * 0.06
+    ? 6
+    : hbRingRadius * 0.045 + 4;
+  hbRingAlpha  *= 0.935;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -433,24 +733,20 @@ function revealTexts() {
   if (textsRevealed) return;
   textsRevealed = true;
 
-  const t1 = document.getElementById('t1');
-  const t2 = document.getElementById('t2');
-  const t3 = document.getElementById('t3');
-  const dt = document.getElementById('date-el');
-  const nv = document.getElementById('nav-el');
-
-  function fade(el, delay, dur, extra) {
+  function fade(id, delay, dur) {
     setTimeout(() => {
-      el.style.transition = `opacity ${dur}ms ease` + (extra ? ', ' + extra : '');
+      const el = document.getElementById(id);
+      el.style.transition = `opacity ${dur}ms ease`;
       el.style.opacity    = '1';
     }, delay);
   }
 
-  fade(t1, 100,  900);
-  fade(t2, 600,  900);
-  fade(t3, 1200, 900);
-  fade(dt, 1600, 900);
-  fade(nv, 1800, 900);
+  fade('t1',          100,  900);
+  fade('t2',          600,  900);
+  fade('t3',         1200,  900);
+  fade('date-el',    1600,  900);
+  fade('nav-el',     1800,  900);
+  fade('freq-pills', 2100,  900);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -458,7 +754,6 @@ function revealTexts() {
 // ─────────────────────────────────────────────────────────────────────────────
 function loop() {
   requestAnimationFrame(loop);
-
   tick++;
 
   // Phase transitions
@@ -466,16 +761,58 @@ function loop() {
   if (phase === 'drifting'  && tick > 150) { phase = 'settled'; revealTexts(); }
 
   // Vortex timer
-  if (vortex) {
-    vortex.t++;
-    if (vortex.t > 65) vortex = null;
+  if (vortex) { vortex.t++; if (vortex.t > 65) vortex = null; }
+
+  // Heartbeat
+  hbTimer++;
+  if (hbTimer >= HB_INTERVAL) { hbTimer = 0; triggerHeartbeat(); }
+
+  // Rotate cluster centres (40Hz alive feel)
+  for (const cc of CLUSTER_CENTERS) {
+    const len = Math.sqrt(cc.x*cc.x + cc.y*cc.y) || 1;
+    cc.x += (-cc.y / len) * Math.abs(cc.spin) * len * 0.005;
+    cc.y += ( cc.x / len) * Math.abs(cc.spin) * len * 0.005;
   }
 
-  // Trail clear (low alpha for motion blur effect)
-  ctx.fillStyle = 'rgba(0,0,0,0.14)';
+  // Constellation: mouse-still timer
+  const moved = Math.abs(mouse.x - mouse.lx) > 1 || Math.abs(mouse.y - mouse.ly) > 1;
+  if (moved) {
+    mouseStillTick = 0;
+    if (constellationOn) {
+      constellationOn = false;
+      document.getElementById('const-label').classList.remove('active');
+    }
+  } else if (phase === 'settled') {
+    mouseStillTick++;
+    if (mouseStillTick === 120) {   // 2 s at 60 fps
+      constellationOn = true;
+      document.getElementById('const-label').classList.add('active');
+    }
+  }
+  mouse.lx = mouse.x; mouse.ly = mouse.y;
+
+  // ── Trail / motion blur clear ─────────────────────
+  ctx.fillStyle = 'rgba(0,0,0,0.16)';
   ctx.fillRect(0, 0, W, H);
 
-  drawConnections();
+  // ── Build projection cache ────────────────────────
+  const projCache = particles.map(p => p.project());
+
+  // ── Rebuild constellations periodically ──────────
+  if (constellationOn) {
+    constRebuildClock++;
+    if (constRebuildClock > 80) { constRebuildClock = 0; buildConstellations(projCache); }
+    if (constShapes.length === 0) buildConstellations(projCache);
+    drawConstellations(projCache);
+  }
+
+  // ── Draw connections ──────────────────────────────
+  drawConnections(projCache);
+
+  // ── Heartbeat ring ────────────────────────────────
+  drawHeartbeatRing();
+
+  // ── Update & draw particles ───────────────────────
   for (const p of particles) {
     p.update(tick);
     p.draw();
@@ -492,7 +829,7 @@ window.addEventListener('mousemove', e => {
   mouse.y = e.clientY;
 });
 
-// Nav hover
+// Nav hover / click
 document.querySelectorAll('[data-nav]').forEach(el => {
   el.addEventListener('mouseenter', () => { hoverNav = el.dataset.nav; });
   el.addEventListener('mouseleave', () => { hoverNav = null; });
@@ -500,9 +837,7 @@ document.querySelectorAll('[data-nav]').forEach(el => {
     e.preventDefault();
     const rc = el.getBoundingClientRect();
     vortex = { cx: rc.left + rc.width * 0.5, cy: rc.top + rc.height * 0.5, t: 0 };
-    setTimeout(() => {
-      document.getElementById('overlay').classList.add('active');
-    }, 420);
+    setTimeout(() => document.getElementById('overlay').classList.add('active'), 420);
   });
 });
 
@@ -510,6 +845,31 @@ document.querySelectorAll('[data-nav]').forEach(el => {
 const dateEl = document.getElementById('date-el');
 dateEl.addEventListener('mouseenter', () => { hoverDate = true; });
 dateEl.addEventListener('mouseleave', () => { hoverDate = false; });
+
+// Headline hover — particles swirl toward text
+const centerText = document.getElementById('center-text');
+centerText.addEventListener('mouseenter', () => {
+  hoverHeadline = true;
+  const rc = centerText.getBoundingClientRect();
+  headlineCX = rc.left + rc.width  * 0.5;
+  headlineCY = rc.top  + rc.height * 0.5;
+});
+centerText.addEventListener('mouseleave', () => { hoverHeadline = false; });
+centerText.addEventListener('mousemove', () => {
+  const rc = centerText.getBoundingClientRect();
+  headlineCX = rc.left + rc.width  * 0.5;
+  headlineCY = rc.top  + rc.height * 0.5;
+});
+
+// Frequency pills
+document.querySelectorAll('.freq-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.freq-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    freqMode = pill.dataset.freq;
+    if (freqMode === '40hz') rebuildClusters();
+  });
+});
 </script>
 </body>
 </html>
