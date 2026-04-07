@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import FrequencyBadge from "@/components/FrequencyBadge";
 
 type ArticleSection = { heading?: string; body: string };
 
@@ -235,9 +236,7 @@ export default async function ArticlePage({
             ← Articles
           </Link>
           <span className="text-[#333333]">/</span>
-          <span className="text-[9px] tracking-[0.25em] uppercase text-[#555555] border border-[#333333] px-2 py-0.5">
-            {article.tag}
-          </span>
+          <FrequencyBadge frequency={article.tag} />
         </div>
 
         <h1 className="text-3xl md:text-5xl font-light leading-[1.1] tracking-[-0.02em] mb-8">
@@ -283,9 +282,7 @@ export default async function ArticlePage({
 
         {/* Tags / share */}
         <div className="mt-16 pt-8 border-t border-[#222222] flex flex-wrap items-center justify-between gap-4">
-          <span className="text-[9px] tracking-[0.25em] uppercase text-[#555555] border border-[#333333] px-2 py-0.5">
-            {article.tag}
-          </span>
+          <FrequencyBadge frequency={article.tag} />
           <p className="text-[10px] tracking-[0.2em] uppercase text-[#444444]">
             Written by Grady ONeill
           </p>
@@ -347,9 +344,7 @@ export default async function ArticlePage({
                 href={`/articles/${r.slug}`}
                 className="py-6 flex items-start gap-6 group block hover:bg-[#0d0d0d] -mx-6 px-6 transition-colors"
               >
-                <span className="text-[9px] tracking-[0.25em] uppercase text-[#555555] border border-[#333333] px-2 py-0.5 flex-shrink-0 mt-0.5">
-                  {r.tag}
-                </span>
+                <FrequencyBadge frequency={r.tag} size="xs" className="flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-light leading-snug group-hover:text-[#cccccc] transition-colors">
                     {r.title}
