@@ -22,9 +22,10 @@ function getTimeLeft(target: Date): TimeLeft {
 interface CountdownProps {
   targetDate: string; // ISO string
   label?: string;
+  large?: boolean;
 }
 
-export default function Countdown({ targetDate, label }: CountdownProps) {
+export default function Countdown({ targetDate, label, large = false }: CountdownProps) {
   const target = new Date(targetDate);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(getTimeLeft(target));
 
@@ -42,22 +43,41 @@ export default function Countdown({ targetDate, label }: CountdownProps) {
     { value: timeLeft.seconds, label: "Sec" },
   ];
 
+  const numSize = large
+    ? "text-6xl md:text-8xl lg:text-9xl"
+    : "text-3xl md:text-4xl";
+  const labelSize = large ? "text-[10px]" : "text-[9px]";
+  const gap = large ? "gap-6 md:gap-10" : "gap-4 md:gap-6";
+
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-start gap-3">
       {label && (
-        <p className="text-[10px] tracking-[0.25em] uppercase text-[#888888]">
+        <p className="text-[10px] tracking-[0.3em] uppercase text-[#555555]">
           {label}
         </p>
       )}
-      <div className="flex gap-4 md:gap-6">
-        {units.map((u) => (
-          <div key={u.label} className="flex flex-col items-center gap-1">
-            <span className="text-3xl md:text-5xl font-light tabular-nums text-white">
-              {String(u.value).padStart(2, "0")}
-            </span>
-            <span className="text-[9px] tracking-[0.2em] uppercase text-[#555555]">
-              {u.label}
-            </span>
+      <div className={`flex ${gap}`}>
+        {units.map((u, i) => (
+          <div key={u.label} className="flex items-start">
+            <div className="flex flex-col items-center gap-2">
+              <span
+                className={`${numSize} font-light tabular-nums text-white font-mono leading-none`}
+                style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+              >
+                {String(u.value).padStart(2, "0")}
+              </span>
+              <span className={`${labelSize} tracking-[0.25em] uppercase text-[#555555]`}>
+                {u.label}
+              </span>
+            </div>
+            {i < units.length - 1 && (
+              <span
+                className={`${numSize} font-light text-[#333333] mx-1 md:mx-2 leading-none select-none`}
+                style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+              >
+                :
+              </span>
+            )}
           </div>
         ))}
       </div>
