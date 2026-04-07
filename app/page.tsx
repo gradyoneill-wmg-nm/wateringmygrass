@@ -88,7 +88,7 @@ export default function Home() {
         <div className="flex flex-wrap gap-4 items-center">
           <Link
             href="/april18"
-            className="px-8 py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e8e8e8] transition-colors"
+            className="px-8 py-3 bg-[#F5841F] text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0751a] transition-colors font-medium"
           >
             Join April 18 →
           </Link>
@@ -96,7 +96,7 @@ export default function Home() {
             href="https://nonmagic.app"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-8 py-3 border border-white text-white text-xs tracking-[0.15em] uppercase hover:bg-white hover:text-black transition-all"
+            className="px-8 py-3 border border-[#333333] text-[#888888] text-xs tracking-[0.15em] uppercase hover:border-white hover:text-white transition-all"
           >
             Download Non Magic ↗
           </a>
@@ -133,10 +133,10 @@ export default function Home() {
               className="bg-[#0a0a0a] p-8 hover:bg-[#0f0f0f] transition-colors group block"
             >
               <div className="flex items-center gap-3 mb-5">
-                <span className="text-[9px] tracking-[0.25em] uppercase text-[#555555] border border-[#2a2a2a] px-2 py-0.5">
+                <span className="text-[9px] tracking-[0.25em] uppercase text-[#F5841F] border border-[#F5841F]/30 px-2 py-0.5">
                   {article.tag}
                 </span>
-                <span className="text-[9px] text-[#3a3a3a]">{article.readTime} read</span>
+                <span className="text-[9px] text-[#3a3a3a] font-space-mono">{article.readTime} read</span>
               </div>
               <h3 className="text-sm font-light leading-snug mb-3 group-hover:text-white transition-colors text-[#cccccc]">
                 {article.title}

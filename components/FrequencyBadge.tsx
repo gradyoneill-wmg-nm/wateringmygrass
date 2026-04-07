@@ -68,10 +68,10 @@ const FrequencyBadge: FC<FrequencyBadgeProps> = ({
     );
   }
 
-  // Default: badge
+  // Default: badge — orange accent
   return (
     <span
-      className={`inline-flex items-center ${textSize} tracking-[0.25em] uppercase text-[#888888] border border-[#333333] px-2 py-0.5 ${className}`}
+      className={`inline-flex items-center ${textSize} tracking-[0.25em] uppercase text-[#F5841F] border border-[#F5841F]/30 px-2 py-0.5 ${className}`}
     >
       {label}
     </span>

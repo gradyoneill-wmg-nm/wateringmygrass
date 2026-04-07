@@ -61,8 +61,8 @@ export default function Countdown({ targetDate, label, large = false }: Countdow
           <div key={u.label} className="flex items-start">
             <div className="flex flex-col items-center gap-2">
               <span
-                className={`${numSize} font-light tabular-nums text-white font-mono leading-none`}
-                style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+                className={`${numSize} font-normal tabular-nums text-[#F5841F] leading-none`}
+                style={{ fontFamily: "var(--font-space-mono), monospace" }}
               >
                 {String(u.value).padStart(2, "0")}
               </span>
@@ -72,8 +72,8 @@ export default function Countdown({ targetDate, label, large = false }: Countdow
             </div>
             {i < units.length - 1 && (
               <span
-                className={`${numSize} font-light text-[#333333] mx-1 md:mx-2 leading-none select-none`}
-                style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+                className={`${numSize} font-normal text-[#333333] mx-1 md:mx-2 leading-none select-none`}
+                style={{ fontFamily: "var(--font-space-mono), monospace" }}
               >
                 :
               </span>
