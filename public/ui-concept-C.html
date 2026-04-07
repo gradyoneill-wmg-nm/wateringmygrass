@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATERING MY GRASS — Non Magic</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #000;
+  overflow: hidden;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+canvas {
+  display: block;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 1;
+}
+
+.ui {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── CENTER TEXT ─────────────────────────────────── */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  white-space: nowrap;
+}
+
+#t1 {
+  font-size: 10px;
+  letter-spacing: 0.55em;
+  color: #fff;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+#t2 {
+  margin-top: 14px;
+  font-size: 20px;
+  letter-spacing: 0.3em;
+  color: #fff;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+#t3 {
+  margin-top: 18px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.5);
+  opacity: 0;
+}
+
+/* ── DATE BADGE ─────────────────────────────────── */
+#date-el {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  pointer-events: auto;
+  cursor: default;
+  opacity: 0;
+  transition: color 0.4s ease, opacity 1s ease;
+}
+
+#date-el:hover {
+  color: #00ff88;
+  text-shadow: 0 0 14px rgba(0,255,136,0.6);
+}
+
+/* ── NAV ────────────────────────────────────────── */
+nav {
+  position: absolute;
+  bottom: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 52px;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+nav a {
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  text-transform: uppercase;
+  font-family: 'Courier New', Courier, monospace;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+nav a:hover {
+  color: #F5841F;
+  text-shadow: 0 0 12px rgba(245,132,31,0.5);
+}
+
+/* ── OVERLAY ─────────────────────────────────────── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+  transition: opacity 0.7s ease;
+}
+
+#overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div class="ui">
+  <div class="center">
+    <div id="t1">NON MAGIC</div>
+    <div id="t2">WATERING MY GRASS</div>
+    <div id="t3">— frequency science. evidence. community. —</div>
+  </div>
+
+  <div id="date-el">APRIL 18</div>
+
+  <nav id="nav-el">
+    <a href="#" data-nav="frequencies">FREQUENCIES</a>
+    <a href="#" data-nav="evidence">EVIDENCE</a>
+    <a href="#" data-nav="community">COMMUNITY</a>
+    <a href="#" data-nav="about">ABOUT</a>
+  </nav>
+</div>
+
+<div id="overlay"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANVAS
+// ─────────────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W, H;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CONSTANTS
+// ─────────────────────────────────────────────────────────────────────────────
+const N            = 200;
+const CONNECT_DIST = 130;
+const PUSH_DIST    = 110;
+const FOV          = 400;
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let mouse   = { x: -9999, y: -9999 };
+let hoverNav  = null;   // which nav data-nav is hovered
+let hoverDate = false;
+let vortex    = null;   // { cx, cy, t }
+let phase     = 'exploding';  // exploding → drifting → settled
+let tick      = 0;
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  COLOUR HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function hexToRgb(hex) {
+  const h = parseInt(hex.replace('#',''), 16);
+  return [(h >> 16) & 255, (h >> 8) & 255, h & 255];
+}
+
+function lerpColor(hexA, hexB, t) {
+  const [ar,ag,ab] = hexToRgb(hexA);
+  const [br,bg,bb] = hexToRgb(hexB);
+  return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PARTICLE
+// ─────────────────────────────────────────────────────────────────────────────
+class Particle {
+  constructor() {
+    // Start at screen centre (world space)
+    this.x = 0;
+    this.y = 0;
+    this.z = (Math.random() - 0.5) * 200;
+
+    // Target world position
+    this.tx = (Math.random() - 0.5) * W * 1.2;
+    this.ty = (Math.random() - 0.5) * H * 1.2;
+    this.tz = (Math.random() - 0.5) * 600;
+
+    // Explosion burst
+    const a = Math.random() * Math.PI * 2;
+    const s = 5 + Math.random() * 10;
+    this.vx = Math.cos(a) * s;
+    this.vy = Math.sin(a) * s;
+    this.vz = (Math.random() - 0.5) * 4;
+
+    // Idle drift (used after settle)
+    this.dx = (Math.random() - 0.5) * 0.18;
+    this.dy = (Math.random() - 0.5) * 0.18;
+    this.dz = (Math.random() - 0.5) * 0.08;
+
+    this.baseR      = 0.8 + Math.random() * 1.8;
+    this.r          = this.baseR;
+    this.pulse      = Math.random() * Math.PI * 2;
+
+    this.glow       = 0;       // 0‥1
+    this.glowCol    = '#F5841F';
+  }
+
+  // World → screen projection
+  project() {
+    const scale = FOV / (FOV + this.z + 300);
+    return {
+      sx: this.x * scale + W * 0.5,
+      sy: this.y * scale + H * 0.5,
+      sc: scale
+    };
+  }
+
+  update(t) {
+    // ── Phase-driven movement ──────────────────────────
+    if (phase === 'exploding') {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.z += this.vz;
+      this.vx *= 0.96;
+      this.vy *= 0.96;
+      this.vz *= 0.96;
+
+    } else if (phase === 'drifting') {
+      this.x += (this.tx - this.x) * 0.018;
+      this.y += (this.ty - this.y) * 0.018;
+      this.z += (this.tz - this.z) * 0.018;
+
+    } else {
+      // settled idle drift
+      this.x += this.dx;
+      this.y += this.dy;
+      this.z += this.dz;
+
+      // soft wrap
+      const hw = W * 0.65, hh = H * 0.65;
+      if (this.x >  hw) this.x = -hw;
+      if (this.x < -hw) this.x =  hw;
+      if (this.y >  hh) this.y = -hh;
+      if (this.y < -hh) this.y =  hh;
+      if (this.z >  320) this.z = -320;
+      if (this.z < -320) this.z =  320;
+    }
+
+    // ── Vortex pull ────────────────────────────────────
+    if (vortex) {
+      const { cx, cy } = vortex;
+      const { sx, sy } = this.project();
+      const edx = cx - sx;
+      const edy = cy - sy;
+      const ed  = Math.sqrt(edx*edx + edy*edy) || 1;
+      const f   = Math.max(0, (1 - vortex.t / 55)) * 6;
+      // radial pull
+      this.x += (edx / ed) * f * 0.5;
+      this.y += (edy / ed) * f * 0.5;
+      // tangential swirl
+      const ang = Math.atan2(edy, edx) + 0.25;
+      this.x += Math.cos(ang) * f * 0.4;
+      this.y += Math.sin(ang) * f * 0.4;
+    }
+
+    // ── Mouse push ─────────────────────────────────────
+    const { sx, sy } = this.project();
+    const mdx  = sx - mouse.x;
+    const mdy  = sy - mouse.y;
+    const mdst = Math.sqrt(mdx*mdx + mdy*mdy);
+
+    if (phase === 'settled' && mdst < PUSH_DIST && mdst > 0.1) {
+      const f = (PUSH_DIST - mdst) / PUSH_DIST;
+      this.x += (mdx / mdst) * f * 3;
+      this.y += (mdy / mdst) * f * 3;
+      this.glow     = Math.min(1, this.glow + 0.12);
+      this.glowCol  = '#F5841F';
+    } else {
+      this.glow = Math.max(0, this.glow - 0.035);
+    }
+
+    // ── Nav hover ripple (orange) ──────────────────────
+    if (hoverNav) {
+      const el = document.querySelector(`[data-nav="${hoverNav}"]`);
+      if (el) {
+        const rc   = el.getBoundingClientRect();
+        const nx   = rc.left + rc.width  * 0.5;
+        const ny   = rc.top  + rc.height * 0.5;
+        const dx   = sx - nx;
+        const dy   = sy - ny;
+        const d    = Math.sqrt(dx*dx + dy*dy);
+        if (d < 160) {
+          const ripple = (1 - d / 160) * 0.85;
+          if (ripple > this.glow) {
+            this.glow    = ripple;
+            this.glowCol = '#F5841F';
+          }
+        }
+      }
+    }
+
+    // ── Date hover ripple (green) ──────────────────────
+    if (hoverDate) {
+      const el = document.getElementById('date-el');
+      const rc = el.getBoundingClientRect();
+      const nx = rc.left + rc.width  * 0.5;
+      const ny = rc.top  + rc.height * 0.5;
+      const dx = sx - nx;
+      const dy = sy - ny;
+      const d  = Math.sqrt(dx*dx + dy*dy);
+      if (d < 190) {
+        const ripple = (1 - d / 190) * 0.92;
+        if (ripple > this.glow) {
+          this.glow    = ripple;
+          this.glowCol = '#00ff88';
+        }
+      }
+    }
+
+    // ── Pulse radius ───────────────────────────────────
+    this.r = this.baseR + Math.sin(t * 0.018 + this.pulse) * 0.4;
+  }
+
+  draw() {
+    const { sx, sy, sc } = this.project();
+    const r = Math.max(0.4, this.r * sc);
+
+    ctx.save();
+
+    if (this.glow > 0.05) {
+      ctx.shadowBlur  = 10 + 14 * this.glow;
+      ctx.shadowColor = this.glowCol;
+    }
+
+    const baseAlpha = 0.35 + sc * 0.65;
+    if (this.glow > 0.05) {
+      ctx.fillStyle = lerpColor('#ffffff', this.glowCol, this.glow);
+    } else {
+      ctx.fillStyle = `rgba(255,255,255,${baseAlpha})`;
+    }
+
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BUILD PARTICLE ARRAY
+// ─────────────────────────────────────────────────────────────────────────────
+const particles = Array.from({ length: N }, () => new Particle());
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CONNECTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+function drawConnections() {
+  // Cache projected positions to avoid double-projecting per pair
+  const proj = particles.map(p => p.project());
+
+  for (let i = 0; i < N - 1; i++) {
+    const { sx: ax, sy: ay } = proj[i];
+    for (let j = i + 1; j < N; j++) {
+      const { sx: bx, sy: by } = proj[j];
+      const dx   = ax - bx;
+      const dy   = ay - by;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (dist >= CONNECT_DIST) continue;
+
+      const baseA = (1 - dist / CONNECT_DIST) * 0.18;
+      const gi    = Math.max(particles[i].glow, particles[j].glow);
+      const gc    = particles[i].glow >= particles[j].glow
+                      ? particles[i].glowCol
+                      : particles[j].glowCol;
+
+      let stroke;
+      if (gi > 0.05) {
+        if (gc === '#00ff88') {
+          stroke = `rgba(0,255,136,${baseA + gi * 0.35})`;
+        } else {
+          stroke = `rgba(245,132,31,${baseA + gi * 0.35})`;
+        }
+      } else {
+        stroke = `rgba(255,255,255,${baseA})`;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth   = 0.5;
+      ctx.stroke();
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  TEXT REVEAL
+// ─────────────────────────────────────────────────────────────────────────────
+let textsRevealed = false;
+
+function revealTexts() {
+  if (textsRevealed) return;
+  textsRevealed = true;
+
+  const t1 = document.getElementById('t1');
+  const t2 = document.getElementById('t2');
+  const t3 = document.getElementById('t3');
+  const dt = document.getElementById('date-el');
+  const nv = document.getElementById('nav-el');
+
+  function fade(el, delay, dur, extra) {
+    setTimeout(() => {
+      el.style.transition = `opacity ${dur}ms ease` + (extra ? ', ' + extra : '');
+      el.style.opacity    = '1';
+    }, delay);
+  }
+
+  fade(t1, 100,  900);
+  fade(t2, 600,  900);
+  fade(t3, 1200, 900);
+  fade(dt, 1600, 900);
+  fade(nv, 1800, 900);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MAIN LOOP
+// ─────────────────────────────────────────────────────────────────────────────
+function loop() {
+  requestAnimationFrame(loop);
+
+  tick++;
+
+  // Phase transitions
+  if (phase === 'exploding' && tick > 55)  phase = 'drifting';
+  if (phase === 'drifting'  && tick > 150) { phase = 'settled'; revealTexts(); }
+
+  // Vortex timer
+  if (vortex) {
+    vortex.t++;
+    if (vortex.t > 65) vortex = null;
+  }
+
+  // Trail clear (low alpha for motion blur effect)
+  ctx.fillStyle = 'rgba(0,0,0,0.14)';
+  ctx.fillRect(0, 0, W, H);
+
+  drawConnections();
+  for (const p of particles) {
+    p.update(tick);
+    p.draw();
+  }
+}
+
+loop();
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  INPUT
+// ─────────────────────────────────────────────────────────────────────────────
+window.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+// Nav hover
+document.querySelectorAll('[data-nav]').forEach(el => {
+  el.addEventListener('mouseenter', () => { hoverNav = el.dataset.nav; });
+  el.addEventListener('mouseleave', () => { hoverNav = null; });
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    const rc = el.getBoundingClientRect();
+    vortex = { cx: rc.left + rc.width * 0.5, cy: rc.top + rc.height * 0.5, t: 0 };
+    setTimeout(() => {
+      document.getElementById('overlay').classList.add('active');
+    }, 420);
+  });
+});
+
+// Date hover
+const dateEl = document.getElementById('date-el');
+dateEl.addEventListener('mouseenter', () => { hoverDate = true; });
+dateEl.addEventListener('mouseleave', () => { hoverDate = false; });
+</script>
+</body>
+</html>
