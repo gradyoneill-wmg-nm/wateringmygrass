@@ -9,6 +9,7 @@ const links = [
   { href: "/community", label: "Community" },
   { href: "/events", label: "Events" },
   { href: "/meditation", label: "5AM Meditation" },
+  { href: "/evidence", label: "Evidence" },
   { href: "/tm-course", label: "TM Course" },
   { href: "/about", label: "About" },
   { href: "/newsletter", label: "Newsletter" },
