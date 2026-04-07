@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATERING MY GRASS — Concept F</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+    user-select: none;
+  }
+
+  /* Background frequency number */
+  #bg-freq {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(180px, 35vw, 420px);
+    font-weight: 700;
+    color: #fff;
+    opacity: 0.03;
+    pointer-events: none;
+    transition: opacity 0.6s, color 0.6s;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    z-index: 0;
+  }
+
+  /* Title */
+  #title {
+    position: relative;
+    z-index: 10;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 28px;
+    opacity: 0.7;
+    text-transform: uppercase;
+  }
+
+  /* Waveform container */
+  #waveform-wrap {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #waveform-canvas {
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* Frequency pills */
+  #freq-pills {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    margin-bottom: 18px;
+  }
+
+  .pill {
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 5px 14px;
+    border: 1px solid rgba(245,132,31,0.35);
+    background: transparent;
+    color: rgba(245,132,31,0.6);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .pill:hover {
+    border-color: #F5841F;
+    color: #F5841F;
+    background: rgba(245,132,31,0.08);
+  }
+
+  .pill.active {
+    border-color: #F5841F;
+    color: #000;
+    background: #F5841F;
+  }
+
+  /* Data readout */
+  #data-readout {
+    position: relative;
+    z-index: 10;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+  }
+
+  #data-readout span {
+    color: rgba(245,132,31,0.8);
+  }
+
+  /* CTA */
+  #cta {
+    position: relative;
+    z-index: 10;
+    margin-top: 32px;
+    font-size: 10px;
+    letter-spacing: 0.5em;
+    color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 10px 28px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+  }
+
+  #cta:hover {
+    color: #F5841F;
+    border-color: #F5841F;
+    background: rgba(245,132,31,0.05);
+    letter-spacing: 0.6em;
+  }
+
+  /* Navigation */
+  #nav {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    z-index: 20;
+  }
+
+  #nav a {
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.25);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  #nav a:hover { color: rgba(255,255,255,0.8); }
+
+  /* Explosion overlay */
+  #explosion-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+</style>
+</head>
+<body>
+
+<div id="bg-freq">40</div>
+
+<div id="title">WATERING MY GRASS</div>
+
+<div id="waveform-wrap">
+  <canvas id="waveform-canvas"></canvas>
+</div>
+
+<div id="freq-pills">
+  <button class="pill active" data-freq="40" data-label="40Hz">40Hz</button>
+  <button class="pill" data-freq="7.83" data-label="7.83Hz">7.83Hz</button>
+  <button class="pill" data-freq="6" data-label="6Hz">6Hz</button>
+</div>
+
+<div id="data-readout">
+  FREQUENCY: <span id="dr-freq">40Hz</span> &nbsp;|&nbsp;
+  AMPLITUDE: <span id="dr-amp">0.73</span> &nbsp;|&nbsp;
+  SESSIONS: <span id="dr-sessions">2,847</span>
+</div>
+
+<div id="cta">ENTER THE SESSION</div>
+
+<canvas id="explosion-canvas"></canvas>
+
+<nav id="nav">
+  <a href="#">Home</a>
+  <a href="#">Sessions</a>
+  <a href="#">Science</a>
+  <a href="#">About</a>
+  <a href="#">Contact</a>
+</nav>
+
+<script>
+(function() {
+  // ── Config ──────────────────────────────────────────────────────────────
+  const ORANGE = '#F5841F';
+  const BAR_COUNT = 120;
+  const freqConfigs = {
+    '40':   { speed: 1.8,  turbulence: 0.9, label: '40Hz'   },
+    '7.83': { speed: 0.72, turbulence: 0.55, label: '7.83Hz' },
+    '6':    { speed: 0.5,  turbulence: 0.38, label: '6Hz'    },
+  };
+
+  let currentFreq = '40';
+  let mouseX = -9999, mouseY = -9999;
+  let ctaHover = false;
+  let exploding = false;
+  let explodeParticles = [];
+  let t = 0;
+
+  // ── Waveform Canvas ──────────────────────────────────────────────────────
+  const wCanvas = document.getElementById('waveform-canvas');
+  const wCtx = wCanvas.getContext('2d');
+
+  const eCanvas = document.getElementById('explosion-canvas');
+  const eCtx = eCanvas.getContext('2d');
+
+  function resize() {
+    wCanvas.width  = window.innerWidth * 0.92;
+    wCanvas.height = window.innerHeight * 0.60;
+    eCanvas.width  = window.innerWidth;
+    eCanvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Bar state ────────────────────────────────────────────────────────────
+  // Each bar has independent noise phases
+  const phases = Array.from({length: BAR_COUNT}, (_, i) => ({
+    p1: Math.random() * Math.PI * 2,
+    p2: Math.random() * Math.PI * 2,
+    p3: Math.random() * Math.PI * 2,
+    vel: 0,
+    h: 0,
+    targetH: 0,
+  }));
+
+  function getBarHeight(i, cfg, ts) {
+    const ph = phases[i];
+    const norm = i / BAR_COUNT; // 0..1
+    // Layered sines — feel organic, not mechanical
+    const wave1 = Math.sin(norm * Math.PI * 3   + ts * cfg.speed * 0.8  + ph.p1);
+    const wave2 = Math.sin(norm * Math.PI * 7   + ts * cfg.speed * 1.4  + ph.p2) * 0.5;
+    const wave3 = Math.sin(norm * Math.PI * 1.5 + ts * cfg.speed * 0.35 + ph.p3) * 0.35;
+    const envelope = Math.sin(norm * Math.PI); // taper edges
+    const raw = (wave1 + wave2 + wave3) * cfg.turbulence * envelope;
+    return Math.max(0.02, (raw + 1) * 0.5); // 0..1
+  }
+
+  // ── Mouse proximity effect ───────────────────────────────────────────────
+  function getMouseBoost(barX, cfg) {
+    const rect = wCanvas.getBoundingClientRect();
+    const relX = mouseX - rect.left;
+    const relY = mouseY - rect.top;
+    if (relX < 0 || relX > wCanvas.width) return { boost: 0, inCanvas: false };
+    const dist = Math.abs(relX - barX);
+    const ripple = Math.max(0, 1 - dist / 90);
+    const boost  = ripple * ripple * (ctaHover ? 1.4 : 0.7);
+    return { boost, inCanvas: true };
+  }
+
+  // ── Explode ──────────────────────────────────────────────────────────────
+  function triggerExplode() {
+    if (exploding) return;
+    exploding = true;
+    explodeParticles = [];
+    const cx = eCanvas.width / 2;
+    const cy = eCanvas.height / 2;
+    for (let i = 0; i < 180; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 8;
+      explodeParticles.push({
+        x: cx + (Math.random() - 0.5) * wCanvas.width * 0.8,
+        y: cy + (Math.random() - 0.5) * 60,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - Math.random() * 4,
+        life: 1,
+        decay: 0.012 + Math.random() * 0.022,
+        size: 1 + Math.random() * 3,
+        hue: Math.random() > 0.3 ? ORANGE : '#fff',
+      });
+    }
+    setTimeout(() => { exploding = false; }, 1800);
+  }
+
+  // ── Draw explosion particles ─────────────────────────────────────────────
+  function drawExplosion() {
+    eCtx.clearRect(0, 0, eCanvas.width, eCanvas.height);
+    if (!explodeParticles.length) return;
+    let alive = false;
+    for (const p of explodeParticles) {
+      if (p.life <= 0) continue;
+      alive = true;
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.vy += 0.18; // gravity
+      p.life -= p.decay;
+      eCtx.save();
+      eCtx.globalAlpha = Math.max(0, p.life);
+      eCtx.fillStyle = p.hue;
+      eCtx.beginPath();
+      eCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      eCtx.fill();
+      eCtx.restore();
+    }
+    if (!alive) explodeParticles = [];
+  }
+
+  // ── Data readout ─────────────────────────────────────────────────────────
+  let drAmp = 0.73;
+  let drSessions = 2847;
+  setInterval(() => {
+    drAmp = (0.4 + Math.random() * 0.55).toFixed(2);
+    drSessions += Math.floor(Math.random() * 3);
+    document.getElementById('dr-amp').textContent = drAmp;
+    document.getElementById('dr-sessions').textContent = drSessions.toLocaleString();
+  }, 1100);
+
+  // ── Main draw loop ───────────────────────────────────────────────────────
+  function draw(ts) {
+    ts *= 0.001; // seconds
+    t = ts;
+
+    const cfg = freqConfigs[currentFreq];
+    const W = wCanvas.width;
+    const H = wCanvas.height;
+    const barW = W / BAR_COUNT;
+    const maxH = H * (exploding ? 0.22 : (ctaHover ? 0.92 : 0.78));
+
+    wCtx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const barX = i * barW + barW / 2;
+      const raw = getBarHeight(i, cfg, ts);
+      const { boost } = getMouseBoost(barX, cfg);
+
+      // Spring toward target
+      const target = Math.min(1, raw + boost * (exploding ? 0.1 : 1));
+      phases[i].targetH = target;
+      phases[i].vel += (target - phases[i].h) * 0.18;
+      phases[i].vel *= 0.72;
+      phases[i].h  += phases[i].vel;
+
+      const barH = Math.max(2, phases[i].h * maxH);
+      const cx = i * barW;
+      const cy = H / 2;
+
+      // Gradient per bar — brighter at tip
+      const grad = wCtx.createLinearGradient(0, cy - barH, 0, cy + barH);
+      const alpha = 0.25 + phases[i].h * 0.75;
+      grad.addColorStop(0,   `rgba(255,255,255,${(alpha * 0.5).toFixed(2)})`);
+      grad.addColorStop(0.3, `rgba(245,132,31,${alpha.toFixed(2)})`);
+      grad.addColorStop(0.5, `rgba(245,132,31,${(alpha * 0.85).toFixed(2)})`);
+      grad.addColorStop(1,   `rgba(245,132,31,${(alpha * 0.4).toFixed(2)})`);
+
+      wCtx.fillStyle = grad;
+      const gap = Math.max(0.5, barW * 0.18);
+      const bw  = barW - gap;
+
+      // Mirrored bars (top + bottom)
+      wCtx.fillRect(cx + gap / 2, cy - barH, bw, barH);
+      wCtx.fillRect(cx + gap / 2, cy,        bw, barH);
+    }
+
+    // Center line
+    wCtx.strokeStyle = `rgba(245,132,31,0.18)`;
+    wCtx.lineWidth = 1;
+    wCtx.beginPath();
+    wCtx.moveTo(0, H / 2);
+    wCtx.lineTo(W, H / 2);
+    wCtx.stroke();
+
+    drawExplosion();
+    requestAnimationFrame(draw);
+  }
+
+  requestAnimationFrame(draw);
+
+  // ── Events ───────────────────────────────────────────────────────────────
+  wCanvas.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  wCanvas.addEventListener('mouseleave', () => {
+    mouseX = -9999;
+    mouseY = -9999;
+  });
+
+  wCanvas.addEventListener('click', () => {
+    triggerExplode();
+  });
+
+  // Frequency pills
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentFreq = pill.dataset.freq;
+      document.getElementById('bg-freq').textContent = pill.dataset.label;
+      document.getElementById('dr-freq').textContent = pill.dataset.label;
+    });
+  });
+
+  // CTA hover → waveform surge
+  const cta = document.getElementById('cta');
+  cta.addEventListener('mouseenter', () => { ctaHover = true; });
+  cta.addEventListener('mouseleave', () => { ctaHover = false; });
+  cta.addEventListener('click', () => { triggerExplode(); });
+
+})();
+</script>
+</body>
+</html>
