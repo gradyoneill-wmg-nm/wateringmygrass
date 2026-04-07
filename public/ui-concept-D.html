@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMG — Watering My Grass</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #FAFAFA;
+    --gray-light: #e8e8e8;
+    --gray-mid: #999;
+    --gray-dark: #444;
+    --line: 1px solid #0a0a0a;
+    --font: 'Courier New', Courier, monospace;
+  }
+
+  html, body {
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    height: 100%;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom crosshair cursor */
+  #cursor {
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  #cursor::before,
+  #cursor::after {
+    content: '';
+    position: absolute;
+    background: var(--black);
+  }
+  #cursor::before {
+    width: 1px;
+    height: 18px;
+    top: -9px;
+    left: 0;
+  }
+  #cursor::after {
+    width: 18px;
+    height: 1px;
+    left: -9px;
+    top: 0;
+  }
+  #cursor-dot {
+    position: fixed;
+    top: 0; left: 0;
+    width: 3px;
+    height: 3px;
+    background: var(--black);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Header */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 40px;
+    border-bottom: var(--line);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+  }
+
+  .header-logo {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .header-title {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  nav {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+  }
+
+  nav a {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--gray-dark);
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--black);
+    transition: width 0.25s ease;
+  }
+
+  nav a:hover::after { width: 100%; }
+  nav a:hover { color: var(--black); }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    height: 100vh;
+    padding-top: 40px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    border-right: var(--line);
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-label {
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+    margin-bottom: 28px;
+    border-bottom: var(--line);
+    padding-bottom: 8px;
+  }
+
+  .data-row {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-light);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .data-row:last-of-type { border-bottom: none; }
+
+  .data-key {
+    font-size: 8px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+  }
+
+  .data-value {
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    font-weight: normal;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .data-unit {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--gray-dark);
+    margin-top: 2px;
+  }
+
+  .data-delta {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: var(--gray-mid);
+  }
+
+  .delta-up { color: #2a7a2a; }
+  .delta-stable { color: var(--gray-mid); }
+
+  .sidebar-status {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: var(--line);
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+  }
+
+  .status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2a7a2a;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Main area */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .main-header {
+    padding: 20px 32px 16px;
+    border-bottom: var(--line);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .main-label {
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+  }
+
+  .main-timestamp {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gray-mid);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* EEG Canvas area */
+  .eeg-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  #eeg-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Frequency labels */
+  .freq-labels {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+  }
+
+  .freq-tag {
+    position: absolute;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--white);
+    border: var(--line);
+    padding: 4px 8px;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    white-space: nowrap;
+  }
+
+  .freq-tag.visible { opacity: 1; }
+
+  /* Grid lines overlay */
+  .grid-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--gray-light) 1px, transparent 1px),
+      linear-gradient(90deg, var(--gray-light) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.4;
+  }
+
+  /* Bottom strip */
+  .bottom-strip {
+    height: 56px;
+    border-top: var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    justify-content: space-between;
+  }
+
+  .strip-info {
+    display: flex;
+    gap: 40px;
+  }
+
+  .strip-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .strip-key {
+    font-size: 7px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+  }
+
+  .strip-val {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* CTA Button */
+  .cta-btn {
+    font-family: var(--font);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: transparent;
+    border: var(--line);
+    padding: 10px 24px;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--black);
+    transition: left 0.3s ease;
+    z-index: 0;
+  }
+
+  .cta-btn:hover::before { left: 0; }
+  .cta-btn:hover { color: var(--white); }
+
+  .cta-btn span {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Channel labels on canvas */
+  .channel-labels {
+    position: absolute;
+    left: 0;
+    top: 0; bottom: 0;
+    width: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 20px 0;
+    border-right: 1px solid var(--gray-light);
+    background: var(--white);
+    z-index: 2;
+  }
+
+  .ch-label {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--gray-mid);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  /* Scale bar */
+  .scale-bar {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  .scale-line {
+    width: 40px;
+    height: 1px;
+    background: var(--black);
+  }
+
+  .scale-text {
+    font-size: 7px;
+    letter-spacing: 0.15em;
+    color: var(--gray-mid);
+  }
+
+  /* Ticker at top of EEG */
+  .ticker-line {
+    position: absolute;
+    top: 0; left: 64px; right: 0;
+    height: 24px;
+    border-bottom: 1px solid var(--gray-light);
+    overflow: hidden;
+    z-index: 2;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+  }
+
+  .ticker-marks {
+    position: absolute;
+    left: 0;
+    display: flex;
+    gap: 0;
+    height: 100%;
+    align-items: flex-end;
+  }
+
+  .tick {
+    width: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 2px;
+    flex-shrink: 0;
+  }
+
+  .tick-line {
+    width: 1px;
+    height: 8px;
+    background: var(--gray-mid);
+    margin-bottom: 2px;
+  }
+
+  .tick-label {
+    font-size: 7px;
+    letter-spacing: 0.05em;
+    color: var(--gray-mid);
+  }
+
+  /* Scan line cursor */
+  #scan-line {
+    position: absolute;
+    top: 24px;
+    bottom: 0;
+    width: 1px;
+    background: rgba(0,0,0,0.15);
+    pointer-events: none;
+    z-index: 3;
+    left: 70%;
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<!-- Header -->
+<header>
+  <div class="header-logo">WMG</div>
+  <div class="header-title">&#9632; Watering My Grass</div>
+  <nav>
+    <a href="#">Research</a>
+    <a href="#">Protocol</a>
+    <a href="#">Data</a>
+    <a href="#">About</a>
+  </nav>
+</header>
+
+<!-- Main layout -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Live Metrics</div>
+
+    <div class="data-row">
+      <div class="data-key">HRV</div>
+      <div class="data-value" id="val-hrv">0</div>
+      <div class="data-unit">ms &nbsp; heart rate variability</div>
+      <div class="data-delta delta-up" id="delta-hrv">&uarr; nominal</div>
+    </div>
+
+    <div class="data-row">
+      <div class="data-key">Sessions Today</div>
+      <div class="data-value" id="val-sessions">0</div>
+      <div class="data-unit">active participants</div>
+      <div class="data-delta delta-up" id="delta-sessions">&uarr; +12.4%</div>
+    </div>
+
+    <div class="data-row">
+      <div class="data-key">Streak Leaders</div>
+      <div class="data-value" id="val-streak">0</div>
+      <div class="data-unit">consecutive days</div>
+      <div class="data-delta delta-stable" id="delta-streak">&mdash; updated 0s ago</div>
+    </div>
+
+    <div class="data-row">
+      <div class="data-key">Avg. Coherence</div>
+      <div class="data-value" id="val-coherence">0</div>
+      <div class="data-unit">% neural sync</div>
+      <div class="data-delta delta-up">&uarr; above baseline</div>
+    </div>
+
+    <div class="data-row">
+      <div class="data-key">Active Channels</div>
+      <div class="data-value" id="val-channels">0</div>
+      <div class="data-unit">EEG inputs online</div>
+      <div class="data-delta delta-stable">&mdash; full array</div>
+    </div>
+
+    <div class="sidebar-status">
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Recording active</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="main-header">
+      <div class="main-label">EEG Feed — Multi-Channel Neural Activity</div>
+      <div class="main-timestamp" id="timestamp">00:00:00.000</div>
+    </div>
+
+    <div class="eeg-container">
+      <div class="grid-overlay"></div>
+
+      <!-- Channel labels -->
+      <div class="channel-labels" id="ch-labels"></div>
+
+      <!-- Ticker -->
+      <div class="ticker-line">
+        <div class="ticker-marks" id="ticker-marks"></div>
+      </div>
+
+      <!-- Scan line -->
+      <div id="scan-line"></div>
+
+      <!-- EEG Canvas -->
+      <canvas id="eeg-canvas"></canvas>
+
+      <!-- Frequency tags -->
+      <div class="freq-labels" id="freq-labels">
+        <div class="freq-tag" id="tag-gamma" style="top: 18%; left: 20%;">40Hz &mdash; GAMMA</div>
+        <div class="freq-tag" id="tag-schumann" style="top: 42%; left: 55%;">7.83Hz &mdash; SCHUMANN</div>
+        <div class="freq-tag" id="tag-theta" style="top: 65%; left: 35%;">6Hz &mdash; THETA</div>
+        <div class="freq-tag" id="tag-alpha" style="top: 30%; left: 70%;">10Hz &mdash; ALPHA</div>
+        <div class="freq-tag" id="tag-delta" style="top: 78%; left: 15%;">2Hz &mdash; DELTA</div>
+      </div>
+
+      <!-- Scale bar -->
+      <div class="scale-bar">
+        <div class="scale-text">100&mu;V</div>
+        <div class="scale-line"></div>
+        <div class="scale-text">1s</div>
+      </div>
+    </div>
+
+    <div class="bottom-strip">
+      <div class="strip-info">
+        <div class="strip-item">
+          <div class="strip-key">Sample Rate</div>
+          <div class="strip-val">256 Hz</div>
+        </div>
+        <div class="strip-item">
+          <div class="strip-key">Filter</div>
+          <div class="strip-val">0.5–70 Hz</div>
+        </div>
+        <div class="strip-item">
+          <div class="strip-key">Notch</div>
+          <div class="strip-val">60 Hz</div>
+        </div>
+        <div class="strip-item">
+          <div class="strip-key">Epoch</div>
+          <div class="strip-val">2048 pts</div>
+        </div>
+        <div class="strip-item">
+          <div class="strip-key">Protocol</div>
+          <div class="strip-val">WMG-v2.4</div>
+        </div>
+      </div>
+      <button class="cta-btn"><span>Join the Study</span></button>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function() {
+  // ─── Cursor ────────────────────────────────────────────────────────────────
+  const cursor = document.getElementById('cursor');
+  const cursorDot = document.getElementById('cursor-dot');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+    cursorDot.style.left = e.clientX + 'px';
+    cursorDot.style.top  = e.clientY + 'px';
+  });
+
+  // ─── Timestamp ────────────────────────────────────────────────────────────
+  const tsEl = document.getElementById('timestamp');
+  const startTime = Date.now();
+  function updateTimestamp() {
+    const ms = Date.now() - startTime;
+    const h  = Math.floor(ms / 3600000).toString().padStart(2,'0');
+    const m  = Math.floor((ms % 3600000) / 60000).toString().padStart(2,'0');
+    const s  = Math.floor((ms % 60000) / 1000).toString().padStart(2,'0');
+    const cs = Math.floor((ms % 1000) / 10).toString().padStart(3,'0');
+    tsEl.textContent = `${h}:${m}:${s}.${cs}`;
+  }
+  setInterval(updateTimestamp, 33);
+
+  // ─── Count-up animations ──────────────────────────────────────────────────
+  function countUp(elId, target, duration, decimals = 0, suffix = '') {
+    const el = document.getElementById(elId);
+    const start = performance.now();
+    function frame(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = target * ease;
+      el.textContent = decimals
+        ? val.toFixed(decimals) + suffix
+        : Math.floor(val).toLocaleString() + suffix;
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  setTimeout(() => {
+    countUp('val-hrv',        73,   1800);
+    countUp('val-sessions',   2847, 2200);
+    countUp('val-streak',     47,   1400);
+    countUp('val-coherence',  84,   2000);
+    countUp('val-channels',   19,   1000);
+  }, 200);
+
+  // Live jitter for HRV
+  setInterval(() => {
+    const base = 73;
+    const jitter = (Math.random() - 0.5) * 6;
+    document.getElementById('val-hrv').textContent = (base + jitter).toFixed(0);
+  }, 2500);
+
+  // ─── Channel setup ────────────────────────────────────────────────────────
+  const CHANNELS = ['Fp1','Fp2','F3','F4','C3','Cz','C4','P3','P4','Oz'];
+  const chLabels = document.getElementById('ch-labels');
+  CHANNELS.forEach(ch => {
+    const d = document.createElement('div');
+    d.className = 'ch-label';
+    d.textContent = ch;
+    chLabels.appendChild(d);
+  });
+
+  // ─── Ticker marks ─────────────────────────────────────────────────────────
+  const tickerMarks = document.getElementById('ticker-marks');
+  for (let i = 0; i < 40; i++) {
+    const t = document.createElement('div');
+    t.className = 'tick';
+    const line = document.createElement('div'); line.className = 'tick-line';
+    const lbl  = document.createElement('div'); lbl.className  = 'tick-label';
+    lbl.textContent = (i * 0.25).toFixed(2) + 's';
+    t.appendChild(line);
+    t.appendChild(lbl);
+    tickerMarks.appendChild(t);
+  }
+
+  // ─── EEG Canvas ───────────────────────────────────────────────────────────
+  const canvas = document.getElementById('eeg-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  // Per-channel oscillator state
+  const chFreqs   = [40, 12, 10, 8, 7.83, 6, 4, 2, 40, 10]; // Hz (display freq)
+  const chAmps    = [0.6, 0.8, 1.0, 0.9, 1.1, 1.3, 0.7, 1.5, 0.5, 0.9];
+  const chPhases  = CHANNELS.map(() => Math.random() * Math.PI * 2);
+  const chNoise   = CHANNELS.map(() => new Array(512).fill(0).map(() => (Math.random()-0.5)*0.3));
+
+  let scrollX = 0;
+  const SCROLL_SPEED = 60; // px per second
+  let lastTime = null;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width;
+    canvas.height = rect.height;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function noise(ch, x) {
+    const arr = chNoise[ch];
+    const i = Math.floor(x * 0.3) % arr.length;
+    const j = (i + 1) % arr.length;
+    const f = (x * 0.3) - Math.floor(x * 0.3);
+    return arr[Math.abs(i)] * (1 - f) + arr[Math.abs(j)] * f;
+  }
+
+  function drawEEG(ts) {
+    if (!lastTime) lastTime = ts;
+    const dt = (ts - lastTime) / 1000;
+    lastTime = ts;
+    scrollX += SCROLL_SPEED * dt;
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const TICKER_H = 24;
+    const usableH = H - TICKER_H;
+    const chH = usableH / CHANNELS.length;
+    const CHAN_OFFSET = 64;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw each channel
+    CHANNELS.forEach((ch, ci) => {
+      const centerY = TICKER_H + chH * ci + chH / 2;
+      const amp     = chH * 0.35 * chAmps[ci];
+      const freq    = chFreqs[ci];
+
+      // Faint center line
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+      ctx.lineWidth = 1;
+      ctx.moveTo(CHAN_OFFSET, centerY);
+      ctx.lineTo(W, centerY);
+      ctx.stroke();
+
+      // EEG trace
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(10,10,10,0.85)';
+      ctx.lineWidth   = 1;
+      ctx.lineJoin    = 'round';
+
+      const steps = W - CHAN_OFFSET;
+      for (let px = 0; px <= steps; px++) {
+        const t  = (px + scrollX) / SCROLL_SPEED;
+        const y  = centerY
+          + Math.sin(2 * Math.PI * freq * t + chPhases[ci]) * amp * 0.7
+          + Math.sin(2 * Math.PI * freq * 2.1 * t + chPhases[ci] * 1.3) * amp * 0.2
+          + noise(ci, px + scrollX) * amp * 0.4;
+
+        if (px === 0) ctx.moveTo(CHAN_OFFSET + px, y);
+        else ctx.lineTo(CHAN_OFFSET + px, y);
+      }
+      ctx.stroke();
+    });
+
+    requestAnimationFrame(drawEEG);
+  }
+
+  requestAnimationFrame(drawEEG);
+
+  // ─── Frequency tag cycling ─────────────────────────────────────────────────
+  const tags = [
+    document.getElementById('tag-gamma'),
+    document.getElementById('tag-schumann'),
+    document.getElementById('tag-theta'),
+    document.getElementById('tag-alpha'),
+    document.getElementById('tag-delta'),
+  ];
+
+  // Stagger their appearances
+  const tagSchedule = [
+    { el: tags[0], showAt: 800,  hideAt: 3200  },
+    { el: tags[1], showAt: 2000, hideAt: 5000  },
+    { el: tags[2], showAt: 1400, hideAt: 4200  },
+    { el: tags[3], showAt: 3500, hideAt: 6500  },
+    { el: tags[4], showAt: 500,  hideAt: 2800  },
+  ];
+
+  function cycleTag(entry, offset) {
+    const cycle = 7000 + offset;
+    function show() {
+      entry.el.classList.add('visible');
+      setTimeout(() => {
+        entry.el.classList.remove('visible');
+        setTimeout(show, cycle);
+      }, 2400);
+    }
+    setTimeout(show, entry.showAt);
+  }
+
+  tagSchedule.forEach((t, i) => cycleTag(t, i * 1300));
+
+  // ─── Live streak counter ───────────────────────────────────────────────────
+  let secondsAgo = 0;
+  setInterval(() => {
+    secondsAgo++;
+    if (secondsAgo > 12) {
+      secondsAgo = 0;
+      const v = document.getElementById('val-streak');
+      const cur = parseInt(v.textContent);
+      if (Math.random() < 0.3) v.textContent = cur + 1;
+    }
+    document.getElementById('delta-streak').textContent =
+      '\u2014 updated ' + secondsAgo + 's ago';
+  }, 1000);
+
+  // ─── Sessions live ticker ─────────────────────────────────────────────────
+  setInterval(() => {
+    const el = document.getElementById('val-sessions');
+    const cur = parseInt(el.textContent.replace(/,/g,''));
+    const delta = Math.floor(Math.random() * 3);
+    el.textContent = (cur + delta).toLocaleString();
+  }, 3200);
+
+})();
+</script>
+</body>
+</html>
