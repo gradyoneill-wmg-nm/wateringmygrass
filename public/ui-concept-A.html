@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATERING MY GRASS // TERMINAL</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #00cc33;
+    --green-ghost: rgba(0,255,65,0.08);
+    --green-glow: rgba(0,255,65,0.4);
+    --black: #000000;
+    --dark: #050505;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--black);
+    color: var(--green);
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* === CUSTOM CURSOR === */
+  #cursor {
+    position: fixed;
+    width: 10px;
+    height: 18px;
+    background: var(--green);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: cursorBlink 0.8s step-end infinite;
+    box-shadow: 0 0 8px var(--green), 0 0 16px var(--green-glow);
+  }
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* === SCANLINES === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+    animation: scanlineShift 8s linear infinite;
+  }
+  @keyframes scanlineShift {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+
+  /* === SCREEN FLICKER === */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,255,65,0.015);
+    pointer-events: none;
+    z-index: 99;
+    animation: flicker 0.15s infinite;
+  }
+  @keyframes flicker {
+    0%   { opacity: 1; }
+    7%   { opacity: 0.98; }
+    10%  { opacity: 1; }
+    13%  { opacity: 0.97; }
+    43%  { opacity: 1; }
+    50%  { opacity: 0.99; }
+    70%  { opacity: 1; }
+    80%  { opacity: 0.98; }
+    90%  { opacity: 1; }
+    93%  { opacity: 0.97; }
+    100% { opacity: 1; }
+  }
+
+  /* === MATRIX RAIN BG === */
+  #matrix-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.12;
+  }
+
+  /* === MAIN LAYOUT === */
+  #terminal {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(20px, 6vw, 80px) clamp(20px, 8vw, 120px);
+    gap: 0;
+  }
+
+  /* === BOOT SEQUENCE === */
+  #boot-sequence {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px;
+    gap: 4px;
+    transition: opacity 0.5s ease;
+  }
+  #boot-sequence.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .boot-line {
+    font-size: clamp(10px, 1.2vw, 14px);
+    color: var(--green-dim);
+    opacity: 0;
+    white-space: nowrap;
+    animation: bootAppear 0.1s ease forwards;
+  }
+  .boot-line.ok {
+    color: var(--green);
+  }
+  .boot-line.warn {
+    color: #ffaa00;
+  }
+  @keyframes bootAppear {
+    to { opacity: 1; }
+  }
+
+  /* === PROGRESS BAR === */
+  #boot-progress-wrap {
+    margin-top: 16px;
+    width: 400px;
+    max-width: 80vw;
+    opacity: 0;
+  }
+  #boot-progress-wrap.visible { opacity: 1; }
+  #boot-progress-label {
+    font-size: 12px;
+    color: var(--green-dim);
+    margin-bottom: 4px;
+  }
+  #boot-progress-bar-outer {
+    width: 100%;
+    height: 14px;
+    border: 1px solid var(--green-dim);
+    position: relative;
+    overflow: hidden;
+  }
+  #boot-progress-bar-inner {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 10px var(--green);
+    position: relative;
+  }
+  #boot-progress-bar-inner::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, transparent, #ffffff88);
+  }
+  #boot-progress-pct {
+    font-size: 11px;
+    color: var(--green);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* === TERMINAL LINES === */
+  .t-line {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .t-line.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* === PROMPT === */
+  .prompt {
+    color: var(--green-dim);
+    user-select: none;
+  }
+  .prompt::before { content: '> '; }
+
+  /* === HEADLINE === */
+  #headline {
+    font-size: clamp(28px, 5vw, 72px);
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-shadow:
+      0 0 10px var(--green),
+      0 0 20px var(--green-glow),
+      0 0 40px rgba(0,255,65,0.2);
+    animation: glitch 5s infinite;
+    margin-bottom: 4px;
+  }
+  @keyframes glitch {
+    0%, 89%, 100% {
+      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow), 0 0 40px rgba(0,255,65,0.2);
+      transform: translate(0);
+    }
+    90% {
+      text-shadow: -2px 0 #ff003c, 2px 0 #00f0ff, 0 0 10px var(--green);
+      transform: translate(-2px, 0);
+    }
+    91% {
+      text-shadow: 2px 0 #ff003c, -2px 0 #00f0ff, 0 0 10px var(--green);
+      transform: translate(2px, 0);
+    }
+    92% {
+      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow);
+      transform: translate(0);
+    }
+    93% {
+      text-shadow: -3px 0 #ff003c, 3px 0 #00f0ff;
+      transform: translate(-1px, 1px);
+    }
+    94% {
+      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow), 0 0 40px rgba(0,255,65,0.2);
+      transform: translate(0);
+    }
+  }
+
+  /* === SUBLINE === */
+  #subline {
+    font-size: clamp(12px, 1.6vw, 20px);
+    color: var(--green-dim);
+    letter-spacing: 0.15em;
+    margin-bottom: clamp(24px, 4vw, 48px);
+    text-shadow: 0 0 8px var(--green-glow);
+  }
+
+  /* === DIVIDER === */
+  .t-divider {
+    font-size: clamp(10px, 1.1vw, 14px);
+    color: rgba(0,255,65,0.3);
+    letter-spacing: 0.05em;
+    margin: clamp(8px, 1.5vw, 16px) 0;
+    animation: pulse 3s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+
+  /* === NAV ITEMS === */
+  #nav {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1.5vw, 16px);
+    margin-bottom: clamp(24px, 4vw, 48px);
+  }
+
+  .nav-item {
+    position: relative;
+    cursor: none;
+    padding: 6px 0;
+  }
+
+  .nav-cmd {
+    font-size: clamp(16px, 2.2vw, 28px);
+    font-weight: bold;
+    color: var(--green);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 8px var(--green-glow);
+    transition: text-shadow 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-item:hover .nav-cmd {
+    color: #ffffff;
+    text-shadow: 0 0 12px var(--green), 0 0 24px var(--green), 0 0 48px var(--green-glow);
+  }
+
+  .nav-arrow {
+    color: var(--green-dim);
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.2s, transform 0.2s;
+    font-size: 0.85em;
+  }
+  .nav-item:hover .nav-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .nav-desc {
+    font-size: clamp(10px, 1.1vw, 13px);
+    color: var(--green-dim);
+    margin-top: 3px;
+    padding-left: 2px;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: height 0.25s ease, opacity 0.25s ease;
+    letter-spacing: 0.08em;
+  }
+  .nav-desc.reveal {
+    height: 1.6em;
+    opacity: 0.7;
+  }
+
+  .nav-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-right: 4px;
+    box-shadow: 0 0 6px var(--green);
+    animation: statusPulse 2s ease infinite;
+    flex-shrink: 0;
+  }
+  @keyframes statusPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+    50% { opacity: 0.4; box-shadow: 0 0 2px var(--green); }
+  }
+
+  /* === COUNTDOWN === */
+  #countdown-wrap {
+    margin-top: clamp(8px, 1.5vw, 16px);
+  }
+  #countdown-label {
+    font-size: clamp(10px, 1.1vw, 13px);
+    color: rgba(0,255,65,0.5);
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+  }
+  #countdown {
+    font-size: clamp(18px, 2.8vw, 36px);
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow);
+    font-variant-numeric: tabular-nums;
+    animation: countdownFlash 1s step-end infinite;
+  }
+  @keyframes countdownFlash {
+    0%, 100% { opacity: 1; }
+    95% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+  }
+  #countdown-sub {
+    font-size: clamp(9px, 1vw, 12px);
+    color: rgba(0,255,65,0.4);
+    margin-top: 3px;
+    letter-spacing: 0.15em;
+  }
+
+  /* === SYSTEM STATUS BAR === */
+  #statusbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: clamp(22px, 2.5vw, 30px);
+    background: rgba(0,255,65,0.06);
+    border-top: 1px solid rgba(0,255,65,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(16px, 3vw, 40px);
+    z-index: 50;
+  }
+  .status-item {
+    font-size: clamp(8px, 0.9vw, 11px);
+    color: rgba(0,255,65,0.5);
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+  .status-item.active {
+    color: var(--green);
+    animation: statusBlink 2s step-end infinite;
+  }
+  @keyframes statusBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  #status-clock {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* === TOP BAR === */
+  #topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: clamp(22px, 2.5vw, 30px);
+    background: rgba(0,255,65,0.04);
+    border-bottom: 1px solid rgba(0,255,65,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(16px, 3vw, 40px);
+    z-index: 50;
+  }
+
+  /* === TYPING CURSOR === */
+  .type-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    background: var(--green);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: cursorBlink 0.7s step-end infinite;
+  }
+  .type-cursor.hidden { display: none; }
+
+  /* === NOISE OVERLAY === */
+  #noise {
+    position: fixed;
+    inset: 0;
+    z-index: 101;
+    pointer-events: none;
+    opacity: 0.03;
+    animation: noiseAnim 0.1s steps(1) infinite;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+  @keyframes noiseAnim {
+    0%   { background-position: 0 0; }
+    10%  { background-position: -5% -10%; }
+    20%  { background-position: -15% 5%; }
+    30%  { background-position: 7% -25%; }
+    40%  { background-position: 20% 25%; }
+    50%  { background-position: -25% 10%; }
+    60%  { background-position: 15% 5%; }
+    70%  { background-position: 0% 15%; }
+    80%  { background-position: 25% 35%; }
+    90%  { background-position: -10% 10%; }
+    100% { background-position: 0 0; }
+  }
+
+  /* === RANDOM GLITCH LINES === */
+  .glitch-line {
+    position: fixed;
+    left: 0; right: 0;
+    height: 2px;
+    background: rgba(0,255,65,0.6);
+    pointer-events: none;
+    z-index: 102;
+    opacity: 0;
+    animation: glitchLine 0.1s ease forwards;
+  }
+  @keyframes glitchLine {
+    0% { opacity: 0.8; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(0.3); }
+  }
+
+  /* === SIDE DECORATION === */
+  #side-deco {
+    position: fixed;
+    right: clamp(16px, 3vw, 40px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 1s ease 3s;
+  }
+  #side-deco.visible { opacity: 1; }
+  .side-bar {
+    width: 2px;
+    background: var(--green-dim);
+    opacity: 0.3;
+    animation: sideBarPulse 2s ease infinite;
+  }
+  .side-bar:nth-child(1) { height: 60px; animation-delay: 0s; }
+  .side-bar:nth-child(2) { height: 30px; animation-delay: 0.3s; }
+  .side-bar:nth-child(3) { height: 80px; animation-delay: 0.6s; }
+  .side-bar:nth-child(4) { height: 20px; animation-delay: 0.9s; }
+  .side-bar:nth-child(5) { height: 50px; animation-delay: 1.2s; }
+  @keyframes sideBarPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  /* === CORNER DECORATIONS === */
+  .corner {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    z-index: 20;
+    opacity: 0.4;
+  }
+  .corner::before, .corner::after {
+    content: '';
+    position: absolute;
+    background: var(--green);
+  }
+  .corner-tl { top: 36px; left: 16px; }
+  .corner-tl::before { top: 0; left: 0; width: 100%; height: 2px; }
+  .corner-tl::after { top: 0; left: 0; width: 2px; height: 100%; }
+
+  .corner-tr { top: 36px; right: 16px; }
+  .corner-tr::before { top: 0; right: 0; width: 100%; height: 2px; }
+  .corner-tr::after { top: 0; right: 0; width: 2px; height: 100%; }
+
+  .corner-bl { bottom: 36px; left: 16px; }
+  .corner-bl::before { bottom: 0; left: 0; width: 100%; height: 2px; }
+  .corner-bl::after { bottom: 0; left: 0; width: 2px; height: 100%; }
+
+  .corner-br { bottom: 36px; right: 16px; }
+  .corner-br::before { bottom: 0; right: 0; width: 100%; height: 2px; }
+  .corner-br::after { bottom: 0; right: 0; width: 2px; height: 100%; }
+
+  /* === HORIZONTAL SCAN === */
+  #hscan {
+    position: fixed;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(0,255,65,0.4), transparent);
+    z-index: 50;
+    pointer-events: none;
+    animation: hscan 4s linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes hscan {
+    0% { top: 0%; }
+    100% { top: 100%; }
+  }
+
+  /* === RANDOM CHARACTERS BG === */
+  #char-rain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 1s ease 3.5s;
+  }
+  #char-rain.visible { opacity: 1; }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 600px) {
+    #terminal { padding: 20px; }
+    #side-deco { display: none; }
+    .corner { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Noise overlay -->
+<div id="noise"></div>
+
+<!-- Horizontal scan line -->
+<div id="hscan"></div>
+
+<!-- Matrix canvas background -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- Corner decorations -->
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- Top bar -->
+<div id="topbar">
+  <span class="status-item">WATERINGMYGRASS.COM // TERMINAL v2.0.4</span>
+  <span class="status-item active" id="topbar-status">● SYSTEM ONLINE</span>
+</div>
+
+<!-- Boot sequence -->
+<div id="boot-sequence">
+  <div id="boot-lines"></div>
+  <div id="boot-progress-wrap">
+    <div id="boot-progress-label">LOADING FREQUENCY DATABASE...</div>
+    <div id="boot-progress-bar-outer">
+      <div id="boot-progress-bar-inner"></div>
+    </div>
+    <div id="boot-progress-pct">0%</div>
+  </div>
+</div>
+
+<!-- Side decoration -->
+<div id="side-deco">
+  <div class="side-bar"></div>
+  <div class="side-bar"></div>
+  <div class="side-bar"></div>
+  <div class="side-bar"></div>
+  <div class="side-bar"></div>
+</div>
+
+<!-- Main terminal content -->
+<div id="terminal">
+
+  <div class="t-line" id="line-system">
+    <span class="status-item" style="font-size:clamp(9px,1vw,12px);letter-spacing:0.12em;color:rgba(0,255,65,0.5)">
+      SYSTEM: ROOT@WMG — BASH 5.2.26 — CONNECTED
+    </span>
+  </div>
+
+  <div class="t-line" id="line-spacer1" style="height:clamp(16px,3vw,40px)"></div>
+
+  <div class="t-line" id="line-headline">
+    <span id="headline"><span class="prompt"></span><span id="headline-text"></span><span class="type-cursor" id="headline-cursor"></span></span>
+  </div>
+
+  <div class="t-line" id="line-subline">
+    <span id="subline"><span class="prompt"></span><span id="subline-text"></span><span class="type-cursor" id="subline-cursor"></span></span>
+  </div>
+
+  <div class="t-line" id="line-div1">
+    <span class="t-divider" id="divider-text"></span>
+  </div>
+
+  <div id="nav">
+    <div class="t-line" id="line-nav1">
+      <div class="nav-item" data-desc="// browse the signal archive. truth in the frequencies." data-url="/articles">
+        <div class="nav-cmd">
+          <span class="nav-status"></span>
+          <span class="prompt"></span><span class="nav-cmd-text"></span><span class="type-cursor nav-cursor"></span>
+          <span class="nav-arrow">→</span>
+        </div>
+        <div class="nav-desc"></div>
+      </div>
+    </div>
+
+    <div class="t-line" id="line-nav2">
+      <div class="nav-item" data-desc="// forensic data. visualized. undeniable." data-url="/evidence">
+        <div class="nav-cmd">
+          <span class="nav-status"></span>
+          <span class="prompt"></span><span class="nav-cmd-text"></span><span class="type-cursor nav-cursor"></span>
+          <span class="nav-arrow">→</span>
+        </div>
+        <div class="nav-desc"></div>
+      </div>
+    </div>
+
+    <div class="t-line" id="line-nav3">
+      <div class="nav-item" data-desc="// plug into the network. become the signal." data-url="/join">
+        <div class="nav-cmd">
+          <span class="nav-status"></span>
+          <span class="prompt"></span><span class="nav-cmd-text"></span><span class="type-cursor nav-cursor"></span>
+          <span class="nav-arrow">→</span>
+        </div>
+        <div class="nav-desc"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="t-line" id="line-div2">
+    <span class="t-divider" id="divider2-text"></span>
+  </div>
+
+  <div class="t-line" id="line-countdown">
+    <div id="countdown-wrap">
+      <div id="countdown-label">// NEXT TRANSMISSION</div>
+      <div id="countdown"><span class="prompt"></span><span id="countdown-text">EVENT IN: --d --h --m --s</span></div>
+      <div id="countdown-sub">APR 18 2026 // FREQUENCY UNLOCK</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Status bar -->
+<div id="statusbar">
+  <span class="status-item">WMG-TERMINAL // BUILD 2026.04.07</span>
+  <span class="status-item active">● REC</span>
+  <span class="status-item" id="status-clock">00:00:00</span>
+  <span class="status-item">MEM: 4.2GB FREE</span>
+  <span class="status-item active">SIGNAL: LOCKED</span>
+</div>
+
+<script>
+// ============================================================
+// UTILITIES
+// ============================================================
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function typeText(el, text, speed = 40) {
+  return new Promise(resolve => {
+    let i = 0;
+    el.textContent = '';
+    const interval = setInterval(() => {
+      el.textContent += text[i];
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, speed);
+  });
+}
+
+function showLine(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('visible');
+  }
+}
+
+// ============================================================
+// CURSOR
+// ============================================================
+const cursor = document.getElementById('cursor');
+let mx = -100, my = -100;
+let cx = -100, cy = -100;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+});
+
+(function animateCursor() {
+  cx += (mx - cx) * 0.35;
+  cy += (my - cy) * 0.35;
+  cursor.style.left = cx + 'px';
+  cursor.style.top = cy + 'px';
+  requestAnimationFrame(animateCursor);
+})();
+
+// ============================================================
+// MATRIX RAIN
+// ============================================================
+(function initMatrix() {
+  const canvas = document.getElementById('matrix-canvas');
+  const ctx = canvas.getContext('2d');
+  let cols, drops, W, H;
+
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cols = Math.floor(W / 16);
+    drops = new Array(cols).fill(1);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '14px Courier New';
+    for (let i = 0; i < drops.length; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(char, i * 16, drops[i] * 16);
+      if (drops[i] * 16 > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+
+  setInterval(draw, 50);
+})();
+
+// ============================================================
+// RANDOM GLITCH LINES
+// ============================================================
+function spawnGlitchLine() {
+  const el = document.createElement('div');
+  el.className = 'glitch-line';
+  el.style.top = Math.random() * 100 + 'vh';
+  el.style.width = (30 + Math.random() * 70) + '%';
+  el.style.left = (Math.random() * 30) + '%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 200);
+}
+
+setInterval(() => {
+  if (Math.random() > 0.7) spawnGlitchLine();
+}, 800);
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('status-clock').textContent = h + ':' + m + ':' + s;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// COUNTDOWN
+// ============================================================
+function updateCountdown() {
+  const eventDate = new Date('2026-04-18T00:00:00');
+  const now = new Date();
+  let diff = eventDate - now;
+
+  if (diff <= 0) {
+    document.getElementById('countdown-text').textContent = 'EVENT IN: 00d 00h 00m 00s -- TRANSMISSION LIVE';
+    return;
+  }
+
+  const days = Math.floor(diff / 86400000);
+  diff -= days * 86400000;
+  const hours = Math.floor(diff / 3600000);
+  diff -= hours * 3600000;
+  const mins = Math.floor(diff / 60000);
+  diff -= mins * 60000;
+  const secs = Math.floor(diff / 1000);
+
+  document.getElementById('countdown-text').textContent =
+    'EVENT IN: ' +
+    String(days).padStart(2, '0') + 'd ' +
+    String(hours).padStart(2, '0') + 'h ' +
+    String(mins).padStart(2, '0') + 'm ' +
+    String(secs).padStart(2, '0') + 's';
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// ============================================================
+// BOOT SEQUENCE
+// ============================================================
+const bootLines = [
+  { text: 'BIOS v2.0.4 // WATERINGMYGRASS SYSTEMS INC.', delay: 0, cls: '' },
+  { text: 'CPU: TRUTH ENGINE 3.7GHz x16 CORES', delay: 80, cls: '' },
+  { text: 'RAM: 64GB FREQ-DDR5 // ECC ENABLED', delay: 160, cls: '' },
+  { text: 'STORAGE: 48TB NVMe ARRAY // RAID-6', delay: 240, cls: '' },
+  { text: '---', delay: 320, cls: '' },
+  { text: 'CHECKING FREQUENCY DATABASES...', delay: 400, cls: '' },
+  { text: '[OK] DATABASE ALPHA: LOADED (847,221 ENTRIES)', delay: 520, cls: 'ok' },
+  { text: '[OK] DATABASE BETA: LOADED (1,204,847 ENTRIES)', delay: 640, cls: 'ok' },
+  { text: '[OK] EVIDENCE MATRIX: ONLINE', delay: 760, cls: 'ok' },
+  { text: '[OK] SIGNAL ROUTER: CONNECTED', delay: 880, cls: 'ok' },
+  { text: '[WARN] 3 RESTRICTED FREQUENCIES DETECTED', delay: 960, cls: 'warn' },
+  { text: '[OK] ENCRYPTION: AES-256-GCM ACTIVE', delay: 1060, cls: 'ok' },
+  { text: '[OK] NETWORK: TOR CIRCUIT ESTABLISHED', delay: 1160, cls: 'ok' },
+  { text: '---', delay: 1240, cls: '' },
+  { text: 'INITIALIZING TERMINAL INTERFACE...', delay: 1340, cls: '' },
+];
+
+async function runBoot() {
+  const container = document.getElementById('boot-lines');
+  const progressWrap = document.getElementById('boot-progress-wrap');
+  const progressBar = document.getElementById('boot-progress-bar-inner');
+  const progressPct = document.getElementById('boot-progress-pct');
+
+  for (const line of bootLines) {
+    await sleep(line.delay ? 80 : 80);
+    const el = document.createElement('div');
+    el.className = 'boot-line' + (line.cls ? ' ' + line.cls : '');
+    el.textContent = line.text;
+    container.appendChild(el);
+    el.style.animationDelay = '0ms';
+    if (container.children.length > 12) {
+      container.removeChild(container.firstChild);
+    }
+  }
+
+  await sleep(200);
+  progressWrap.classList.add('visible');
+
+  // Animate progress bar
+  let pct = 0;
+  await new Promise(resolve => {
+    const interval = setInterval(() => {
+      pct += Math.random() * 8 + 2;
+      if (pct >= 100) pct = 100;
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = Math.floor(pct) + '%';
+      if (pct >= 100) {
+        clearInterval(interval);
+        setTimeout(resolve, 300);
+      }
+    }, 40);
+  });
+
+  // Final boot line
+  const finalEl = document.createElement('div');
+  finalEl.className = 'boot-line ok';
+  finalEl.textContent = '[OK] SYSTEM READY. WELCOME TO WATERINGMYGRASS.';
+  container.appendChild(finalEl);
+
+  await sleep(600);
+
+  // Fade out boot sequence
+  document.getElementById('boot-sequence').classList.add('fade-out');
+  setTimeout(() => {
+    document.getElementById('boot-sequence').style.display = 'none';
+  }, 600);
+
+  await sleep(700);
+  startMain();
+}
+
+// ============================================================
+// MAIN SEQUENCE
+// ============================================================
+async function startMain() {
+  document.getElementById('side-deco').classList.add('visible');
+
+  // System line
+  showLine('line-system');
+  await sleep(300);
+  showLine('line-spacer1');
+  await sleep(200);
+
+  // Headline
+  showLine('line-headline');
+  await sleep(100);
+  await typeText(document.getElementById('headline-text'), 'WATERING MY GRASS', 55);
+  document.getElementById('headline-cursor').classList.add('hidden');
+  await sleep(400);
+
+  // Subline
+  showLine('line-subline');
+  await sleep(80);
+  await typeText(document.getElementById('subline-text'), 'frequency science. evidence. community.', 30);
+  document.getElementById('subline-cursor').classList.add('hidden');
+  await sleep(300);
+
+  // Divider
+  showLine('line-div1');
+  document.getElementById('divider-text').textContent =
+    '─'.repeat(60);
+  await sleep(200);
+
+  // Nav items
+  const navData = [
+    { lineId: 'line-nav1', text: './articles', speed: 40 },
+    { lineId: 'line-nav2', text: './evidence', speed: 40 },
+    { lineId: 'line-nav3', text: './join', speed: 40 },
+  ];
+
+  for (const item of navData) {
+    showLine(item.lineId);
+    await sleep(80);
+    const lineEl = document.getElementById(item.lineId);
+    const textEl = lineEl.querySelector('.nav-cmd-text');
+    const cursorEl = lineEl.querySelector('.nav-cursor');
+    await typeText(textEl, item.text, item.speed);
+    cursorEl.classList.add('hidden');
+    await sleep(180);
+  }
+
+  await sleep(200);
+
+  // Second divider
+  showLine('line-div2');
+  document.getElementById('divider2-text').textContent =
+    '─'.repeat(60);
+  await sleep(200);
+
+  // Countdown
+  showLine('line-countdown');
+
+  // Attach nav hover effects
+  attachNavHovers();
+}
+
+// ============================================================
+// NAV HOVER TYPEOUTS
+// ============================================================
+function attachNavHovers() {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const desc = item.querySelector('.nav-desc');
+    const descText = item.dataset.desc;
+    let typing = null;
+    let isOver = false;
+
+    item.addEventListener('mouseenter', () => {
+      isOver = true;
+      desc.classList.add('reveal');
+      desc.textContent = '';
+      let i = 0;
+      if (typing) clearInterval(typing);
+      typing = setInterval(() => {
+        if (!isOver) { clearInterval(typing); return; }
+        desc.textContent += descText[i];
+        i++;
+        if (i >= descText.length) clearInterval(typing);
+      }, 22);
+    });
+
+    item.addEventListener('mouseleave', () => {
+      isOver = false;
+      if (typing) clearInterval(typing);
+      desc.classList.remove('reveal');
+    });
+
+    item.addEventListener('click', () => {
+      // terminal-style navigation with a little flicker
+      document.body.style.opacity = '0.7';
+      setTimeout(() => document.body.style.opacity = '1', 80);
+      setTimeout(() => document.body.style.opacity = '0.5', 140);
+      setTimeout(() => document.body.style.opacity = '1', 200);
+    });
+  });
+}
+
+// ============================================================
+// TOPBAR CYCLING STATUS
+// ============================================================
+const statusMessages = [
+  '● SYSTEM ONLINE',
+  '● FREQUENCIES ACTIVE',
+  '● 847K ENTRIES LOADED',
+  '● SIGNAL LOCKED',
+  '● ENCRYPTED',
+  '● TRANSMISSION READY',
+];
+let statusIdx = 0;
+setInterval(() => {
+  statusIdx = (statusIdx + 1) % statusMessages.length;
+  const el = document.getElementById('topbar-status');
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = statusMessages[statusIdx];
+    el.style.opacity = '1';
+  }, 200);
+}, 3000);
+
+// ============================================================
+// RANDOM TERMINAL NOISE IN DIVIDERS
+// ============================================================
+setInterval(() => {
+  const dividers = ['divider-text', 'divider2-text'];
+  const target = dividers[Math.floor(Math.random() * dividers.length)];
+  const el = document.getElementById(target);
+  if (!el || !el.textContent) return;
+  const pos = Math.floor(Math.random() * el.textContent.length);
+  const glitchChars = '!@#$%^&*<>?/\\|~`';
+  const original = el.textContent;
+  el.textContent = original.slice(0, pos) +
+    glitchChars[Math.floor(Math.random() * glitchChars.length)] +
+    original.slice(pos + 1);
+  setTimeout(() => {
+    el.textContent = original;
+  }, 80);
+}, 1200);
+
+// ============================================================
+// START
+// ============================================================
+runBoot();
+</script>
+</body>
+</html>
