@@ -356,6 +356,32 @@ const meetings = [
   },
 ];
 
+// ── Command-centre vitals ─────────────────────────────────────────────────────
+const vitals = [
+  { label: "Total Subscribers",  value: "14,203", delta: 2.8,  accent: "text-white" },
+  { label: "Daily Active Users", value: "3,241",  delta: 5.4,  accent: "text-white" },
+  { label: "April 18 Registered",value: "4,821",  delta: 22.4, accent: "text-emerald-400" },
+  { label: "ManyChat DMs / wk",  value: "12,840", delta: 14.2, accent: "text-white" },
+  { label: "IG Followers",        value: "42.1K",  delta: 2.3,  accent: "text-white" },
+  { label: "Avg HRV (all users)", value: "62 ms",  delta: 2.2,  accent: "text-emerald-400" },
+];
+
+// ── Today's focus items ───────────────────────────────────────────────────────
+const focusItems = [
+  { priority: "P0", label: "Confirm Zoom capacity for April 18 (5K viewers)",          due: "Apr 6" },
+  { priority: "P0", label: "Fix ManyChat keyword trigger for 'frequency'",             due: "Apr 6" },
+  { priority: "P1", label: "Send T-7 reminder sequence for April 18 registrants",      due: "Apr 11" },
+  { priority: "P1", label: "Publish frequency science deep-dive on Substack",          due: "Apr 7" },
+  { priority: "P2", label: "Model TM course cohort pricing ($197 / $297 / $497)",      due: "Apr 8" },
+  { priority: "P2", label: "Review Stripe webhook failures from Mar 28",               due: "Apr 6" },
+];
+
+const priorityColors: Record<string, string> = {
+  P0: "text-red-400 border-red-400/30 bg-red-400/5",
+  P1: "text-amber-400 border-amber-400/30 bg-amber-400/5",
+  P2: "text-[#555555] border-[#333333] bg-transparent",
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -385,7 +411,47 @@ export default function CRMDashboard() {
             >
               Contacts →
             </Link>
+            <a
+              href="/api/agents"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2.5 border border-[#333333] text-[#888888] text-xs tracking-[0.12em] uppercase hover:border-white hover:text-white transition-colors"
+            >
+              Agent Mesh ↗
+            </a>
           </div>
+        </div>
+      </section>
+
+      {/* ── Command Centre — vitals bar ── */}
+      <section className="max-w-7xl mx-auto px-6 pb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-[#1a1a1a] border border-[#1a1a1a]">
+          {vitals.map((v) => (
+            <div key={v.label} className="bg-[#0a0a0a] px-4 py-4">
+              <p className="text-[9px] tracking-[0.2em] uppercase text-[#444444] mb-1.5">{v.label}</p>
+              <p className={`text-xl font-light tracking-tight ${v.accent}`}>{v.value}</p>
+              <Delta value={v.delta} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Today's Focus ── */}
+      <section className="max-w-7xl mx-auto px-6 pb-8">
+        <SectionLabel>Today&rsquo;s Focus — April 6</SectionLabel>
+        <div className="border border-[#1a1a1a]">
+          {focusItems.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-4 px-5 py-3.5 border-b border-[#111111] last:border-0 hover:bg-[#0d0d0d] transition-colors"
+            >
+              <span className={`shrink-0 text-[9px] tracking-[0.1em] uppercase border px-2 py-0.5 font-mono ${priorityColors[item.priority]}`}>
+                {item.priority}
+              </span>
+              <p className="flex-1 text-[12px] text-[#888888]">{item.label}</p>
+              <span className="shrink-0 text-[10px] text-[#444444] font-mono">{item.due}</span>
+            </div>
+          ))}
         </div>
       </section>
 

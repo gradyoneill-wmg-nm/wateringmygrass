@@ -1,0 +1,193 @@
+/**
+ * WMGGrain.css
+ * Watering My Grass — Animated Film Grain Overlay
+ *
+ * Simulates 16mm film grain via SVG feTurbulence.
+ * At steps(1) the animation jumps instantly between positions — each frame
+ * shows a different crop of the noise tile, exactly like real celluloid grain
+ * where each physical frame has a unique random silver-halide pattern.
+ *
+ * ─── Usage ───────────────────────────────────────────────────────────────────
+ *
+ * Option A — whole-page grain (apply to html or body):
+ *   <body class="wmg-grain">
+ *
+ * Option B — section-level grain (apply to any positioned container):
+ *   <section class="wmg-grain wmg-grain--contained">
+ *
+ * Option C — Framer "Custom Code" component on root frame:
+ *   Just paste the body::after block into a <style> tag in Framer's
+ *   Custom Code panel (Project Settings → Custom Code → End of <body>).
+ *
+ * ─── Customisation ───────────────────────────────────────────────────────────
+ *
+ *   Override CSS variables on the target element:
+ *
+ *   .my-section {
+ *     --wmg-opacity: 0.12;
+ *     --wmg-speed:   0.3s;
+ *     --wmg-blend:   soft-light;
+ *     --wmg-size:    180px;
+ *   }
+ */
+
+/* ─── Custom properties ─────────────────────────────────────────────────────── */
+
+:root {
+  --wmg-opacity:  0.07;    /* sweet spot for dark sites: 0.06–0.10 */
+  --wmg-speed:    0.42s;   /* animation cycle: lower = faster flicker */
+  --wmg-z-index:  9999;
+  --wmg-blend:    overlay; /* overlay works on both dark and light */
+  --wmg-size:     220px;   /* noise tile repeat size */
+}
+
+/* ─── Full-viewport grain (default) ────────────────────────────────────────── */
+/*
+ * The pseudo-element is oversized (300% × 300%) so translation never reveals
+ * a hard edge. It sits above all content via z-index but never receives events.
+ */
+
+.wmg-grain::before {
+  content:           '';
+  position:          fixed;
+  top:              -100%;
+  left:             -100%;
+  width:             300%;
+  height:            300%;
+  pointer-events:    none;
+  z-index:           var(--wmg-z-index);
+  opacity:           var(--wmg-opacity);
+  mix-blend-mode:    var(--wmg-blend);
+  will-change:       transform;
+  animation:         wmg-grain var(--wmg-speed) steps(1) infinite;
+
+  /*
+   * SVG feTurbulence noise inline as data URI.
+   * fractalNoise at baseFrequency 0.80 with 4 octaves produces
+   * a fine grain character close to pushed 400 ISO film.
+   * stitchTiles='stitch' prevents seams at tile boundaries.
+   */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.80' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size:   var(--wmg-size) var(--wmg-size);
+}
+
+/* ─── Contained grain — stays within its parent bounds ─────────────────────── */
+
+.wmg-grain--contained::before {
+  position: absolute;
+  top:     -50%;
+  left:    -50%;
+  width:    200%;
+  height:   200%;
+}
+
+/* ─── Intensity presets ─────────────────────────────────────────────────────── */
+
+/* Subtle — hero sections, over images */
+.wmg-grain--subtle::before   { opacity: 0.04; }
+
+/* Default already set above */
+
+/* Medium — article pages, editorial */
+.wmg-grain--medium::before   { opacity: 0.09; }
+
+/* Heavy — dark sections, hero backgrounds, intentional cinematic feel */
+.wmg-grain--heavy::before    { opacity: 0.14; }
+
+/* ─── Speed presets ─────────────────────────────────────────────────────────── */
+
+/* Slow — closer to 8mm film, more visible flicker */
+.wmg-grain--slow::before     { animation-duration: 0.85s; }
+
+/* Fast — 16mm digital emulation, rapid stochastic texture */
+.wmg-grain--fast::before     { animation-duration: 0.22s; }
+
+/* ─── Blend mode presets ────────────────────────────────────────────────────── */
+
+/* overlay default works for most cases */
+.wmg-grain--soft-light::before  { mix-blend-mode: soft-light;  }
+.wmg-grain--multiply::before    { mix-blend-mode: multiply;    }  /* for light backgrounds */
+.wmg-grain--screen::before      { mix-blend-mode: screen;      }  /* for very dark backgrounds */
+
+/* ─── Keyframes — 11-step pseudo-random translation ─────────────────────────── */
+/*
+ * Each step translates the oversized noise texture to a different origin.
+ * steps(1) makes each transition instantaneous — no smooth motion, just
+ * a new grain crop on every frame. The percentages are small enough that
+ * the shift is subpixel-imperceptible as movement but creates grain variation.
+ */
+
+@keyframes wmg-grain {
+  0%   { transform: translate(  0%,    0% ); }
+  9%   { transform: translate( -4%,   -8% ); }
+  18%  { transform: translate(-11%,    5% ); }
+  27%  { transform: translate(  6%,  -20% ); }
+  36%  { transform: translate( -2%,   16% ); }
+  45%  { transform: translate(-13%,    9% ); }
+  54%  { transform: translate( 12%,    2% ); }
+  63%  { transform: translate(  0%,   14% ); }
+  72%  { transform: translate(  4%,  -15% ); }
+  81%  { transform: translate( -7%,    8% ); }
+  90%  { transform: translate(  9%,  -4%  ); }
+  100% { transform: translate(  0%,    0% ); }
+}
+
+/* ─── Vignette — darkens corners, directs attention to centre ───────────────── */
+/*
+ * Separate from grain — apply independently if needed.
+ * Combine: <div class="wmg-grain wmg-vignette">
+ */
+
+.wmg-vignette::after {
+  content:        '';
+  position:       fixed;
+  inset:          0;
+  background:     radial-gradient(
+                    ellipse at 50% 50%,
+                    transparent 55%,
+                    rgba(0, 0, 0, 0.45) 100%
+                  );
+  pointer-events: none;
+  z-index:        calc(var(--wmg-z-index) - 1);
+}
+
+/* ─── Scanlines — optional CRT / monitor effect ────────────────────────────── */
+
+.wmg-scanlines::before {
+  content:           '';
+  position:          fixed;
+  inset:             0;
+  background:        repeating-linear-gradient(
+                       0deg,
+                       transparent,
+                       transparent 3px,
+                       rgba(0, 0, 0, 0.025) 3px,
+                       rgba(0, 0, 0, 0.025) 4px
+                     );
+  pointer-events:    none;
+  z-index:           calc(var(--wmg-z-index) - 2);
+}
+
+/* ─── Accessibility — respect reduced-motion preference ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .wmg-grain::before,
+  .wmg-grain--contained::before {
+    animation: none;
+    /* Grain texture still visible as a static layer — just no flicker */
+  }
+}
+
+/* ─── Light mode adjustment ─────────────────────────────────────────────────── */
+/*
+ * On light backgrounds, overlay blends differently.
+ * Multiply at lower opacity prevents darkening the page.
+ */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --wmg-opacity: 0.04;
+    --wmg-blend:   multiply;
+  }
+}
