@@ -3,6 +3,10 @@ import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/WMGGrain.css";
 import Navigation from "@/components/Navigation";
+import CustomCursor from "@/components/CustomCursor";
+import ScrollProgress from "@/components/ScrollProgress";
+import LoadAnimation from "@/components/LoadAnimation";
+import PageTransitionOverlay from "@/components/PageTransitionOverlay";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -45,6 +49,79 @@ export const metadata: Metadata = {
   },
 };
 
+// ─── Frequency spectrum data ───────────────────────────────────────────────
+const FREQUENCIES: { hz: number; label: string; name: string }[] = [
+  { hz: 0.1,  label: "0.1 Hz",  name: "ULF"      },
+  { hz: 0.5,  label: "0.5 Hz",  name: "Deep δ"   },
+  { hz: 2,    label: "2 Hz",    name: "Delta"     },
+  { hz: 4,    label: "4 Hz",    name: "Theta"     },
+  { hz: 7.83, label: "7.83",    name: "Schumann"  },
+  { hz: 10,   label: "10 Hz",   name: "Alpha"     },
+  { hz: 14,   label: "14 Hz",   name: "Low β"     },
+  { hz: 20,   label: "20 Hz",   name: "Beta"      },
+  { hz: 40,   label: "40 Hz",   name: "Gamma"     },
+  { hz: 100,  label: "100 Hz",  name: "High γ"    },
+  { hz: 432,  label: "432 Hz",  name: "432"       },
+  { hz: 528,  label: "528 Hz",  name: "528"       },
+];
+
+// Sine wave bezier path: 3 full cycles in 180 px (container shows 60 px)
+// Animation scrolls −60 px per period → seamless tile
+const WAVE_PATH =
+  "M0,8 C10.9,1 19.1,1 30,8 C40.9,15 49.1,15 60,8 " +
+  "C70.9,1 79.1,1 90,8 C100.9,15 109.1,15 120,8 " +
+  "C130.9,1 139.1,1 150,8 C160.9,15 169.1,15 180,8";
+
+function FrequencyWave({
+  hz,
+  label,
+  name,
+}: {
+  hz: number;
+  label: string;
+  name: string;
+}) {
+  // Actual period in seconds, minimum 15 ms so CSS animation is visible
+  const duration = `${Math.max(1 / hz, 0.015).toFixed(3)}s`;
+
+  return (
+    <div className="flex flex-col items-center gap-1 flex-shrink-0">
+      {/* 60 px clip window over 180 px scrolling SVG */}
+      <div className="w-[60px] h-[16px] overflow-hidden">
+        <svg
+          width={180}
+          height={16}
+          style={{
+            animationName: "waveScroll",
+            animationDuration: duration,
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
+        >
+          <path
+            d={WAVE_PATH}
+            fill="none"
+            stroke="#4CBB17"
+            strokeWidth="1"
+            opacity="0.65"
+          />
+        </svg>
+      </div>
+      <span
+        className="text-[7px] text-[#555555] tracking-wider"
+        style={{ fontFamily: "var(--font-space-mono), monospace" }}
+      >
+        {label}
+      </span>
+      <span className="text-[6px] text-[#333333] tracking-widest uppercase">
+        {name}
+      </span>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,10 +133,19 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceMono.variable} h-full antialiased`}
     >
       <body className="wmg-grain wmg-vignette min-h-full flex flex-col bg-[#0C0C0A] text-white">
+        {/* Global UI overlays */}
+        <LoadAnimation />
+        <CustomCursor />
+        <ScrollProgress />
+        <PageTransitionOverlay />
+
         <Navigation />
         <main className="flex-1">{children}</main>
+
+        {/* ─── Footer ─────────────────────────────────────────────────────── */}
         <footer className="border-t border-[#222222] pt-16 pb-10 px-6 mt-20">
           <div className="max-w-6xl mx-auto">
+
             {/* Top row: brand + newsletter */}
             <div className="flex flex-col lg:flex-row justify-between gap-12 mb-14">
               {/* Brand */}
@@ -81,7 +167,7 @@ export default function RootLayout({
                     className="text-[#555555] hover:text-white transition-colors"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.26 5.632 5.904-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.26 5.632 5.904-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                     </svg>
                   </a>
                   <a
@@ -92,7 +178,7 @@ export default function RootLayout({
                     className="text-[#555555] hover:text-white transition-colors"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                     </svg>
                   </a>
                   <a
@@ -103,7 +189,7 @@ export default function RootLayout({
                     className="text-[#555555] hover:text-white transition-colors"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/>
+                      <path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z" />
                     </svg>
                   </a>
                 </div>
@@ -151,7 +237,11 @@ export default function RootLayout({
                     { href: "/manifesto", label: "Manifesto" },
                     { href: "/founders-log", label: "Founder's Log" },
                   ].map(({ href, label }) => (
-                    <a key={href} href={href} className="text-xs text-[#555555] hover:text-white transition-colors">
+                    <a
+                      key={href}
+                      href={href}
+                      className="text-xs text-[#555555] hover:text-white transition-colors"
+                    >
                       {label}
                     </a>
                   ))}
@@ -172,7 +262,11 @@ export default function RootLayout({
                     { href: "/april18", label: "April 18 Event" },
                     { href: "/directory", label: "Directory" },
                   ].map(({ href, label }) => (
-                    <a key={href} href={href} className="text-xs text-[#555555] hover:text-white transition-colors">
+                    <a
+                      key={href}
+                      href={href}
+                      className="text-xs text-[#555555] hover:text-white transition-colors"
+                    >
                       {label}
                     </a>
                   ))}
@@ -191,7 +285,11 @@ export default function RootLayout({
                     { href: "/build-log", label: "Build Log" },
                     { href: "/calendar", label: "Content Calendar" },
                   ].map(({ href, label }) => (
-                    <a key={href} href={href} className="text-xs text-[#555555] hover:text-white transition-colors">
+                    <a
+                      key={href}
+                      href={href}
+                      className="text-xs text-[#555555] hover:text-white transition-colors"
+                    >
                       {label}
                     </a>
                   ))}
@@ -217,8 +315,22 @@ export default function RootLayout({
                   </p>
                 </a>
                 <div className="flex flex-col gap-2 mt-4">
-                  <a href="/about" className="text-xs text-[#555555] hover:text-white transition-colors">About WMG</a>
+                  <a href="/about" className="text-xs text-[#555555] hover:text-white transition-colors">
+                    About WMG
+                  </a>
                 </div>
+              </div>
+            </div>
+
+            {/* ── Frequency spectrum visualizer ──────────────────────────── */}
+            <div className="border-t border-[#1a1a1a] pt-10 mb-12">
+              <p className="text-[9px] tracking-[0.3em] uppercase text-[#2a2a2a] mb-6">
+                Frequency Spectrum
+              </p>
+              <div className="flex flex-wrap gap-x-5 gap-y-5">
+                {FREQUENCIES.map((f) => (
+                  <FrequencyWave key={f.label} {...f} />
+                ))}
               </div>
             </div>
 
@@ -239,6 +351,7 @@ export default function RootLayout({
                 </a>
               </p>
             </div>
+
           </div>
         </footer>
       </body>

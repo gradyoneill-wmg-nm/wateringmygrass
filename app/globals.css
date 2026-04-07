@@ -232,3 +232,58 @@ p {
   .claim-card-front { transition: none !important; }
   .wmg-tag:hover { animation: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL LAYOUT: CURSOR · NAV · SCROLL · TRANSITIONS · WAVEFORMS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Custom cursor: hide default on pointer devices ───────── */
+body.has-custom-cursor,
+body.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* ── Nav link: underline draws left-to-right in 0.3 s ─────── */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Active nav link: orange left border pulses */
+.nav-link-active {
+  animation: navPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes navPulse {
+  0%, 100% { border-left-color: #F5841F; }
+  50%       { border-left-color: rgba(245, 132, 31, 0.18); }
+}
+
+/* ── Page transition: horizontal clip-path wipe ───────────── */
+/* 0 % → 40 %: black sweeps in from left                       */
+/* 40 % → 60 %: full coverage (new page already rendered)      */
+/* 60 % → 100 %: black exits to the right                      */
+@keyframes pageWipe {
+  0%   { clip-path: inset(0 100% 0 0); }
+  40%  { clip-path: inset(0 0 0 0); }
+  60%  { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 100%); }
+}
+
+/* ── Frequency footer waveforms ───────────────────────────── */
+@keyframes waveScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-60px); }
+}
