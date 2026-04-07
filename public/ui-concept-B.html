@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATERING MY GRASS — Editorial Brutalism</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root { --green: #4CBB17; }
+
+html { scroll-behavior: auto; }
+
+body {
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+  cursor: none;
+  min-height: 200vh;
+}
+
+/* ── CURSOR ──────────────────────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: #4CBB17;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.18s ease, height 0.18s ease, opacity 0.18s ease;
+  mix-blend-mode: normal;
+}
+body:not(.cursor-init) #cursor { opacity: 0; }
+
+/* ── GRAIN ───────────────────────────────────────────── */
+#grain-canvas {
+  position: fixed;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.065;
+}
+
+/* ── WAVEFORM ─────────────────────────────────────────── */
+#wave-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.04;
+}
+
+/* ── SWEEP LINE ──────────────────────────────────────── */
+#sweep {
+  position: fixed;
+  top: 50%;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: #4CBB17;
+  z-index: 500;
+  transform: translateY(-50%);
+  animation: sweep-across 0.8s cubic-bezier(0.77, 0, 0.175, 1) 0.3s forwards;
+  pointer-events: none;
+}
+@keyframes sweep-across {
+  0%   { left: -100%; opacity: 1; }
+  60%  { left: 50%;   opacity: 1; }
+  99%  { left: 100%;  opacity: 1; }
+  100% { left: 100%;  opacity: 0; }
+}
+
+/* ── COUNTDOWN ───────────────────────────────────────── */
+#countdown {
+  position: fixed;
+  top: 22px;
+  right: 28px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.38);
+  z-index: 400;
+  user-select: none;
+}
+#countdown span.num {
+  color: rgba(255,255,255,0.65);
+}
+
+/* ── MASTHEAD ─────────────────────────────────────────── */
+#masthead {
+  position: fixed;
+  left: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  will-change: top, transform;
+  pointer-events: none;
+  transition: top 0.55s cubic-bezier(0.77, 0, 0.175, 1),
+              transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+}
+#masthead h1 {
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 18vw;
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  color: #fff;
+  white-space: nowrap;
+  transition: font-size 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+}
+#masthead.pinned {
+  top: 22px;
+  transform: translateY(0);
+}
+#masthead.pinned h1 {
+  font-size: 2vw;
+}
+#masthead.pinned #subtitle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── SUBTITLE ─────────────────────────────────────────── */
+#subtitle {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(9px, 0.85vw, 13px);
+  letter-spacing: 0.28em;
+  color: rgba(255,255,255,0.45);
+  margin-top: 2.2vw;
+  transition: opacity 0.4s ease;
+}
+
+/* ── ARTICLES ─────────────────────────────────────────── */
+#articles {
+  position: fixed;
+  right: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4vw;
+  pointer-events: none;
+  transition: top 0.55s cubic-bezier(0.77, 0, 0.175, 1),
+              transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+}
+#articles.pinned {
+  top: 22px;
+  transform: translateY(0);
+}
+
+.art {
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 4.6vw;
+  line-height: 1.05;
+  color: rgba(255,255,255,0);
+  transform: translateX(110%);
+  transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              color 0.35s ease;
+  text-align: right;
+  pointer-events: auto;
+  cursor: none;
+}
+.art:nth-child(1) { font-weight: 900; }
+.art:nth-child(2) { font-weight: 300; font-style: italic; letter-spacing: -0.01em; }
+.art:nth-child(3) { font-weight: 700; }
+
+.art.in {
+  transform: translateX(0);
+  color: rgba(255,255,255,0.88);
+}
+.art:hover { color: #4CBB17 !important; }
+
+#articles.pinned .art {
+  font-size: 0.85vw;
+  color: rgba(255,255,255,0.3) !important;
+  transition: font-size 0.55s cubic-bezier(0.77, 0, 0.175, 1), color 0.3s ease;
+}
+#articles.pinned .art.in {
+  color: rgba(255,255,255,0.3);
+}
+#articles.pinned .art:hover { color: rgba(255,255,255,0.7) !important; }
+
+/* ── NAV ──────────────────────────────────────────────── */
+#nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: 20px 4vw;
+  z-index: 400;
+  gap: 36px;
+}
+
+.nav-item {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  cursor: none;
+  position: relative;
+  padding-bottom: 5px;
+  transition: color 0.2s ease;
+}
+.nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #4CBB17;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.nav-item:hover { color: #fff; }
+.nav-item:hover::after { transform: scaleX(1); }
+
+/* ── SCROLL BODY ──────────────────────────────────────── */
+#scroll-body { height: 200vh; }
+
+/* ── MOUSE-DRIFT LAYER ────────────────────────────────── */
+#drift-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  will-change: transform;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+
+<!-- Grain -->
+<canvas id="grain-canvas"></canvas>
+
+<!-- Waveform -->
+<canvas id="wave-canvas"></canvas>
+
+<!-- Sweep line -->
+<div id="sweep"></div>
+
+<!-- Countdown -->
+<div id="countdown">
+  <span class="num" id="cd-days">--</span>D&thinsp;
+  <span class="num" id="cd-hours">--</span>H&thinsp;
+  <span class="num" id="cd-mins">--</span>M
+</div>
+
+<!-- Masthead -->
+<div id="masthead">
+  <h1>WATERING<br>MY GRASS</h1>
+  <div id="subtitle">— a publication about frequency science —</div>
+</div>
+
+<!-- Articles -->
+<div id="articles">
+  <div class="art">THE RESONANCE<br>OF RAIN</div>
+  <div class="art">Deep Root<br>Frequencies</div>
+  <div class="art">SIGNALS FROM<br>THE SOIL</div>
+</div>
+
+<!-- Nav -->
+<nav id="nav">
+  <div class="nav-item">Archive</div>
+  <div class="nav-item">Frequencies</div>
+  <div class="nav-item">About</div>
+  <div class="nav-item">Subscribe</div>
+</nav>
+
+<!-- Scrollable body -->
+<div id="scroll-body"></div>
+
+<script>
+// ─── CURSOR ────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+let cx = mx, cy = my;
+let hovering = false;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  document.body.classList.add('cursor-init');
+});
+
+document.querySelectorAll('.nav-item, .art').forEach(el => {
+  el.addEventListener('mouseenter', () => hovering = true);
+  el.addEventListener('mouseleave', () => hovering = false);
+});
+
+(function tickCursor() {
+  cx += (mx - cx) * 0.1;
+  cy += (my - cy) * 0.1;
+  cursor.style.left = cx + 'px';
+  cursor.style.top  = cy + 'px';
+  const s = hovering ? 32 : 8;
+  cursor.style.width  = s + 'px';
+  cursor.style.height = s + 'px';
+  requestAnimationFrame(tickCursor);
+})();
+
+// ─── GRAIN ─────────────────────────────────────────────
+const gc = document.getElementById('grain-canvas');
+const gx = gc.getContext('2d');
+let grainW = 0, grainH = 0;
+
+function sizeGrain() {
+  grainW = gc.width  = Math.ceil(window.innerWidth  * 1.4);
+  grainH = gc.height = Math.ceil(window.innerHeight * 1.4);
+}
+sizeGrain();
+window.addEventListener('resize', sizeGrain);
+
+function makeGrain() {
+  const id = gx.createImageData(grainW, grainH);
+  const d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = (Math.random() * 255) | 0;
+    d[i] = d[i+1] = d[i+2] = v;
+    d[i+3] = (Math.random() * 38) | 0;
+  }
+  gx.putImageData(id, 0, 0);
+}
+
+let gf = 0;
+(function tickGrain() {
+  if (++gf % 3 === 0) {
+    makeGrain();
+    // Shift the canvas position randomly for variety
+    const ox = (Math.random() * 0.2 * window.innerWidth - 0.1 * window.innerWidth);
+    const oy = (Math.random() * 0.2 * window.innerHeight - 0.1 * window.innerHeight);
+    gc.style.left = ox + 'px';
+    gc.style.top  = oy + 'px';
+  }
+  requestAnimationFrame(tickGrain);
+})();
+
+// ─── WAVEFORM ──────────────────────────────────────────
+const wc = document.getElementById('wave-canvas');
+const wx = wc.getContext('2d');
+
+function sizeWave() {
+  wc.width  = window.innerWidth;
+  wc.height = window.innerHeight;
+}
+sizeWave();
+window.addEventListener('resize', sizeWave);
+
+let wt = 0;
+(function tickWave() {
+  wx.clearRect(0, 0, wc.width, wc.height);
+  wx.lineWidth = 1;
+
+  const waves = [
+    { amp: 28, freq: 0.0055, phase: 0,    speed: 0.25, yFrac: 0.22 },
+    { amp: 18, freq: 0.009,  phase: 1.2,  speed: 0.18, yFrac: 0.40 },
+    { amp: 35, freq: 0.004,  phase: 0.7,  speed: 0.12, yFrac: 0.58 },
+    { amp: 15, freq: 0.013,  phase: 2.1,  speed: 0.30, yFrac: 0.73 },
+    { amp: 24, freq: 0.007,  phase: 3.4,  speed: 0.20, yFrac: 0.88 },
+  ];
+
+  waves.forEach(w => {
+    wx.beginPath();
+    wx.strokeStyle = 'rgba(255,255,255,0.9)';
+    const yBase = wc.height * w.yFrac;
+    for (let x = 0; x <= wc.width; x += 3) {
+      const y = yBase
+        + Math.sin(x * w.freq + wt * w.speed + w.phase) * w.amp
+        + Math.sin(x * w.freq * 1.61 + wt * w.speed * 0.7) * w.amp * 0.35;
+      x === 0 ? wx.moveTo(x, y) : wx.lineTo(x, y);
+    }
+    wx.stroke();
+  });
+
+  wt += 0.018;
+  requestAnimationFrame(tickWave);
+})();
+
+// ─── COUNTDOWN ─────────────────────────────────────────
+function updateCD() {
+  const diff = new Date('2026-04-18T00:00:00') - new Date();
+  if (diff <= 0) {
+    ['cd-days','cd-hours','cd-mins'].forEach(id => document.getElementById(id).textContent = '00');
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('cd-days').textContent  = String(d).padStart(2,'0');
+  document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-mins').textContent  = String(m).padStart(2,'0');
+}
+updateCD();
+setInterval(updateCD, 30000);
+
+// ─── ARTICLES SLIDE-IN ─────────────────────────────────
+const arts = document.querySelectorAll('.art');
+setTimeout(() => {
+  arts.forEach((el, i) => setTimeout(() => el.classList.add('in'), i * 200));
+}, 900);
+
+// ─── SCROLL PIN ────────────────────────────────────────
+const masthead  = document.getElementById('masthead');
+const articlesEl = document.getElementById('articles');
+
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  const pin = y > 60;
+  masthead.classList.toggle('pinned', pin);
+  articlesEl.classList.toggle('pinned', pin);
+}, { passive: true });
+
+// ─── MOUSE PARALLAX ────────────────────────────────────
+let prx = 0, pry = 0;
+document.addEventListener('mousemove', e => {
+  prx = (e.clientX / window.innerWidth  - 0.5);
+  pry = (e.clientY / window.innerHeight - 0.5);
+});
+
+let pmx = 0, pmy = 0;
+(function tickParallax() {
+  pmx += (prx - pmx) * 0.05;
+  pmy += (pry - pmy) * 0.05;
+  if (!masthead.classList.contains('pinned')) {
+    masthead.style.setProperty('--px', pmx * 12 + 'px');
+    masthead.style.setProperty('--py', pmy * 8  + 'px');
+    masthead.style.transform = `translateY(-50%) translate(${pmx*12}px, ${pmy*8}px)`;
+  }
+  if (!articlesEl.classList.contains('pinned')) {
+    articlesEl.style.transform = `translateY(-50%) translate(${pmx*-8}px, ${pmy*-5}px)`;
+  }
+  requestAnimationFrame(tickParallax);
+})();
+
+</script>
+</body>
+</html>
