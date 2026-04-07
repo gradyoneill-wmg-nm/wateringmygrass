@@ -15,9 +15,15 @@ export default function April18Page() {
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Hero — centered, full impact */}
       <section className="max-w-5xl mx-auto px-6 pt-24 pb-20 md:pt-36 md:pb-28 text-center">
-        <p className="text-[10px] tracking-[0.4em] uppercase text-[#444444] mb-8">
-          Global Event · April 18, 2026
-        </p>
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <p className="text-[10px] tracking-[0.4em] uppercase text-[#444444]">
+            Global Event · April 18, 2026
+          </p>
+          <span className="inline-flex items-center gap-1.5 text-[9px] tracking-[0.25em] uppercase text-[#4CBB17] border border-[#4CBB17]/40 px-2 py-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#4CBB17] animate-pulse shrink-0" />
+            Live
+          </span>
+        </div>
 
         <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-light leading-[1.0] tracking-[-0.03em] mb-6">
           5:00 AM EST
@@ -41,7 +47,7 @@ export default function April18Page() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
             href="#register"
-            className="px-10 py-4 border border-white text-white text-xs tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all"
+            className="px-10 py-4 bg-[#F5841F] text-black text-xs tracking-[0.2em] uppercase hover:bg-[#e0751a] transition-colors font-medium"
           >
             Join Remotely — Register Free
           </a>
