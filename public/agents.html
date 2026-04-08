@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NON MAGIC // AGENTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0C0C0A; color: #E8E8E0; font-family: 'Inter', sans-serif; min-height: 100vh; }
+.mono { font-family: 'Space Mono', monospace; }
+header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid #1E1E1C; position:sticky; top:0; background:#0C0C0A; z-index:10; }
+.logo { font-family:'Space Mono',monospace; font-size:14px; color:#F5841F; letter-spacing:3px; font-weight:700; }
+.meta { display:flex; align-items:center; gap:16px; }
+.refresh-time { font-family:'Space Mono',monospace; font-size:10px; color:#444; }
+.refresh-btn { font-family:'Space Mono',monospace; font-size:10px; color:#F5841F; background:none; border:1px solid #F5841F33; padding:4px 12px; cursor:pointer; }
+.refresh-btn:hover { background:#F5841F11; }
+
+/* Summary bar */
+.summary { display:flex; border-bottom:1px solid #1E1E1C; }
+.summary-stat { flex:1; padding:12px 20px; border-right:1px solid #1E1E1C; text-align:center; }
+.summary-stat:last-child { border-right:none; }
+.summary-val { font-family:'Space Mono',monospace; font-size:22px; font-weight:700; }
+.summary-label { font-family:'Space Mono',monospace; font-size:8px; color:#555; letter-spacing:2px; margin-top:3px; }
+
+/* Agent grid */
+.agent-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1px; background:#1E1E1C; }
+.agent-card { background:#0C0C0A; padding:20px; }
+.agent-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.agent-name { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; letter-spacing:1px; }
+.status-badge { font-family:'Space Mono',monospace; font-size:9px; padding:3px 8px; letter-spacing:1px; }
+.badge-active { color:#4CBB17; background:#4CBB1711; border:1px solid #4CBB1733; }
+.badge-idle { color:#555; background:#1a1a1a; border:1px solid #333; }
+.badge-failed { color:#FF3B30; background:#FF3B3011; border:1px solid #FF3B3033; }
+.badge-busy { color:#F5841F; background:#F5841F11; border:1px solid #F5841F33; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.5} }
+
+/* Stats row */
+.agent-stats { display:flex; gap:16px; margin-bottom:12px; }
+.stat { text-align:center; }
+.stat-val { font-family:'Space Mono',monospace; font-size:16px; font-weight:700; }
+.stat-val.green { color:#4CBB17; }
+.stat-val.orange { color:#F5841F; }
+.stat-val.red { color:#FF3B30; }
+.stat-val.gray { color:#555; }
+.stat-label { font-family:'Space Mono',monospace; font-size:8px; color:#444; letter-spacing:1px; }
+
+/* Task list */
+.task-list { border-top:1px solid #111; padding-top:10px; }
+.task-row { display:flex; align-items:flex-start; gap:8px; padding:6px 0; border-bottom:1px solid #0F0F0D; }
+.task-row:last-child { border-bottom:none; }
+.task-dot { width:5px; height:5px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+.dot-pending { background:#333; }
+.dot-inprog { background:#F5841F; }
+.dot-done { background:#4CBB17; }
+.dot-failed { background:#FF3B30; }
+.task-content { flex:1; min-width:0; }
+.task-type { font-family:'Space Mono',monospace; font-size:10px; color:#ccc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.task-meta { font-family:'Space Mono',monospace; font-size:9px; color:#444; margin-top:2px; }
+.task-status { font-family:'Space Mono',monospace; font-size:8px; flex-shrink:0; padding:2px 5px; }
+.ts-pending { color:#444; }
+.ts-in_progress { color:#F5841F; }
+.ts-completed { color:#4CBB17; }
+.ts-failed { color:#FF3B30; }
+
+.empty-state { padding:20px; text-align:center; font-family:'Space Mono',monospace; font-size:11px; color:#333; }
+.show-more { font-family:'Space Mono',monospace; font-size:9px; color:#444; cursor:pointer; padding:6px 0; text-align:center; width:100%; background:none; border:none; }
+.show-more:hover { color:#F5841F; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">NON MAGIC // AGENTS</div>
+  <div class="meta">
+    <span class="refresh-time mono" id="lastRefresh">Loading...</span>
+    <button class="refresh-btn" onclick="loadAll()">REFRESH</button>
+  </div>
+</header>
+
+<!-- Summary bar -->
+<div class="summary" id="summary">
+  <div class="summary-stat"><div class="summary-val orange" id="sumTotal">-</div><div class="summary-label">TOTAL TASKS</div></div>
+  <div class="summary-stat"><div class="summary-val" style="color:#CC44FF" id="sumPending">-</div><div class="summary-label">PENDING</div></div>
+  <div class="summary-stat"><div class="summary-val orange" id="sumActive">-</div><div class="summary-label">IN PROGRESS</div></div>
+  <div class="summary-stat"><div class="summary-val green" id="sumDone">-</div><div class="summary-label">COMPLETED</div></div>
+  <div class="summary-stat"><div class="summary-val red" id="sumFailed">-</div><div class="summary-label">FAILED</div></div>
+  <div class="summary-stat"><div class="summary-val" style="color:#4499FF" id="sumAgents">-</div><div class="summary-label">AGENTS</div></div>
+</div>
+
+<div class="agent-grid" id="agentGrid">
+  <div style="padding:40px;text-align:center;font-family:'Space Mono',monospace;color:#333">Loading agents...</div>
+</div>
+
+<script>
+const SB = 'https://sbeqrkvxgfymrsqgugqz.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZXFya3Z4Z2Z5bXJzcWd1Z3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQ1MTUsImV4cCI6MjA5MDc5MDUxNX0.UzlVmJc--MJMsDaXtG9TGJahTigc-TD1YVESpsWJCLw';
+const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY };
+
+const AGENTS = ['rat','roach','rooster','raccoon','reign','rove','rhino','rockbird','wren','reel','robin','rosefinch','roadrunner','rabbit','redwing'];
+
+const AGENT_COLORS = {
+  rat:'#F5841F', roach:'#FF3B5C', rooster:'#FFD60A', raccoon:'#8B4513',
+  reign:'#CC44FF', rove:'#4499FF', rhino:'#4CBB17', rockbird:'#00CED1',
+  wren:'#FF69B4', reel:'#9370DB', robin:'#32CD32', rosefinch:'#FF6347',
+  roadrunner:'#FFA500', rabbit:'#DDA0DD', redwing:'#DC143C'
+};
+
+const AGENT_DESC = {
+  rat:'App build · Matrix · UI', roach:'Strategy · Gateway · Routing', rooster:'Content strategy · Calendar · Briefs',
+  raccoon:'Research · Apify scraping · Intel', reign:'Scripts · Long-form · Manifesto', rove:'Video production · CapCut · Editing',
+  rhino:'Investor outreach · Decks · CRM', rockbird:'WMG editorial · Press · Journalism', wren:'Design · Figma · Brand',
+  reel:'Video analysis · Transcription', robin:'Fact-check · WMG articles', rosefinch:'Web · Framer · Frontend',
+  roadrunner:'Grants · Research', rabbit:'Growth · Partnerships', redwing:'QA · Testing'
+};
+
+function timeAgo(iso) {
+  if (!iso) return 'never';
+  const d = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(d / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  if (m < 1440) return Math.floor(m/60) + 'h ago';
+  return Math.floor(m/1440) + 'd ago';
+}
+
+async function loadAll() {
+  try {
+    const r = await fetch(`${SB}/rest/v1/agent_tasks?select=to_agent,from_agent,task_type,status,created_at,completed_at,rationale,payload&order=created_at.desc&limit=500`, { headers: H });
+    const tasks = await r.json();
+    if (!Array.isArray(tasks)) throw new Error('Bad response');
+
+    // Summary
+    document.getElementById('sumTotal').textContent = tasks.length;
+    document.getElementById('sumPending').textContent = tasks.filter(t=>t.status==='pending').length;
+    document.getElementById('sumActive').textContent = tasks.filter(t=>t.status==='in_progress').length;
+    document.getElementById('sumDone').textContent = tasks.filter(t=>t.status==='completed').length;
+    document.getElementById('sumFailed').textContent = tasks.filter(t=>t.status==='failed').length;
+
+    // Group by agent
+    const byAgent = {};
+    for (const t of tasks) {
+      const a = t.to_agent || 'unknown';
+      if (!byAgent[a]) byAgent[a] = [];
+      byAgent[a].push(t);
+    }
+
+    const allAgents = [...new Set([...AGENTS, ...Object.keys(byAgent)])].filter(a => a && a !== 'unknown');
+    document.getElementById('sumAgents').textContent = allAgents.length;
+
+    // Render cards
+    const grid = document.getElementById('agentGrid');
+    grid.innerHTML = allAgents.map(agent => {
+      const agentTasks = byAgent[agent] || [];
+      const pending = agentTasks.filter(t=>t.status==='pending').length;
+      const active = agentTasks.filter(t=>t.status==='in_progress').length;
+      const done = agentTasks.filter(t=>t.status==='completed').length;
+      const failed = agentTasks.filter(t=>t.status==='failed').length;
+      const latest = agentTasks[0];
+      const color = AGENT_COLORS[agent] || '#555';
+
+      const statusLabel = active > 0 ? 'ACTIVE' : pending > 0 ? 'QUEUED' : failed > 0 ? 'FAILED' : done > 0 ? 'IDLE' : 'IDLE';
+      const statusClass = active > 0 ? 'badge-busy' : pending > 0 ? 'badge-active' : failed > 0 ? 'badge-failed' : 'badge-idle';
+
+      const recentTasks = agentTasks.slice(0, 8);
+
+      return `<div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-name" style="color:${color}">${agent.toUpperCase()}</div>
+          <span class="status-badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <div style="font-size:11px;color:#444;margin-bottom:10px;font-family:'Space Mono',monospace;">${AGENT_DESC[agent]||''}</div>
+        <div class="agent-stats">
+          <div class="stat"><div class="stat-val gray">${pending}</div><div class="stat-label">QUEUE</div></div>
+          <div class="stat"><div class="stat-val orange">${active}</div><div class="stat-label">ACTIVE</div></div>
+          <div class="stat"><div class="stat-val green">${done}</div><div class="stat-label">DONE</div></div>
+          <div class="stat"><div class="stat-val red">${failed}</div><div class="stat-label">FAILED</div></div>
+        </div>
+        ${recentTasks.length > 0 ? `
+        <div class="task-list">
+          ${recentTasks.map(t => {
+            const dotClass = t.status==='in_progress'?'dot-inprog':t.status==='completed'?'dot-done':t.status==='failed'?'dot-failed':'dot-pending';
+            const tsClass = 'ts-' + t.status;
+            return `<div class="task-row">
+              <div class="task-dot ${dotClass}"></div>
+              <div class="task-content">
+                <div class="task-type">${t.task_type||'unknown'}</div>
+                <div class="task-meta">${timeAgo(t.created_at)} ${t.rationale ? '· '+t.rationale.substring(0,40) : ''}</div>
+              </div>
+              <span class="task-status ${tsClass}">${t.status}</span>
+            </div>`;
+          }).join('')}
+        </div>` : `<div class="empty-state">No tasks yet</div>`}
+      </div>`;
+    }).join('');
+
+    document.getElementById('lastRefresh').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York'}) + ' ET';
+  } catch(e) {
+    document.getElementById('agentGrid').innerHTML = `<div style="padding:40px;text-align:center;font-family:'Space Mono',monospace;color:#FF3B30">Error loading: ${e.message}</div>`;
+  }
+}
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
