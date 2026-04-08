@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NON MAGIC // CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0C0C0A; color: #E8E8E0; font-family: 'Inter', sans-serif; min-height: 100vh; }
+.mono { font-family: 'Space Mono', monospace; }
+header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid #1E1E1C; position:sticky; top:0; background:#0C0C0A; z-index:100; }
+.logo { font-family:'Space Mono',monospace; font-size:13px; color:#F5841F; letter-spacing:2px; }
+.tabs { display:flex; gap:0; border-bottom:1px solid #1E1E1C; }
+.tab { padding:12px 24px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; cursor:pointer; color:#555; border-bottom:2px solid transparent; }
+.tab.active { color:#F5841F; border-bottom-color:#F5841F; }
+.panel { display:none; padding:24px; }
+.panel.active { display:block; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+.stat-card { background:#111; border:1px solid #1E1E1C; padding:16px; }
+.stat-label { font-family:'Space Mono',monospace; font-size:9px; color:#555; letter-spacing:2px; margin-bottom:8px; }
+.stat-value { font-family:'Space Mono',monospace; font-size:28px; color:#F5841F; }
+.stat-value.green { color:#4CBB17; }
+.stat-sub { font-size:11px; color:#555; margin-top:4px; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+thead tr { border-bottom:1px solid #1E1E1C; }
+th { font-family:'Space Mono',monospace; font-size:9px; color:#555; letter-spacing:1px; padding:8px 12px; text-align:left; }
+td { padding:10px 12px; border-bottom:1px solid #111; color:#ccc; }
+tr:hover td { background:#111; }
+.badge { display:inline-block; padding:2px 8px; font-family:'Space Mono',monospace; font-size:9px; border-radius:0; }
+.badge-investor { background:#1a0e00; color:#F5841F; border:1px solid #F5841F44; }
+.badge-journalist { background:#001a1a; color:#4CBB17; border:1px solid #4CBB1744; }
+.badge-partner { background:#00001a; color:#4499FF; border:1px solid #4499FF44; }
+.badge-influencer { background:#1a0033; color:#CC44FF; border:1px solid #CC44FF44; }
+.badge-user { background:#0a1a00; color:#4CBB17; border:1px solid #4CBB1744; }
+.badge-new { color:#555; background:#111; border:1px solid #333; }
+.badge-contacted { color:#F5841F; background:#1a0e00; border:1px solid #F5841F44; }
+.badge-responded { color:#4CBB17; background:#0a1a00; border:1px solid #4CBB1744; }
+.badge-meeting { color:#4499FF; background:#00001a; border:1px solid #4499FF44; }
+.section-title { font-family:'Space Mono',monospace; font-size:10px; color:#555; letter-spacing:2px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #1E1E1C; }
+.add-btn { background:#F5841F; color:#000; border:none; padding:8px 16px; font-family:'Space Mono',monospace; font-size:11px; cursor:pointer; float:right; }
+.empty-state { text-align:center; padding:40px; color:#333; font-family:'Space Mono',monospace; font-size:12px; }
+.pipeline-row { display:flex; gap:1px; margin-bottom:24px; }
+.pipeline-stage { flex:1; background:#111; border:1px solid #1E1E1C; padding:12px; text-align:center; }
+.pipeline-stage-name { font-family:'Space Mono',monospace; font-size:9px; color:#555; letter-spacing:1px; margin-bottom:4px; }
+.pipeline-count { font-family:'Space Mono',monospace; font-size:20px; color:#F5841F; }
+.intel-card { background:#111; border:1px solid #1E1E1C; padding:12px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; }
+.intel-platform { font-family:'Space Mono',monospace; font-size:9px; padding:3px 8px; }
+.ig { background:#1a001a; color:#CC44FF; border:1px solid #CC44FF44; }
+.tt { background:#001a1a; color:#4CBBFF; border:1px solid #4CBBFF44; }
+.yt { background:#1a0000; color:#FF3B30; border:1px solid #FF3B3044; }
+.intel-content { flex:1; }
+.intel-account { font-size:12px; color:#fff; margin-bottom:2px; }
+.intel-caption { font-size:11px; color:#555; margin-bottom:4px; }
+.intel-stats { font-family:'Space Mono',monospace; font-size:10px; color:#F5841F; }
+input, select, textarea { background:#111; border:1px solid #333; color:#fff; padding:8px 12px; font-family:'Inter',sans-serif; font-size:13px; width:100%; margin-bottom:8px; }
+input:focus, select:focus { outline:none; border-color:#F5841F; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.save-btn { background:#F5841F; color:#000; border:none; padding:10px 24px; font-family:'Space Mono',monospace; font-size:12px; cursor:pointer; margin-top:8px; }
+::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:#0C0C0A; } ::-webkit-scrollbar-thumb { background:#333; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">NON MAGIC // CRM</div>
+  <div style="display:flex;gap:16px;align-items:center">
+    <span class="mono" style="font-size:11px;color:#555" id="lastUpdate">—</span>
+    <button class="add-btn" onclick="showTab('add')">+ ADD CONTACT</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview')">OVERVIEW</div>
+  <div class="tab" onclick="showTab('contacts')">CONTACTS</div>
+  <div class="tab" onclick="showTab('intel')">SOCIAL INTEL</div>
+  <div class="tab" onclick="showTab('revenue')">REVENUE</div>
+  <div class="tab" onclick="showTab('add')">+ ADD</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="panel active" id="tab-overview">
+  <div class="grid-4" id="statsCards">
+    <div class="stat-card"><div class="stat-label">TOTAL CONTACTS</div><div class="stat-value" id="sTotal">—</div></div>
+    <div class="stat-card"><div class="stat-label">INVESTORS</div><div class="stat-value" id="sInvestors">—</div></div>
+    <div class="stat-card"><div class="stat-label">JOURNALISTS</div><div class="stat-value" id="sJournalists">—</div></div>
+    <div class="stat-card"><div class="stat-label">INFLUENCERS</div><div class="stat-value green" id="sInfluencers">—</div></div>
+  </div>
+
+  <div class="section-title">PIPELINE</div>
+  <div class="pipeline-row" id="pipelineRow">
+    <div class="pipeline-stage"><div class="pipeline-stage-name">NEW</div><div class="pipeline-count" id="pNew">—</div></div>
+    <div class="pipeline-stage"><div class="pipeline-stage-name">CONTACTED</div><div class="pipeline-count" id="pContacted">—</div></div>
+    <div class="pipeline-stage"><div class="pipeline-stage-name">RESPONDED</div><div class="pipeline-count" id="pResponded">—</div></div>
+    <div class="pipeline-stage"><div class="pipeline-stage-name">MEETING</div><div class="pipeline-count" id="pMeeting">—</div></div>
+    <div class="pipeline-stage"><div class="pipeline-stage-name">DEAL</div><div class="pipeline-count" id="pDeal">—</div></div>
+    <div class="pipeline-stage"><div class="pipeline-stage-name">CLOSED</div><div class="pipeline-count" id="pClosed">—</div></div>
+  </div>
+
+  <div class="section-title" style="margin-top:24px">RECENT CONTACTS</div>
+  <div id="recentContacts"><div class="empty-state">No contacts yet — add your first contact above</div></div>
+</div>
+
+<!-- CONTACTS -->
+<div class="panel" id="tab-contacts">
+  <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center">
+    <select id="filterType" onchange="filterContacts()" style="width:150px">
+      <option value="">ALL TYPES</option>
+      <option value="investor">INVESTOR</option>
+      <option value="journalist">JOURNALIST</option>
+      <option value="partner">PARTNER</option>
+      <option value="influencer">INFLUENCER</option>
+      <option value="user">USER</option>
+    </select>
+    <select id="filterStatus" onchange="filterContacts()" style="width:150px">
+      <option value="">ALL STATUS</option>
+      <option value="new">NEW</option>
+      <option value="contacted">CONTACTED</option>
+      <option value="responded">RESPONDED</option>
+      <option value="meeting">MEETING</option>
+    </select>
+  </div>
+  <table>
+    <thead><tr><th>NAME</th><th>TYPE</th><th>ORG</th><th>STATUS</th><th>LAST CONTACT</th><th>NOTES</th></tr></thead>
+    <tbody id="contactsTable"><tr><td colspan="6" style="text-align:center;color:#333;padding:40px">Loading...</td></tr></tbody>
+  </table>
+</div>
+
+<!-- SOCIAL INTEL -->
+<div class="panel" id="tab-intel">
+  <div class="section-title">SCRAPED SOCIAL CONTENT — APIFY FEED</div>
+  <div id="intelFeed"><div class="empty-state">No intel yet — Raccoon's Apify scrapes will appear here</div></div>
+</div>
+
+<!-- REVENUE -->
+<div class="panel" id="tab-revenue">
+  <div class="grid-4">
+    <div class="stat-card"><div class="stat-label">REVENUE EVENTS</div><div class="stat-value" id="rTotal">—</div></div>
+    <div class="stat-card"><div class="stat-label">TODAY</div><div class="stat-value green" id="rToday">—</div></div>
+    <div class="stat-card"><div class="stat-label">EST MRR</div><div class="stat-value" id="rMRR">—</div></div>
+    <div class="stat-card"><div class="stat-label">REVENUECAT</div><div class="stat-value" style="font-size:12px;color:#4CBB17;margin-top:8px">CONNECTED</div></div>
+  </div>
+  <div class="section-title" style="margin-top:24px">REVENUE EVENTS</div>
+  <table>
+    <thead><tr><th>TIME</th><th>USER</th><th>EVENT</th><th>PLATFORM</th><th>AMOUNT</th></tr></thead>
+    <tbody id="revenueTable"><tr><td colspan="5" style="text-align:center;color:#333;padding:40px">No revenue events yet</td></tr></tbody>
+  </table>
+</div>
+
+<!-- ADD CONTACT -->
+<div class="panel" id="tab-add">
+  <div class="section-title">ADD NEW CONTACT</div>
+  <div class="form-row">
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">FIRST NAME</label><input type="text" id="fFirstName" placeholder="First name"></div>
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">LAST NAME</label><input type="text" id="fLastName" placeholder="Last name"></div>
+  </div>
+  <div class="form-row">
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">EMAIL</label><input type="email" id="fEmail" placeholder="email@company.com"></div>
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">ORGANIZATION</label><input type="text" id="fOrg" placeholder="Company / publication"></div>
+  </div>
+  <div class="form-row">
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">TYPE</label>
+      <select id="fType">
+        <option value="investor">INVESTOR</option>
+        <option value="journalist">JOURNALIST</option>
+        <option value="partner">PARTNER</option>
+        <option value="influencer">INFLUENCER</option>
+        <option value="user">USER</option>
+      </select>
+    </div>
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">STATUS</label>
+      <select id="fStatus">
+        <option value="new">NEW</option>
+        <option value="contacted">CONTACTED</option>
+        <option value="responded">RESPONDED</option>
+        <option value="meeting">MEETING</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">LINKEDIN</label><input type="text" id="fLinkedin" placeholder="linkedin.com/in/..."></div>
+    <div><label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">INSTAGRAM / TWITTER</label><input type="text" id="fSocial" placeholder="@handle"></div>
+  </div>
+  <label style="font-family:'Space Mono',monospace;font-size:9px;color:#555;letter-spacing:1px">NOTES</label>
+  <textarea id="fNotes" rows="3" placeholder="Context, intro source, conversation notes..."></textarea>
+  <button class="save-btn" onclick="saveContact()">SAVE CONTACT</button>
+  <div id="saveMsg" style="margin-top:8px;font-family:'Space Mono',monospace;font-size:11px;color:#4CBB17"></div>
+</div>
+
+<script>
+const SB = 'https://sbeqrkvxgfymrsqgugqz.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZXFya3Z4Z2Z5bXJzcWd1Z3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQ1MTUsImV4cCI6MjA5MDc5MDUxNX0.UzlVmJc--MJMsDaXtG9TGJahTigc-TD1YVESpsWJCLw';
+const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+let allContacts = [];
+
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => { if(t.textContent.toLowerCase().includes(id)) t.classList.add('active'); });
+}
+
+async function sb(table, params, method='GET', body=null) {
+  const opts = { method, headers: H };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(`${SB}/rest/v1/${table}?${params}`, opts);
+    if (!r.ok) return [];
+    const text = await r.text();
+    return text ? JSON.parse(text) : [];
+  } catch(e) { return []; }
+}
+
+function typeBadge(t) { return `<span class="badge badge-${t}">${t}</span>`; }
+function statusBadge(s) { return `<span class="badge badge-${s||'new'}">${s||'new'}</span>`; }
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  if (m < 1440) return Math.floor(m/60) + 'h ago';
+  return Math.floor(m/1440) + 'd ago';
+}
+
+async function loadAll() {
+  allContacts = await sb('crm_contacts', 'order=created_at.desc&limit=200');
+  const intel = await sb('competitive_intel', 'order=scraped_at.desc&limit=20');
+  const revenue = await sb('revenue_events', 'order=created_at.desc&limit=50');
+
+  // Stats
+  document.getElementById('sTotal').textContent = allContacts.length;
+  document.getElementById('sInvestors').textContent = allContacts.filter(c=>c.type==='investor').length;
+  document.getElementById('sJournalists').textContent = allContacts.filter(c=>c.type==='journalist').length;
+  document.getElementById('sInfluencers').textContent = allContacts.filter(c=>c.type==='influencer').length;
+
+  // Pipeline
+  const statuses = ['new','contacted','responded','meeting','deal','closed'];
+  statuses.forEach(s => {
+    const el = document.getElementById('p' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (el) el.textContent = allContacts.filter(c=>c.status===s).length;
+  });
+
+  // Recent contacts
+  const recent = allContacts.slice(0, 10);
+  if (recent.length === 0) {
+    document.getElementById('recentContacts').innerHTML = '<div class="empty-state">No contacts yet — add your first contact above</div>';
+  } else {
+    document.getElementById('recentContacts').innerHTML = `<table>
+      <thead><tr><th>NAME</th><th>TYPE</th><th>ORG</th><th>STATUS</th><th>ADDED</th></tr></thead>
+      <tbody>${recent.map(c=>`<tr>
+        <td>${(c.first_name||'')+' '+(c.last_name||'')}</td>
+        <td>${typeBadge(c.type)}</td>
+        <td style="color:#555">${c.organization||'—'}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td style="color:#555;font-family:'Space Mono',monospace;font-size:10px">${timeAgo(c.created_at)}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+
+  // Contacts table
+  renderContacts(allContacts);
+
+  // Intel
+  if (intel.length === 0) {
+    document.getElementById('intelFeed').innerHTML = '<div class="empty-state">No intel yet — Raccoon\'s Apify scrapes will appear here automatically</div>';
+  } else {
+    document.getElementById('intelFeed').innerHTML = intel.map(i => `
+      <div class="intel-card">
+        <div>
+          <span class="intel-platform mono ${i.platform==='instagram'?'ig':i.platform==='tiktok'?'tt':'yt'}">${(i.platform||'?').toUpperCase()}</span>
+          ${i.views ? `<div style="font-family:'Space Mono',monospace;font-size:10px;color:#F5841F;margin-top:4px">${Number(i.views).toLocaleString()} views</div>` : ''}
+        </div>
+        <div class="intel-content">
+          <div class="intel-account">@${i.account||'unknown'}</div>
+          <div class="intel-caption">${(i.caption||'').substring(0,120)}${i.caption?.length>120?'...':''}</div>
+          ${i.audio_name ? `<div style="font-size:10px;color:#4CBB17">Audio: ${i.audio_name}</div>` : ''}
+        </div>
+        <div style="text-align:right;font-family:'Space Mono',monospace;font-size:9px;color:#444">${timeAgo(i.scraped_at)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Revenue
+  document.getElementById('rTotal').textContent = revenue.length;
+  document.getElementById('rToday').textContent = revenue.filter(r=>new Date(r.created_at).toDateString()===new Date().toDateString()).length;
+  document.getElementById('rMRR').textContent = '$' + (revenue.filter(r=>r.event_type==='active_subscriber').length * 9.99).toFixed(0);
+
+  if (revenue.length > 0) {
+    document.getElementById('revenueTable').innerHTML = revenue.slice(0,20).map(r=>`<tr>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:#555">${timeAgo(r.created_at)}</td>
+      <td style="font-size:11px">${r.user_id?.substring(0,12)||'—'}</td>
+      <td>${statusBadge(r.event_type)}</td>
+      <td style="color:#555">${r.platform||'—'}</td>
+      <td style="color:#4CBB17;font-family:'Space Mono',monospace">$${r.price_usd||'9.99'}</td>
+    </tr>`).join('');
+  }
+
+  document.getElementById('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+function renderContacts(contacts) {
+  if (contacts.length === 0) {
+    document.getElementById('contactsTable').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#333;padding:40px">No contacts yet</td></tr>';
+    return;
+  }
+  document.getElementById('contactsTable').innerHTML = contacts.map(c=>`<tr>
+    <td>${(c.first_name||'')+' '+(c.last_name||'')}</td>
+    <td>${typeBadge(c.type)}</td>
+    <td style="color:#555">${c.organization||'—'}</td>
+    <td>${statusBadge(c.status)}</td>
+    <td style="color:#555;font-family:'Space Mono',monospace;font-size:10px">${timeAgo(c.last_contacted_at||c.created_at)}</td>
+    <td style="color:#444;font-size:11px">${(c.notes||'').substring(0,60)}</td>
+  </tr>`).join('');
+}
+
+function filterContacts() {
+  const type = document.getElementById('filterType').value;
+  const status = document.getElementById('filterStatus').value;
+  let filtered = allContacts;
+  if (type) filtered = filtered.filter(c=>c.type===type);
+  if (status) filtered = filtered.filter(c=>c.status===status);
+  renderContacts(filtered);
+}
+
+async function saveContact() {
+  const contact = {
+    first_name: document.getElementById('fFirstName').value,
+    last_name: document.getElementById('fLastName').value,
+    email: document.getElementById('fEmail').value,
+    organization: document.getElementById('fOrg').value,
+    type: document.getElementById('fType').value,
+    status: document.getElementById('fStatus').value,
+    linkedin_url: document.getElementById('fLinkedin').value,
+    instagram_handle: document.getElementById('fSocial').value.replace('@',''),
+    notes: document.getElementById('fNotes').value,
+  };
+  const r = await fetch(`${SB}/rest/v1/crm_contacts`, {
+    method: 'POST', headers: { ...H, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(contact)
+  });
+  if (r.ok) {
+    document.getElementById('saveMsg').textContent = 'Contact saved.';
+    setTimeout(() => { document.getElementById('saveMsg').textContent = ''; showTab('contacts'); loadAll(); }, 1500);
+  } else {
+    document.getElementById('saveMsg').style.color = '#FF3B30';
+    document.getElementById('saveMsg').textContent = 'Error saving — check Supabase table exists';
+  }
+}
+
+loadAll();
+setInterval(loadAll, 20000);
+</script>
+</body>
+</html>
