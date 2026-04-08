@@ -603,7 +603,7 @@
       html += '<span class="agent-emoji">' + a.emoji + '</span>';
       html += '<span class="status-indicator"></span>';
       html += '</div>';
-      html += '<div class="agent-name">' + escape(a.name) + '</div>';
+      html += '<div class="agent-name">' + escape(a.node) + '</div>';
       if (currentTask) {
         html += '<div class="agent-task has-task">' + escape(truncate(currentTask, 28)) + '</div>';
       } else if (regStatus) {
@@ -784,8 +784,8 @@
 
   function loadMemory() {
     showLoading('memory-loading');
-    // agent_memory columns: id, agent_id, key, value, created_at, updated_at
-    supaFetch('agent_memory?select=agent_id,key,value,updated_at&order=updated_at.desc&limit=100')
+    // agent_memory columns: id, to_agent, key, value, created_at, updated_at
+    supaFetch('agent_memory?select=to_agent,key,value,updated_at&order=updated_at.desc&limit=100')
       .then(function(rows) {
         hideLoading('memory-loading');
         var container = document.getElementById('memory-container');
@@ -798,7 +798,7 @@
         var agentOrder = [];
         for (var i = 0; i < rows.length; i++) {
           var r = rows[i];
-          var aid = r.agent_id || 'unknown';
+          var aid = r.to_agent || 'unknown';
           if (!byAgent[aid]) { byAgent[aid] = []; agentOrder.push(aid); }
           if (byAgent[aid].length < 10) byAgent[aid].push(r);
         }
@@ -916,7 +916,7 @@
 
   function loadEvents() {
     showLoading('events-loading');
-    supaFetch('agent_events?select=id,created_at,agent_id,event_type,data&order=created_at.desc&limit=50')
+    supaFetch('agent_events?select=id,created_at,to_agent,event_type,data&order=created_at.desc&limit=50')
       .then(function(rows) {
         hideLoading('events-loading');
         if (!Array.isArray(rows)) rows = [];
@@ -951,7 +951,7 @@
           }
           html += '<div class="event-entry' + isNew + '">';
           html += '<div class="ev-time">' + escape(fmtTime(r.created_at)) + '</div>';
-          html += '<div class="ev-agent">' + escape((r.agent_id || '--').toUpperCase()) + '</div>';
+          html += '<div class="ev-agent">' + escape((r.to_agent || '--').toUpperCase()) + '</div>';
           html += '<div class="ev-type">' + escape(r.event_type || '--') + '</div>';
           html += '<div class="ev-data">' + escape(truncate(dataStr, 120)) + '</div>';
           html += '</div>';
@@ -980,3 +980,4 @@
 </script>
 </body>
 </html>
+
