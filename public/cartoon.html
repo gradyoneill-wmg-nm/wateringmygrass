@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATERING MY GRASS — Animated Short</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0C0C0A;color:#E8E8E0;font-family:'Space Mono',monospace;overflow-x:hidden}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;border-bottom:1px solid #1E1E1C;position:relative}
+canvas#hero-canvas{position:absolute;inset:0;z-index:0}
+.hero-content{position:relative;z-index:10}
+.hero-eyebrow{font-size:10px;color:#F5841F;letter-spacing:4px;margin-bottom:20px}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(48px,8vw,96px);color:#fff;margin-bottom:16px;line-height:1.05}
+.hero-sub{font-size:13px;color:#555;letter-spacing:2px;margin-bottom:32px}
+.btn{display:inline-block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;padding:14px 28px;background:#F5841F;color:#000;text-decoration:none;font-weight:700}
+
+/* Characters */
+.characters{padding:80px 40px;max-width:1200px;margin:0 auto}
+.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1E1E1C;margin-top:40px}
+@media(max-width:768px){.char-grid{grid-template-columns:1fr}}
+.char-card{background:#0C0C0A;padding:40px 32px;text-align:center}
+.char-emoji{font-size:80px;margin-bottom:20px;display:block}
+.char-name{font-size:14px;color:#F5841F;letter-spacing:3px;font-weight:700;margin-bottom:8px}
+.char-role{font-size:10px;color:#555;letter-spacing:2px;margin-bottom:16px}
+.char-desc{font-size:13px;color:#888;line-height:1.8;text-align:left}
+.char-gag{margin-top:16px;padding:12px;border:1px solid #F5841F33;background:#F5841F08;font-size:11px;color:#F5841F;text-align:left}
+
+/* Storyboard */
+.storyboard{padding:80px 40px;border-top:1px solid #1E1E1C;max-width:1200px;margin:0 auto}
+.section-label{font-size:9px;color:#555;letter-spacing:4px;margin-bottom:40px}
+.board-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:768px){.board-grid{grid-template-columns:1fr}}
+.frame{border:1px solid #1E1E1C;overflow:hidden}
+.frame-canvas{display:block;width:100%;aspect-ratio:16/9;background:#111}
+.frame-caption{padding:12px;background:#0F0F0D}
+.frame-time{font-size:9px;color:#F5841F;margin-bottom:4px}
+.frame-desc{font-size:11px;color:#888;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">A FREQUENCY FABLE</div>
+    <h1 class="hero-title">Watering<br><em style="color:#F5841F;font-style:italic">My Grass</em></h1>
+    <p class="hero-sub">AN ANIMATED SHORT — 15 MINUTES — WORDLESS</p>
+    <a href="/launch-animation.html" class="btn">WATCH PREVIEW →</a>
+  </div>
+</section>
+
+<!-- CHARACTERS -->
+<section class="characters">
+  <div class="section-label">THE CHARACTERS</div>
+  <div class="char-grid">
+    <div class="char-card">
+      <span class="char-emoji">🐀</span>
+      <div class="char-name">RAT</div>
+      <div class="char-role">THE DREAMER — IN THE CLOUDS</div>
+      <div class="char-desc">Lives on a floating cloud above the city. Always in meditation. Eyes closed. Monk robes, but with a Non Magic app open on a laptop beside him. Visible theta waves ripple from his head in concentric circles.When things go wrong around him, his HRV monitor (strapped to his wrist) keeps going UP. He is the Tom — chaos happens TO him. He doesn't notice.</div>
+      <div class="char-gag">SIGNATURE GAG: Car crashes into him during meditation. He levitates slightly from impact. HRV: still perfect. Opens one eye. Nods approvingly. Closes eye.</div>
+    </div>
+    <div class="char-card">
+      <span class="char-emoji">🦟</span>
+      <div class="char-name">ROCKBIRD</div>
+      <div class="char-role">THE SCIENTIST — IN THE LAB</div>
+      <div class="char-desc">Manic, brilliant, tiny. Lab coat perpetually singed. Goggles pushed up. His entire building IS a tuning fork — it vibrates when he cranks his machines. Walls covered in frequency equations. Clipboard always in hand — he writes down the HRV of everyone nearby. Obsessed with Schumann resonance. His greatest discovery is always ONE more experiment away.</div>
+      <div class="char-gag">SIGNATURE GAG: Cranks frequency machine to 528Hz. A Wall Street banker stumbles in. Exits crying and hugging pigeons. Rockbird: furious scribbling in clipboard. Pure data.</div>
+    </div>
+    <div class="char-card">
+      <span class="char-emoji">🪳</span>
+      <div class="char-name">ROACH</div>
+      <div class="char-role">THE EVERYMAN — WATERING HIS GRASS</div>
+      <div class="char-desc">Just wants to water his tiny patch of grass in the city. That's it. Drags a comically large watering can through the chaos of Rat's serenity and Rockbird's experiments. Gets pulled into everything. Represents the audience — skeptical, curious, eventually convinced by the data. His grass is the moral barometer of the show. It grows when the frequencies are right.</div>
+      <div class="char-gag">SIGNATURE GAG: His grass grows visibly larger every time he passes Rockbird's lab. He never notices why. He just keeps watering.</div>
+    </div>
+  </div>
+</section>
+
+<!-- STORYBOARD -->
+<section class="storyboard">
+  <div class="section-label">STORYBOARD — EPISODE 1</div>
+  <div class="board-grid" id="board"></div>
+</section>
+
+<script>
+// Hero canvas — La Linea style single line
+const hc = document.getElementById('hero-canvas');
+hc.width = window.innerWidth; hc.height = window.innerHeight;
+const hCtx = hc.getContext('2d');
+let t = 0;
+function drawHero() {
+  hCtx.fillStyle = 'rgba(12,12,10,0.06)';
+  hCtx.fillRect(0,0,hc.width,hc.height);
+  // Single continuous line — La Linea style
+  hCtx.strokeStyle = '#F5841F';
+  hCtx.lineWidth = 2;
+  hCtx.beginPath();
+  hCtx.moveTo(0, hc.height * 0.6);
+  for (let x = 0; x <= hc.width; x++) {
+    const wave = Math.sin(x * 0.01 + t) * 30 + Math.sin(x * 0.03 + t * 1.5) * 15;
+    hCtx.lineTo(x, hc.height * 0.6 + wave);
+  }
+  hCtx.stroke();
+  // Particles along the line
+  for (let i = 0; i < 8; i++) {
+    const x = ((t * 60 + i * 150) % hc.width);
+    const wave = Math.sin(x * 0.01 + t) * 30 + Math.sin(x * 0.03 + t * 1.5) * 15;
+    hCtx.beginPath();
+    hCtx.arc(x, hc.height * 0.6 + wave, 3, 0, Math.PI * 2);
+    hCtx.fillStyle = '#F5841F';
+    hCtx.fill();
+  }
+  t += 0.008;
+  requestAnimationFrame(drawHero);
+}
+drawHero();
+
+// Storyboard frames
+const frames = [
+  { time: '0:00', desc: 'WIDE — City at dawn. A floating cloud above the skyline. Rat cross-legged on it. Theta waves ripple outward in concentric circles.', scene: 'morning' },
+  { time: '0:45', desc: 'STREET LEVEL — Roach exits apartment. Drags enormous watering can. Looks up at cloud. Shrugs. Walks toward his grass patch.', scene: 'roach_start' },
+  { time: '1:30', desc: "ROCKBIRD'S LAB — Wall of equations. Giant tuning fork. Rockbird discovers something. Runs to machine. CRANKS IT.", scene: 'lab' },
+  { time: '2:15', desc: '40Hz WAVE — The city vibrates. Pigeons fall asleep mid-flight. A businessman stops screaming. A dog sits in lotus pose.', scene: 'wave_hit' },
+  { time: '3:00', desc: "RAT — Opens one eye. Looks down at city. Nods. Closes eye. His HRV monitor: 94ms. Unchanged.", scene: 'rat_nod' },
+  { time: '4:00', desc: "ROACH'S GRASS — He finally arrives. Starts watering. His can vibrates from 40Hz. Water forms Cymascope patterns. He stares. Shrugs. Waters anyway.", scene: 'cymascope' },
+  { time: '5:30', desc: 'ROCKBIRD APPEARS — Thrusts clipboard at Roach. Points at graph: HRV=43. DEPLORABLE. Drags Roach toward lab.', scene: 'clipboard' },
+  { time: '7:00', desc: 'THE CHAMBER — 528Hz blast. Roach emerges dazed. Watering can has new shape. His grass (somehow present) glows green. HRV: 67ms.', scene: 'chamber' },
+  { time: '9:00', desc: 'RAT DESCENDS — Floats down on column of theta waves. Sits in intersection. Cars swerve around him. All drivers somehow calm.', scene: 'intersection' },
+  { time: '11:00', desc: 'MACHINE MALFUNCTIONS — ALL FREQUENCIES SIMULTANEOUS. City: mass meditation. Plants grow visibly. One pigeon achieves enlightenment. Glows.', scene: 'malfunction' },
+  { time: '13:00', desc: "RAT STANDS — Walks to machine. Presses ONE button. 7.83Hz Schumann hum fills city. Everyone exhales. Roach's grass: enormous.", scene: 'reset' },
+  { time: '14:30', desc: "FINAL SHOT — Rat in cloud. Rockbird scribbling. Roach watering his now-magnificent lawn. FREEZE. 'WATERING MY GRASS'", scene: 'final' },
+];
+
+const board = document.getElementById('board');
+frames.forEach(f => {
+  const frameEl = document.createElement('div');
+  frameEl.className = 'frame';
+  const canvas = document.createElement('canvas');
+  canvas.className = 'frame-canvas';
+  canvas.width = 320; canvas.height = 180;
+  frameEl.appendChild(canvas);
+  const cap = document.createElement('div');
+  cap.className = 'frame-caption';
+  cap.innerHTML = `<div class="frame-time">${f.time}</div><div class="frame-desc">${f.desc}</div>`;
+  frameEl.appendChild(cap);
+  board.appendChild(frameEl);
+  // Draw frame sketch
+  const c = canvas.getContext('2d');
+  c.fillStyle = '#0A0A08';
+  c.fillRect(0,0,320,180);
+  // Simple scene sketch
+  drawFrame(c, f.scene, 320, 180);
+});
+
+function drawFrame(c, scene, w, h) {
+  c.strokeStyle = '#333';
+  c.lineWidth = 1;
+  // Ground line
+  c.beginPath(); c.moveTo(0, h*0.7); c.lineTo(w, h*0.7); c.stroke();
+  // Sky
+  c.fillStyle = '#0F0E0B';
+  c.fillRect(0, 0, w, h*0.7);
+
+  if (scene === 'morning' || scene === 'rat_nod') {
+    // Cloud with figure
+    c.strokeStyle = '#F5841F44';
+    c.beginPath(); c.arc(w*0.5, h*0.25, 30, 0, Math.PI*2); c.stroke();
+    c.strokeStyle = '#F5841F';
+    c.lineWidth = 1.5;
+    // Concentric waves
+    for(let i=1;i<=3;i++){c.beginPath();c.arc(w*0.5,h*0.25,30+i*15,0,Math.PI*2);c.globalAlpha=0.3/i;c.stroke()}
+    c.globalAlpha = 1;
+    // Rat figure
+    c.fillStyle = '#F5841F';
+    c.beginPath(); c.arc(w*0.5, h*0.22, 4, 0, Math.PI*2); c.fill();
+  }
+  if (scene === 'lab') {
+    // Tuning fork
+    c.strokeStyle = '#4499FF';
+    c.lineWidth = 2;
+    c.beginPath(); c.moveTo(w*0.4, h*0.7); c.lineTo(w*0.4, h*0.3); c.moveTo(w*0.4,h*0.3);c.lineTo(w*0.35,h*0.15);c.moveTo(w*0.4,h*0.3);c.lineTo(w*0.45,h*0.15); c.stroke();
+    // Wave lines
+    for(let i=0;i<4;i++){c.strokeStyle='rgba(68,153,255,0.3)';c.beginPath();c.moveTo(w*0.5,h*0.3+i*12);c.quadraticCurveTo(w*0.65,h*0.25+i*12,w*0.8,h*0.3+i*12);c.stroke();}
+  }
+  if (scene === 'wave_hit') {
+    // Multiple waves
+    const cols = ['#F5841F','#4CBB17','#CC44FF'];
+    cols.forEach((col,i) => {
+      c.strokeStyle = col; c.lineWidth = 1; c.globalAlpha = 0.6;
+      c.beginPath(); c.moveTo(0, h*(0.3+i*0.1));
+      for(let x=0;x<w;x++) c.lineTo(x, h*(0.3+i*0.1)+Math.sin(x*0.1+i)*12);
+      c.stroke();
+    });
+    c.globalAlpha = 1;
+  }
+  if (scene === 'cymascope') {
+    // Cymascope water pattern
+    c.strokeStyle = '#4CBB17';
+    for(let r=1;r<=5;r++){c.beginPath();c.arc(w*0.5,h*0.85,r*6,0,Math.PI*2);c.globalAlpha=0.3;c.stroke()}
+    c.globalAlpha=1;
+  }
+  if (scene === 'malfunction') {
+    // Chaos — multiple freq lines, glowing
+    for(let i=0;i<6;i++){
+      c.strokeStyle=['#F5841F','#4CBB17','#CC44FF','#4499FF','#FFD60A','#FF3B30'][i];
+      c.lineWidth=1.5; c.globalAlpha=0.7;
+      c.beginPath(); c.moveTo(0,h*0.1+i*h*0.12);
+      for(let x=0;x<w;x++) c.lineTo(x,h*0.1+i*h*0.12+Math.sin(x*0.05*(i+1))*20);
+      c.stroke();
+    }
+    c.globalAlpha=1;
+  }
+  if (scene === 'reset') {
+    // Single perfect sine wave — Schumann
+    c.strokeStyle = '#F5841F';
+    c.lineWidth = 2;
+    c.beginPath(); c.moveTo(0, h*0.5);
+    for(let x=0;x<w;x++) c.lineTo(x, h*0.5+Math.sin(x*0.04)*25);
+    c.stroke();
+  }
+  if (scene === 'final') {
+    // Three figures
+    c.fillStyle = '#F5841F';
+    c.beginPath(); c.arc(w*0.25,h*0.3,5,0,Math.PI*2); c.fill(); // Rat cloud
+    c.fillStyle = '#4499FF';
+    c.beginPath(); c.arc(w*0.75,h*0.55,4,0,Math.PI*2); c.fill(); // Rockbird
+    c.fillStyle = '#4CBB17';
+    c.beginPath(); c.arc(w*0.5,h*0.65,4,0,Math.PI*2); c.fill(); // Roach
+    // Big grass
+    c.strokeStyle = '#4CBB17'; c.lineWidth=1;
+    for(let i=0;i<8;i++){c.beginPath();c.moveTo(w*0.35+i*12,h*0.7);c.lineTo(w*0.35+i*12+4,h*0.55);c.stroke()}
+  }
+}
+</script>
+</body>
+</html>
