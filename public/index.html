@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watering My Grass — Frequency Science Publication</title>
+<meta name="description" content="A publication about frequency science, evidence-based meditation, and consciousness research. From the team behind Non Magic.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0C0C0A;--orange:#F5841F;--green:#4CBB17;--border:#1E1E1C;--text:#E8E8E0;--muted:#666}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;cursor:none;overflow-x:hidden}
+canvas{position:fixed;top:0;left:0;z-index:0;pointer-events:none}
+
+/* Custom cursor */
+#cursor{position:fixed;width:8px;height:8px;background:var(--orange);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:all 0.1s;mix-blend-mode:difference}
+#cursor.hovering{width:32px;height:32px;background:transparent;border:1px solid var(--orange)}
+
+/* Grain overlay */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:8000;opacity:0.35}
+
+/* Layout */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:20px 40px;border-bottom:1px solid transparent;transition:all 0.3s}
+nav.scrolled{background:var(--bg)cc;border-bottom-color:var(--border);backdrop-filter:blur(8px)}
+.nav-logo{font-family:'Space Mono',monospace;font-size:13px;color:var(--orange);letter-spacing:3px;font-weight:700;text-decoration:none}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-decoration:none;transition:color 0.2s}
+.nav-links a:hover{color:var(--orange)}
+
+/* Hero */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 40px;padding-top:80px}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);letter-spacing:3px;margin-bottom:24px;opacity:0;transform:translateY(20px);animation:fadeUp 0.8s 0.3s forwards}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(48px,8vw,96px);line-height:1.05;color:#fff;margin-bottom:24px;opacity:0;animation:fadeUp 0.8s 0.5s forwards}
+.hero-title em{color:var(--orange);font-style:normal}
+.hero-sub{font-size:16px;color:var(--muted);max-width:520px;line-height:1.7;margin-bottom:40px;opacity:0;animation:fadeUp 0.8s 0.7s forwards}
+.hero-cta{display:flex;gap:16px;opacity:0;animation:fadeUp 0.8s 0.9s forwards;flex-wrap:wrap}
+.btn-primary{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;background:var(--orange);color:#000;padding:14px 28px;border:none;cursor:pointer;font-weight:700;transition:transform 0.2s;text-decoration:none;display:inline-block}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-ghost{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;background:none;color:var(--text);padding:14px 28px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block}
+.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.event-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--orange);padding:8px 16px;margin-bottom:24px;opacity:0;animation:fadeUp 0.8s 0.2s forwards}
+.event-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+.event-text{font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+
+/* Ticker */
+.ticker{position:relative;z-index:10;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;padding:12px 0;background:var(--bg)}
+.ticker-inner{display:flex;gap:60px;animation:ticker 30s linear infinite;white-space:nowrap}
+.ticker-item{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;flex-shrink:0}
+.ticker-item span{color:var(--orange)}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* Articles */
+.articles{position:relative;z-index:10;padding:80px 40px;max-width:1200px;margin:0 auto}
+.section-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:3px;margin-bottom:40px;display:flex;align-items:center;gap:16px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.article-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+@media(max-width:768px){.article-grid{grid-template-columns:1fr}.nav-links{display:none}.hero{padding:0 24px;padding-top:80px}}
+.article-card{background:var(--bg);padding:32px;cursor:pointer;transition:background 0.2s}
+.article-card:hover{background:#111}
+.article-tag{font-family:'Space Mono',monospace;font-size:8px;color:var(--orange);letter-spacing:2px;margin-bottom:12px}
+.article-title{font-family:'Playfair Display',serif;font-size:22px;color:#fff;line-height:1.3;margin-bottom:12px}
+.article-excerpt{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.article-meta{font-family:'Space Mono',monospace;font-size:9px;color:#444;letter-spacing:1px}
+.article-arrow{font-family:'Space Mono',monospace;font-size:11px;color:var(--border);transition:color 0.2s}
+.article-card:hover .article-arrow{color:var(--orange)}
+.article-card.featured{grid-column:span 2;display:flex;gap:0;background:var(--bg)}
+@media(max-width:768px){.article-card.featured{grid-column:span 1;flex-direction:column}}
+.article-card.featured .article-content{padding:40px}
+.article-card.featured .article-title{font-size:32px}
+.article-visual{flex:1;background:linear-gradient(135deg,#1a0e00,#0C0C0A);display:flex;align-items:center;justify-content:center;min-height:280px}
+.article-hz{font-family:'Space Mono',monospace;font-size:64px;color:var(--orange);opacity:0.3;font-weight:700}
+
+/* April 18 section */
+.april-section{position:relative;z-index:10;padding:80px 40px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden}
+.april-content{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:768px){.april-content{grid-template-columns:1fr}}
+.april-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:3px;margin-bottom:16px}
+.april-title{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,56px);color:#fff;line-height:1.1;margin-bottom:20px}
+.april-text{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:32px}
+.countdown{display:flex;gap:24px}
+.count-block{text-align:center}
+.count-num{font-family:'Space Mono',monospace;font-size:48px;color:var(--orange);font-weight:700;line-height:1}
+.count-label{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-top:4px}
+
+/* Footer */
+footer{position:relative;z-index:10;padding:40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Space Mono',monospace;font-size:11px;color:var(--orange);letter-spacing:3px}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-decoration:none;transition:color 0.2s}
+.footer-links a:hover{color:var(--orange)}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<canvas id="c"></canvas>
+
+<nav id="nav">
+  <a href="/" class="nav-logo">WATERING MY GRASS</a>
+  <ul class="nav-links">
+    <li><a href="#articles">RESEARCH</a></li>
+    <li><a href="#april18">APRIL 18</a></li>
+    <li><a href="https://nonmagic.com" target="_blank">NON MAGIC APP</a></li>
+    <li><a href="/agents">COMMAND</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="event-pill">
+    <div class="event-dot"></div>
+    <span class="event-text" id="eventPill">APRIL 18 — GLOBAL MEDITATION — 2PM ET</span>
+  </div>
+  <div class="hero-eyebrow">A PUBLICATION ABOUT FREQUENCY SCIENCE</div>
+  <h1 class="hero-title">The nervous system<br>has a <em>frequency.</em><br>We found it.</h1>
+  <p class="hero-sub">Evidence-based research on 40Hz gamma, Schumann resonance, HRV optimization, and the intersection of neuroscience and ancient practice.</p>
+  <div class="hero-cta">
+    <a href="https://nonmagic.com" class="btn-primary" target="_blank">DOWNLOAD NON MAGIC</a>
+    <a href="#articles" class="btn-ghost">READ THE RESEARCH</a>
+  </div>
+</section>
+
+<div class="ticker">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item"><span>40Hz</span> GAMMA — MIT IACCARINO 2016</span>
+    <span class="ticker-item"><span>7.83Hz</span> SCHUMANN RESONANCE — EARTH FREQUENCY</span>
+    <span class="ticker-item"><span>528Hz</span> SOLFEGGIO — DNA REPAIR RESEARCH</span>
+    <span class="ticker-item"><span>+23ms</span> HRV IMPROVEMENT — AVERAGE USER</span>
+    <span class="ticker-item"><span>APRIL 18</span> GLOBAL SYNCHRONIZED SESSION</span>
+    <span class="ticker-item"><span>STANFORD 2023</span> PHYSIOLOGICAL SIGH STUDY</span>
+    <span class="ticker-item"><span>WIM HOF</span> KOXETAL 2014 — IMMUNE ACTIVATION</span>
+    <span class="ticker-item"><span>40Hz</span> GAMMA — MIT IACCARINO 2016</span>
+    <span class="ticker-item"><span>7.83Hz</span> SCHUMANN RESONANCE — EARTH FREQUENCY</span>
+    <span class="ticker-item"><span>528Hz</span> SOLFEGGIO — DNA REPAIR RESEARCH</span>
+    <span class="ticker-item"><span>+23ms</span> HRV IMPROVEMENT — AVERAGE USER</span>
+    <span class="ticker-item"><span>APRIL 18</span> GLOBAL SYNCHRONIZED SESSION</span>
+    <span class="ticker-item"><span>STANFORD 2023</span> PHYSIOLOGICAL SIGH STUDY</span>
+    <span class="ticker-item"><span>WIM HOF</span> KOXETAL 2014 — IMMUNE ACTIVATION</span>
+  </div>
+</div>
+
+<section class="articles" id="articles">
+  <div class="section-label">FEATURED RESEARCH</div>
+  <div class="article-grid">
+    <div class="article-card featured" onclick="window.open('https://news.mit.edu/2024/evidence-gamma-rhythm-stimulation-can-treat-neurological-disorders-emerging-0118','_blank')">
+      <div class="article-visual"><div class="article-hz">40Hz</div></div>
+      <div class="article-content">
+        <div class="article-tag">NEUROSCIENCE · MIT</div>
+        <div class="article-title">The 40Hz Question: What MIT Found After 10 Years of Gamma Research</div>
+        <p class="article-excerpt">A decade after scientists at the Picower Institute first tested 40Hz sensory stimulation, a growing body of evidence supports its role in brain health. Here is what the research actually shows.</p>
+        <div class="article-meta">MIT NEWS · 2024 · 8 MIN READ</div>
+        <div class="article-arrow" style="margin-top:16px">READ ?</div>
+      </div>
+    </div>
+    <div class="article-card">
+      <div class="article-tag">EARTH SCIENCE</div>
+      <div class="article-title">The Schumann Resonance: Why the Earth Hums at 7.83Hz</div>
+      <p class="article-excerpt">In 1952, physicist Winfried Schumann calculated the resonant frequency of the cavity between Earth's surface and the ionosphere. The number was 7.83Hz. This is what it means for meditation.</p>
+      <div class="article-meta">WATERING MY GRASS · APR 2026</div>
+      <div class="article-arrow">READ ?</div>
+    </div>
+    <div class="article-card">
+      <div class="article-tag">HRV SCIENCE</div>
+      <div class="article-title">Heart Rate Variability: The Most Important Number You Are Not Tracking</div>
+      <p class="article-excerpt">HRV measures the variation in time between heartbeats. It is a direct window into your autonomic nervous system. Elite athletes and biohackers have known this for years. Here is the science.</p>
+      <div class="article-meta">WATERING MY GRASS · APR 2026</div>
+      <div class="article-arrow">READ ?</div>
+    </div>
+    <div class="article-card">
+      <div class="article-tag">BREATHWORK</div>
+      <div class="article-title">The Stanford Study That Changed How We Think About Breathing</div>
+      <p class="article-excerpt">In 2023, researchers at Stanford published a study comparing cyclic sighing, box breathing, and mindfulness meditation. The results were definitive. One technique won on every metric.</p>
+      <div class="article-meta">CELL REPORTS MEDICINE · 2023</div>
+      <div class="article-arrow">READ ?</div>
+    </div>
+    <div class="article-card">
+      <div class="article-tag">SOLFEGGIO</div>
+      <div class="article-title">528Hz and the DNA Repair Hypothesis: What the Research Actually Says</div>
+      <p class="article-excerpt">The claim that 528Hz repairs DNA is everywhere. But what does the actual research show? We went through every published study. The answer is more nuanced than either camp wants to admit.</p>
+      <div class="article-meta">WATERING MY GRASS · APR 2026</div>
+      <div class="article-arrow">READ ?</div>
+    </div>
+    <div class="article-card">
+      <div class="article-tag">WIM HOF</div>
+      <div class="article-title">Kox et al. 2014: The Study That Proved Voluntary Immune Control</div>
+      <p class="article-excerpt">Published in PNAS, this study showed that trained practitioners could voluntarily influence their immune response through breathwork and cold exposure. The mechanism was adrenaline release.</p>
+      <div class="article-meta">PNAS · 2014 · 6 MIN READ</div>
+      <div class="article-arrow">READ ?</div>
+    </div>
+  </div>
+</section>
+
+<section class="april-section" id="april18">
+  <div class="april-content">
+    <div>
+      <div class="april-label">APRIL 18, 2026 — 2PM ET</div>
+      <h2 class="april-title">The First Global Synchronized Frequency Meditation</h2>
+      <p class="april-text">We are going to meditate at 40Hz. Together. At the same time. The research says synchronized group meditation amplifies individual outcomes. We are about to find out if that is true with thousands of people at once.</p>
+      <a href="https://nonmagic.com" class="btn-primary" target="_blank">JOIN VIA NON MAGIC APP</a>
+    </div>
+    <div>
+      <div class="countdown" id="countdown">
+        <div class="count-block"><div class="count-num" id="cDays">10</div><div class="count-label">DAYS</div></div>
+        <div class="count-block"><div class="count-num" id="cHours">00</div><div class="count-label">HOURS</div></div>
+        <div class="count-block"><div class="count-num" id="cMins">00</div><div class="count-label">MINS</div></div>
+        <div class="count-block"><div class="count-num" id="cSecs">00</div><div class="count-label">SECS</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">WATERING MY GRASS</div>
+  <div class="footer-links">
+    <a href="/privacy.html">Privacy</a>
+    <a href="https://nonmagic.com" target="_blank">Non Magic App</a>
+    <a href="/agents">Command</a>
+    <a href="/crm">CRM</a>
+  </div>
+  <div style="font-family:'Space Mono',monospace;font-size:9px;color:#333">NOT MAGIC. SCIENCE.</div>
+</footer>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a,button,.article-card').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+});
+
+// Scroll nav
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Particle canvas
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+const pts = Array.from({length:80}, () => ({
+  x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+  vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4,
+  size: 1+Math.random()*2,
+}));
+
+let mouseX = canvas.width/2, mouseY = canvas.height/2;
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+function drawParticles() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    const dx = mouseX - p.x, dy = mouseY - p.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist < 120) {
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(245,132,31,' + (1-dist/120)*0.3 + ')';
+      ctx.lineWidth = 0.5;
+      ctx.moveTo(p.x,p.y);
+      ctx.lineTo(mouseX,mouseY);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle = dist < 120 ? 'rgba(245,132,31,0.8)' : 'rgba(245,132,31,0.25)';
+    ctx.fill();
+  });
+  // Connect nearby particles
+  for (let i=0;i<pts.length;i++) for (let j=i+1;j<pts.length;j++) {
+    const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+    if (d<80) {
+      ctx.beginPath();
+      ctx.strokeStyle='rgba(245,132,31,'+(1-d/80)*0.08+')';
+      ctx.lineWidth=0.5;
+      ctx.moveTo(pts[i].x,pts[i].y);
+      ctx.lineTo(pts[j].x,pts[j].y);
+      ctx.stroke();
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// Countdown
+function updateCountdown() {
+  const target = new Date('2026-04-18T14:00:00-04:00').getTime();
+  const now = Date.now();
+  const diff = Math.max(0, target - now);
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor((diff%86400000)/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  const s = Math.floor((diff%60000)/1000);
+  document.getElementById('cDays').textContent = String(d).padStart(2,'0');
+  document.getElementById('cHours').textContent = String(h).padStart(2,'0');
+  document.getElementById('cMins').textContent = String(m).padStart(2,'0');
+  document.getElementById('cSecs').textContent = String(s).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
