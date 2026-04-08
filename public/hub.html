@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NON MAGIC // HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0C0C0A; color: #E8E8E0; font-family: 'Inter', sans-serif; min-height: 100vh; }
+header { display:flex; align-items:center; justify-content:space-between; padding:20px 32px; border-bottom:1px solid #1E1E1C; }
+.logo { font-family:'Space Mono',monospace; font-size:16px; color:#F5841F; letter-spacing:3px; font-weight:700; }
+.status { font-family:'Space Mono',monospace; font-size:10px; color:#4CBB17; letter-spacing:2px; display:flex; align-items:center; gap:8px; }
+.dot { width:6px; height:6px; border-radius:50%; background:#4CBB17; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:#1E1E1C; padding:0; }
+@media(max-width:768px){.grid{grid-template-columns:1fr;}}
+.card { background:#0C0C0A; padding:32px; cursor:pointer; transition:background 0.15s; text-decoration:none; display:block; }
+.card:hover { background:#111; }
+.card-icon { font-size:32px; margin-bottom:16px; }
+.card-title { font-family:'Space Mono',monospace; font-size:14px; color:#fff; letter-spacing:2px; margin-bottom:8px; font-weight:700; }
+.card-desc { font-size:13px; color:#555; line-height:1.6; margin-bottom:16px; }
+.card-tags { display:flex; gap:6px; flex-wrap:wrap; }
+.tag { font-family:'Space Mono',monospace; font-size:9px; padding:3px 8px; border:1px solid; letter-spacing:1px; }
+.tag-orange { color:#F5841F; border-color:#F5841F44; background:#F5841F11; }
+.tag-green { color:#4CBB17; border-color:#4CBB1744; background:#4CBB1711; }
+.tag-blue { color:#4499FF; border-color:#4499FF44; background:#4499FF11; }
+.tag-purple { color:#CC44FF; border-color:#CC44FF44; background:#CC44FF11; }
+.card-arrow { font-family:'Space Mono',monospace; font-size:11px; color:#333; margin-top:16px; }
+.card:hover .card-arrow { color:#F5841F; }
+.section-header { grid-column:span 3; padding:20px 32px 12px; background:#0C0C0A; border-bottom:1px solid #111; }
+@media(max-width:768px){.section-header{grid-column:span 1;}}
+.section-label { font-family:'Space Mono',monospace; font-size:9px; color:#444; letter-spacing:3px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">NON MAGIC // COMMAND HUB</div>
+  <div class="status"><div class="dot"></div>ALL SYSTEMS LIVE</div>
+</header>
+
+<div class="grid">
+
+  <!-- SECTION: DASHBOARDS -->
+  <div class="section-header">
+    <div class="section-label">DASHBOARDS</div>
+  </div>
+
+  <a class="card" href="/command.html">
+    <div class="card-icon">🎛</div>
+    <div class="card-title">COMMAND CENTER</div>
+    <div class="card-desc">All agent tasks live. Who's doing what right now. Task queue, failures, completions. Auto-refreshes every 15 seconds.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">LIVE</span>
+      <span class="tag tag-green">AUTO-REFRESH</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="/crm.html">
+    <div class="card-icon">👥</div>
+    <div class="card-title">CRM</div>
+    <div class="card-desc">Investors, journalists, partners, influencers. Pipeline stages. Revenue events. Apify social intel feed. Add contacts directly.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">INVESTORS</span>
+      <span class="tag tag-blue">PRESS</span>
+      <span class="tag tag-purple">INFLUENCERS</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="/mission-control.html">
+    <div class="card-icon">📡</div>
+    <div class="card-title">MISSION CONTROL</div>
+    <div class="card-desc">Deep agent registry view. All 12 agents, last heartbeat, current task, capabilities. System health check.</div>
+    <div class="card-tags">
+      <span class="tag tag-green">12 AGENTS</span>
+      <span class="tag tag-orange">SUPABASE LIVE</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <!-- SECTION: APP -->
+  <div class="section-header">
+    <div class="section-label">APP BUILD</div>
+  </div>
+
+  <a class="card" href="https://expo.dev/accounts/gradyoneill/projects/nonmagic/builds" target="_blank">
+    <div class="card-icon">📱</div>
+    <div class="card-title">EAS BUILD STATUS</div>
+    <div class="card-desc">Latest iOS build. Check if passed or failed. Install directly to iPhone from this page. App Store submission status.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">EXPO EAS</span>
+      <span class="tag tag-blue">APRIL 10 DEADLINE</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="https://github.com/gradyoneill-wmg-nm/nonmagic.app/commits/main" target="_blank">
+    <div class="card-icon">💻</div>
+    <div class="card-title">GITHUB COMMITS</div>
+    <div class="card-desc">Every commit Rat pushes. Matrix engine, visualizers, databases, UI screens. Live code history.</div>
+    <div class="card-tags">
+      <span class="tag tag-green">LIVE COMMITS</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="https://supabase.com/dashboard/project/sbeqrkvxgfymrsqgugqz/editor" target="_blank">
+    <div class="card-icon">🗄</div>
+    <div class="card-title">SUPABASE DATABASE</div>
+    <div class="card-desc">All tables. Agent tasks, CRM contacts, revenue events, app sessions, community posts. Run any SQL query.</div>
+    <div class="card-tags">
+      <span class="tag tag-green">LIVE DATA</span>
+      <span class="tag tag-blue">SQL EDITOR</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <!-- SECTION: CONTENT -->
+  <div class="section-header">
+    <div class="section-label">CONTENT MACHINE</div>
+  </div>
+
+  <a class="card" href="https://supabase.com/dashboard/project/sbeqrkvxgfymrsqgugqz/editor?query=select+*+from+agent_tasks+where+namespace+%3D+%27content_cron%27+order+by+created_at+desc+limit+20" target="_blank">
+    <div class="card-icon">⚙️</div>
+    <div class="card-title">CONTENT CRON JOBS</div>
+    <div class="card-desc">30-minute loops. Raccoon scraping → Reign writing → Rove producing. See live status of all 10 content cycles.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">30 MIN CYCLES</span>
+      <span class="tag tag-green">50 POSTS/DAY</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="https://supabase.com/dashboard/project/sbeqrkvxgfymrsqgugqz/editor?query=select+to_agent%2C+task_type%2C+status%2C+created_at+from+agent_tasks+where+namespace+%3D+%27content%27+order+by+created_at+desc+limit+50" target="_blank">
+    <div class="card-icon">📝</div>
+    <div class="card-title">SCRIPTS QUEUE</div>
+    <div class="card-desc">All 100+ scripts Reign is writing. Day-by-day for both accounts. See what's written, what's pending, what's produced.</div>
+    <div class="card-tags">
+      <span class="tag tag-purple">100+ SCRIPTS</span>
+      <span class="tag tag-orange">APRIL 9-18</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="https://apify.com/actors/runs" target="_blank">
+    <div class="card-icon">🕷</div>
+    <div class="card-title">APIFY SCRAPERS</div>
+    <div class="card-desc">TikTok, Instagram, YouTube Shorts scraping runs. Trending audio, competitor analysis, influencer discovery. Real-time.</div>
+    <div class="card-tags">
+      <span class="tag tag-blue">APIFY LIVE</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <!-- SECTION: ANALYTICS -->
+  <div class="section-header">
+    <div class="section-label">ANALYTICS</div>
+  </div>
+
+  <a class="card" href="https://app.posthog.com" target="_blank">
+    <div class="card-icon">📊</div>
+    <div class="card-title">POSTHOG ANALYTICS</div>
+    <div class="card-desc">App user analytics. Session funnels, retention, feature usage, HRV improvement tracking per user cohort.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">USER ANALYTICS</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="https://app.revenuecat.com" target="_blank">
+    <div class="card-icon">💰</div>
+    <div class="card-title">REVENUECAT</div>
+    <div class="card-desc">Subscriptions, MRR, churn, trial conversions. $9.99/mo · $59.99/yr · $149 lifetime. Real revenue dashboard.</div>
+    <div class="card-tags">
+      <span class="tag tag-green">REVENUE</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="https://app.apollio.io" target="_blank">
+    <div class="card-icon">🚀</div>
+    <div class="card-title">APOLLO.IO CRM</div>
+    <div class="card-desc">3 API keys active: investor outreach, partnership, journalism. Contact enrichment, sequences, email tracking.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">3 KEYS ACTIVE</span>
+      <span class="tag tag-blue">INVESTORS + PRESS</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <!-- SECTION: DESIGN -->
+  <div class="section-header">
+    <div class="section-label">DESIGN</div>
+  </div>
+
+  <a class="card" href="https://www.figma.com/design/jXeQ9Bmt4KqNiDL8vrx2rD/" target="_blank">
+    <div class="card-icon">🎨</div>
+    <div class="card-title">FIGMA — NON MAGIC</div>
+    <div class="card-desc">Wren's design system. All app screens. Component library. Auto-updates as code ships via GitHub Action sync.</div>
+    <div class="card-tags">
+      <span class="tag tag-purple">WREN LIVE</span>
+      <span class="tag tag-green">AUTO-SYNC</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="/ui-concept-C.html">
+    <div class="card-icon">🌐</div>
+    <div class="card-title">WMG SITE CONCEPTS</div>
+    <div class="card-desc">12 UI battle concepts. A through L. Particle universe, editorial brutalism, La Linea, Snowman watercolor, Endel ambient.</div>
+    <div class="card-tags">
+      <span class="tag tag-orange">12 CONCEPTS</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+  <a class="card" href="/app-preview.html">
+    <div class="card-icon">📲</div>
+    <div class="card-title">APP SCREEN PREVIEW</div>
+    <div class="card-desc">Every app screen rendered in iPhone frames. Click to expand. Updates as Rat ships new screens.</div>
+    <div class="card-tags">
+      <span class="tag tag-green">LIVE PREVIEW</span>
+    </div>
+    <div class="card-arrow">OPEN →</div>
+  </a>
+
+</div>
+
+<div style="padding:24px 32px;border-top:1px solid #1E1E1C;font-family:'Space Mono',monospace;font-size:9px;color:#333;display:flex;justify-content:space-between;">
+  <span>NON MAGIC COMMAND HUB</span>
+  <span id="ts">--</span>
+</div>
+<script>document.getElementById('ts').textContent = new Date().toLocaleString('en-US',{timeZone:'America/New_York'}) + ' ET';</script>
+</body>
+</html>
