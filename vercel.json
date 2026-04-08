@@ -1,3 +1,8 @@
 {
-  "framework": "nextjs"
+  "rewrites": [
+    { "source": "/hub", "destination": "/hub.html" },
+    { "source": "/command", "destination": "/command.html" },
+    { "source": "/crm", "destination": "/crm.html" },
+    { "source": "/mission-control", "destination": "/mission-control.html" }
+  ]
 }
