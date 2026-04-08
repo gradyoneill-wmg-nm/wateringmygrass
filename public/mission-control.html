@@ -33,7 +33,6 @@
     position: relative;
   }
 
-  /* grain overlay */
   body::before {
     content: '';
     position: fixed;
@@ -45,18 +44,11 @@
     opacity: 0.35;
   }
 
-  /* scanline effect */
   body::after {
     content: '';
     position: fixed;
     inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
     pointer-events: none;
     z-index: 9998;
   }
@@ -73,11 +65,7 @@
     z-index: 100;
   }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
 
   .logo {
     font-size: 11px;
@@ -86,10 +74,7 @@
     color: var(--orange);
     text-transform: uppercase;
   }
-
-  .logo span {
-    color: var(--muted);
-  }
+  .logo span { color: var(--muted); }
 
   .header-status {
     display: flex;
@@ -101,30 +86,17 @@
   }
 
   .pulse-dot {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--green);
     animation: pulse 2s infinite;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  .clock {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-  }
+  .clock { font-size: 11px; color: var(--muted); letter-spacing: 0.12em; }
 
-  .main {
-    padding: 16px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+  .main { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
 
   .section-label {
     font-size: 9px;
@@ -136,14 +108,7 @@
     align-items: center;
     gap: 8px;
   }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
   .section-label .refresh-badge {
     font-size: 8px;
     color: var(--dim);
@@ -153,16 +118,13 @@
     letter-spacing: 0.1em;
   }
 
-  /* AGENT STATUS ROW */
+  /* AGENT STATUS */
   .agents-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 8px;
   }
-
-  @media (max-width: 1100px) {
-    .agents-grid { grid-template-columns: repeat(3, 1fr); }
-  }
+  @media (max-width: 1100px) { .agents-grid { grid-template-columns: repeat(3, 1fr); } }
 
   .agent-card {
     background: var(--bg2);
@@ -172,7 +134,6 @@
     overflow: hidden;
     transition: border-color 0.2s;
   }
-
   .agent-card::before {
     content: '';
     position: absolute;
@@ -181,7 +142,6 @@
     background: var(--dim);
     transition: background 0.3s;
   }
-
   .agent-card.status-active::before { background: var(--green); }
   .agent-card.status-warm::before { background: var(--yellow); }
   .agent-card.status-stale::before { background: var(--red); }
@@ -192,73 +152,19 @@
     justify-content: space-between;
     margin-bottom: 10px;
   }
+  .agent-emoji { font-size: 18px; line-height: 1; }
+  .status-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+  .status-active .status-indicator { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+  .status-warm .status-indicator { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse 3s infinite; }
+  .status-stale .status-indicator { background: var(--red); }
 
-  .agent-emoji {
-    font-size: 18px;
-    line-height: 1;
-  }
+  .agent-name { font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }
+  .agent-task { font-size: 9px; color: var(--muted); letter-spacing: 0.05em; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-bottom: 6px; }
+  .agent-task.has-task { color: var(--orange); }
+  .agent-time { font-size: 8px; color: var(--dim); letter-spacing: 0.08em; }
 
-  .status-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--dim);
-  }
-
-  .status-active .status-indicator {
-    background: var(--green);
-    box-shadow: 0 0 6px var(--green);
-    animation: pulse 2s infinite;
-  }
-
-  .status-warm .status-indicator {
-    background: var(--yellow);
-    box-shadow: 0 0 6px var(--yellow);
-    animation: pulse 3s infinite;
-  }
-
-  .status-stale .status-indicator {
-    background: var(--red);
-  }
-
-  .agent-name {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .agent-task {
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    line-height: 1.5;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    margin-bottom: 6px;
-  }
-
-  .agent-task.has-task {
-    color: var(--orange);
-  }
-
-  .agent-time {
-    font-size: 8px;
-    color: var(--dim);
-    letter-spacing: 0.08em;
-  }
-
-  /* TASKS FEED */
-  .tasks-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px;
-  }
-
+  /* TASKS TABLE */
+  .tasks-table { width: 100%; border-collapse: collapse; font-size: 10px; }
   .tasks-table th {
     text-align: left;
     padding: 6px 10px;
@@ -269,16 +175,8 @@
     text-transform: uppercase;
     font-weight: 400;
   }
-
-  .tasks-table td {
-    padding: 7px 10px;
-    border-bottom: 1px solid rgba(34,34,32,0.5);
-    vertical-align: middle;
-    line-height: 1.4;
-  }
-
+  .tasks-table td { padding: 7px 10px; border-bottom: 1px solid rgba(34,34,32,0.5); vertical-align: middle; line-height: 1.4; }
   .tasks-table tr:last-child td { border-bottom: none; }
-
   .tasks-table tr:hover td { background: rgba(255,255,255,0.02); }
 
   .status-badge {
@@ -289,263 +187,123 @@
     padding: 2px 6px;
     border: 1px solid currentColor;
   }
-
   .status-badge.completed { color: var(--green); }
   .status-badge.in_progress { color: var(--orange); animation: badge-pulse 1.5s infinite; }
   .status-badge.failed { color: var(--red); }
   .status-badge.pending { color: var(--muted); }
+  .status-badge.cancelled { color: var(--dim); }
 
-  @keyframes badge-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
+  @keyframes badge-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
   .td-time { color: var(--muted); font-size: 9px; white-space: nowrap; }
   .td-agent { color: var(--orange); font-weight: 700; letter-spacing: 0.1em; }
+  .td-from { color: var(--muted); font-size: 9px; }
   .td-type { color: var(--text); }
   .td-result { color: var(--muted); font-size: 9px; max-width: 280px; }
+  .td-priority { color: var(--dim); font-size: 9px; }
 
-  /* TWO COLUMN LAYOUT */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
+  /* TWO COLUMN */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
-  @media (max-width: 900px) {
-    .two-col { grid-template-columns: 1fr; }
-  }
+  /* THREE COLUMN */
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 1000px) { .three-col { grid-template-columns: 1fr; } }
 
   /* MEMORY */
-  .memory-block {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-
-  .memory-agent-header {
-    padding: 8px 12px;
-    background: var(--bg3);
-    border-bottom: 1px solid var(--border);
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    color: var(--orange);
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  .memory-entry {
-    display: grid;
-    grid-template-columns: 120px 1fr auto;
-    gap: 10px;
-    padding: 6px 12px;
-    border-bottom: 1px solid rgba(34,34,32,0.4);
-    font-size: 9px;
-    align-items: start;
-  }
-
+  .memory-block { background: var(--bg2); border: 1px solid var(--border); overflow: hidden; margin-bottom: 8px; }
+  .memory-agent-header { padding: 8px 12px; background: var(--bg3); border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.15em; color: var(--orange); text-transform: uppercase; font-weight: 700; }
+  .memory-entry { display: grid; grid-template-columns: 120px 1fr auto; gap: 10px; padding: 6px 12px; border-bottom: 1px solid rgba(34,34,32,0.4); font-size: 9px; align-items: start; }
   .memory-entry:last-child { border-bottom: none; }
-
   .memory-key { color: var(--text); font-weight: 700; letter-spacing: 0.05em; word-break: break-word; }
   .memory-value { color: var(--muted); line-height: 1.5; word-break: break-word; }
   .memory-time { color: var(--dim); white-space: nowrap; text-align: right; }
+  .memory-scroll { max-height: 240px; overflow-y: auto; }
+  .memory-scroll::-webkit-scrollbar { width: 3px; }
+  .memory-scroll::-webkit-scrollbar-track { background: transparent; }
+  .memory-scroll::-webkit-scrollbar-thumb { background: var(--dim); }
 
   /* SESSIONS */
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat-box { background: var(--bg3); border: 1px solid var(--border); padding: 12px; }
+  .stat-label { font-size: 8px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--orange); line-height: 1; }
+  .stat-sub { font-size: 8px; color: var(--dim); margin-top: 4px; letter-spacing: 0.08em; }
 
-  .stat-box {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 12px;
-  }
+  .chart-wrap { background: var(--bg3); border: 1px solid var(--border); padding: 12px; }
+  .chart-label { font-size: 8px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 50px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 3px; }
+  .bar { width: 100%; background: var(--orange); opacity: 0.7; min-height: 1px; transition: height 0.5s ease; }
+  .bar-tick { font-size: 7px; color: var(--dim); letter-spacing: 0; }
 
-  .stat-label {
-    font-size: 8px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .stat-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--orange);
-    line-height: 1;
-  }
-
-  .stat-sub {
-    font-size: 8px;
-    color: var(--dim);
-    margin-top: 4px;
-    letter-spacing: 0.08em;
-  }
-
-  /* HOURLY CHART */
-  .chart-wrap {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 12px;
-  }
-
-  .chart-label {
-    font-size: 8px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-
-  .bar-chart {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 50px;
-  }
-
-  .bar-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    gap: 3px;
-  }
-
-  .bar {
-    width: 100%;
-    background: var(--orange);
-    opacity: 0.7;
-    min-height: 1px;
-    transition: height 0.5s ease;
-  }
-
-  .bar-tick {
-    font-size: 7px;
-    color: var(--dim);
-    letter-spacing: 0;
-  }
-
-  /* COMMUNITY FEED */
-  .community-entry {
-    display: grid;
-    grid-template-columns: 90px 80px 70px 1fr;
-    gap: 10px;
-    padding: 7px 12px;
-    border-bottom: 1px solid rgba(34,34,32,0.4);
-    font-size: 9px;
-    align-items: center;
-  }
-
+  /* COMMUNITY */
+  .community-entry { display: grid; grid-template-columns: 90px 80px 70px 1fr; gap: 10px; padding: 7px 12px; border-bottom: 1px solid rgba(34,34,32,0.4); font-size: 9px; align-items: center; }
   .community-entry:last-child { border-bottom: none; }
-
   .com-user { color: var(--text); font-weight: 700; letter-spacing: 0.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .com-type { color: var(--orange); letter-spacing: 0.08em; }
   .com-hrv { color: var(--green); font-weight: 700; }
   .com-time { color: var(--dim); }
 
   /* EVENT LOG */
-  .event-log {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    height: 300px;
-    overflow-y: auto;
-    font-size: 9px;
-    position: relative;
-  }
-
+  .event-log { background: var(--bg2); border: 1px solid var(--border); height: 300px; overflow-y: auto; font-size: 9px; position: relative; }
   .event-log::-webkit-scrollbar { width: 4px; }
   .event-log::-webkit-scrollbar-track { background: var(--bg); }
   .event-log::-webkit-scrollbar-thumb { background: var(--dim); }
-
-  .event-entry {
-    display: grid;
-    grid-template-columns: 130px 80px 120px 1fr;
-    gap: 8px;
-    padding: 5px 12px;
-    border-bottom: 1px solid rgba(34,34,32,0.3);
-    line-height: 1.4;
-    transition: background 0.1s;
-  }
-
+  .event-entry { display: grid; grid-template-columns: 130px 80px 120px 1fr; gap: 8px; padding: 5px 12px; border-bottom: 1px solid rgba(34,34,32,0.3); line-height: 1.4; transition: background 0.1s; }
   .event-entry:hover { background: rgba(245,132,31,0.03); }
-
-  .event-entry.new-entry {
-    animation: flash-in 0.6s ease;
-  }
-
-  @keyframes flash-in {
-    0% { background: rgba(245,132,31,0.08); }
-    100% { background: transparent; }
-  }
-
+  .event-entry.new-entry { animation: flash-in 0.6s ease; }
+  @keyframes flash-in { 0% { background: rgba(245,132,31,0.08); } 100% { background: transparent; } }
   .ev-time { color: var(--dim); font-size: 8px; white-space: nowrap; }
   .ev-agent { color: var(--orange); font-weight: 700; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ev-type { color: var(--text); letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ev-data { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  /* SHARED CARD */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
+  /* TASK QUEUE */
+  .queue-agent-block { background: var(--bg2); border: 1px solid var(--border); overflow: hidden; margin-bottom: 8px; }
+  .queue-agent-header {
+    padding: 8px 12px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
+  .queue-agent-name { font-size: 9px; letter-spacing: 0.15em; color: var(--orange); text-transform: uppercase; font-weight: 700; }
+  .queue-agent-count { font-size: 8px; color: var(--dim); letter-spacing: 0.1em; }
+  .queue-task-row { display: grid; grid-template-columns: 60px 130px 1fr 80px; gap: 10px; padding: 6px 12px; border-bottom: 1px solid rgba(34,34,32,0.4); font-size: 9px; align-items: center; }
+  .queue-task-row:last-child { border-bottom: none; }
+  .qt-status { }
+  .qt-type { color: var(--text); font-weight: 700; letter-spacing: 0.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qt-rationale { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qt-time { color: var(--dim); white-space: nowrap; text-align: right; }
 
-  .card-inner {
-    padding: 0;
-    overflow-x: auto;
-  }
+  /* COMPLETED TODAY */
+  .completed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 800px) { .completed-grid { grid-template-columns: repeat(2, 1fr); } }
+  .completed-card { background: var(--bg2); border: 1px solid var(--border); padding: 14px; }
+  .completed-agent { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); margin-bottom: 6px; }
+  .completed-count { font-size: 32px; font-weight: 700; color: var(--text); line-height: 1; }
+  .completed-label { font-size: 8px; color: var(--dim); letter-spacing: 0.1em; margin-top: 4px; }
 
-  /* EMPTY STATES */
-  .empty-state {
-    padding: 24px;
-    text-align: center;
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
+  /* HEALTH */
+  .health-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (max-width: 900px) { .health-grid { grid-template-columns: repeat(2, 1fr); } }
+  .health-card { background: var(--bg2); border: 1px solid var(--border); padding: 12px; }
+  .health-table-name { font-size: 8px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .health-count { font-size: 24px; font-weight: 700; color: var(--green); line-height: 1; }
+  .health-count.err { color: var(--red); font-size: 14px; }
+  .health-sub { font-size: 8px; color: var(--dim); margin-top: 4px; letter-spacing: 0.08em; }
 
-  /* LOADING */
-  .loading-bar {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--orange), transparent);
-    background-size: 200% 100%;
-    animation: loading-sweep 1.5s infinite;
-    margin-bottom: 2px;
-  }
-
-  @keyframes loading-sweep {
-    0% { background-position: -100% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  /* TOP SECTION SPLIT */
-  .top-meta {
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 0.1em;
-    padding: 4px 0;
-  }
-
-  .memory-scroll {
-    max-height: 240px;
-    overflow-y: auto;
-  }
-
-  .memory-scroll::-webkit-scrollbar { width: 3px; }
-  .memory-scroll::-webkit-scrollbar-track { background: transparent; }
-  .memory-scroll::-webkit-scrollbar-thumb { background: var(--dim); }
-
-  .error-msg {
-    font-size: 9px;
-    color: var(--red);
-    letter-spacing: 0.08em;
-    padding: 6px 12px;
-  }
+  /* SHARED */
+  .card { background: var(--bg2); border: 1px solid var(--border); }
+  .card-inner { padding: 0; overflow-x: auto; }
+  .empty-state { padding: 24px; text-align: center; font-size: 9px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; }
+  .loading-bar { height: 1px; background: linear-gradient(90deg, transparent, var(--orange), transparent); background-size: 200% 100%; animation: loading-sweep 1.5s infinite; margin-bottom: 2px; }
+  @keyframes loading-sweep { 0% { background-position: -100% 0; } 100% { background-position: 200% 0; } }
+  .error-msg { font-size: 9px; color: var(--red); letter-spacing: 0.08em; padding: 6px 12px; }
+  .tbl-header-row { display: grid; gap: 10px; padding: 5px 12px; background: var(--bg3); border: 1px solid var(--border); border-bottom: none; }
+  .tbl-hcell { font-size: 8px; letter-spacing: .15em; color: var(--muted); text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -563,18 +321,25 @@
 
 <div class="main">
 
-  <!-- 1. AGENT STATUS -->
+  <!-- 1. AGENT STATUS (from registry) -->
   <section>
-    <div class="section-label">Agent Status <span class="refresh-badge">30s</span></div>
+    <div class="section-label">Agent Status <span class="refresh-badge">10s</span></div>
     <div id="agents-loading" class="loading-bar"></div>
-    <div class="agents-grid" id="agents-grid">
-      <!-- populated by JS -->
+    <div class="agents-grid" id="agents-grid"><!-- populated by JS --></div>
+  </section>
+
+  <!-- 2. TASK QUEUE BY AGENT -->
+  <section>
+    <div class="section-label">Task Queue by Agent <span class="refresh-badge">10s</span></div>
+    <div id="queue-loading" class="loading-bar"></div>
+    <div id="queue-container">
+      <div class="empty-state card">Loading...</div>
     </div>
   </section>
 
-  <!-- 2. AGENT TASKS FEED -->
+  <!-- 3. AGENT TASKS FEED -->
   <section>
-    <div class="section-label">Agent Tasks Feed <span class="refresh-badge">15s</span></div>
+    <div class="section-label">Agent Tasks Feed <span class="refresh-badge">10s</span></div>
     <div id="tasks-loading" class="loading-bar"></div>
     <div class="card">
       <div class="card-inner">
@@ -582,35 +347,58 @@
           <thead>
             <tr>
               <th>Time</th>
-              <th>Agent</th>
+              <th>To</th>
+              <th>From</th>
               <th>Type</th>
+              <th>Priority</th>
               <th>Status</th>
               <th>Result</th>
             </tr>
           </thead>
           <tbody id="tasks-body">
-            <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+            <tr><td colspan="7" class="empty-state">Loading...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </section>
 
-  <!-- 3+4. MEMORY + SESSIONS -->
+  <!-- 4. COMPLETED TODAY + SUPABASE HEALTH -->
   <div class="two-col">
 
-    <!-- 3. AGENT MEMORY -->
+    <!-- Completed Today -->
     <section>
-      <div class="section-label">Agent Memory <span class="refresh-badge">60s</span></div>
+      <div class="section-label">Completed Today <span class="refresh-badge">10s</span></div>
+      <div id="completed-loading" class="loading-bar"></div>
+      <div id="completed-container">
+        <div class="empty-state card">Loading...</div>
+      </div>
+    </section>
+
+    <!-- Supabase Health -->
+    <section>
+      <div class="section-label">Supabase Health <span class="refresh-badge">10s</span></div>
+      <div id="health-loading" class="loading-bar"></div>
+      <div class="health-grid" id="health-grid"><!-- populated by JS --></div>
+    </section>
+
+  </div>
+
+  <!-- 5. AGENT MEMORY + SESSIONS -->
+  <div class="two-col">
+
+    <!-- Agent Memory -->
+    <section>
+      <div class="section-label">Agent Memory <span class="refresh-badge">10s</span></div>
       <div id="memory-loading" class="loading-bar"></div>
       <div id="memory-container">
         <div class="empty-state card">Loading...</div>
       </div>
     </section>
 
-    <!-- 4. SESSIONS -->
+    <!-- Sessions -->
     <section>
-      <div class="section-label">Sessions <span class="refresh-badge">30s</span></div>
+      <div class="section-label">Sessions <span class="refresh-badge">10s</span></div>
       <div id="sessions-loading" class="loading-bar"></div>
 
       <div class="stat-row" id="session-stats">
@@ -651,34 +439,32 @@
     </section>
   </div>
 
-  <!-- 5. COMMUNITY FEED -->
+  <!-- 6. COMMUNITY FEED -->
   <section>
-    <div class="section-label">Community Feed <span class="refresh-badge">30s</span></div>
+    <div class="section-label">Community Feed <span class="refresh-badge">10s</span></div>
     <div id="community-loading" class="loading-bar"></div>
     <div class="card">
       <div class="card-inner">
         <div style="display:grid;grid-template-columns:90px 80px 70px 1fr;gap:10px;padding:5px 12px 5px;border-bottom:1px solid var(--border)">
-          <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">User</div>
-          <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Type</div>
-          <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">HRV</div>
-          <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Time</div>
+          <div class="tbl-hcell">User</div>
+          <div class="tbl-hcell">Type</div>
+          <div class="tbl-hcell">HRV</div>
+          <div class="tbl-hcell">Time</div>
         </div>
-        <div id="community-body">
-          <div class="empty-state">Loading...</div>
-        </div>
+        <div id="community-body"><div class="empty-state">Loading...</div></div>
       </div>
     </div>
   </section>
 
-  <!-- 6. AGENT EVENTS LOG -->
+  <!-- 7. AGENT EVENTS LOG -->
   <section>
     <div class="section-label">Agent Events Log <span class="refresh-badge">10s</span></div>
     <div id="events-loading" class="loading-bar"></div>
     <div style="display:grid;grid-template-columns:130px 80px 120px 1fr;gap:8px;padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-bottom:none">
-      <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Time</div>
-      <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Agent</div>
-      <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Event</div>
-      <div style="font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Data</div>
+      <div class="tbl-hcell">Time</div>
+      <div class="tbl-hcell">Agent</div>
+      <div class="tbl-hcell">Event</div>
+      <div class="tbl-hcell">Data</div>
     </div>
     <div class="event-log" id="event-log">
       <div class="empty-state">Waiting for events...</div>
@@ -688,10 +474,10 @@
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://sbeqrkvxgfymrsqgugqz.supabase.co';
-  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZXFya3Z4Z2Z5bXJzcWd1Z3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQ1MTUsImV4cCI6MjA5MDc5MDUxNX0.UzlVmJc--MJMsDaXtG9TGJahTigc-TD1YVESpsWJCLw';
+  var SUPABASE_URL = 'https://sbeqrkvxgfymrsqgugqz.supabase.co';
+  var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZXFya3Z4Z2Z5bXJzcWd1Z3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQ1MTUsImV4cCI6MjA5MDc5MDUxNX0.UzlVmJc--MJMsDaXtG9TGJahTigc-TD1YVESpsWJCLw';
 
-  const AGENTS = [
+  var AGENTS = [
     { id: 'roach',    name: 'Roach',    emoji: '🪳' },
     { id: 'rat',      name: 'Rat',      emoji: '🐀' },
     { id: 'rove',     name: 'Rove',     emoji: '🦊' },
@@ -700,17 +486,38 @@
     { id: 'wren',     name: 'Wren',     emoji: '🐦' },
   ];
 
-  const HEADERS = {
+  var HEADERS = {
     'apikey': ANON_KEY,
     'Authorization': 'Bearer ' + ANON_KEY,
     'Content-Type': 'application/json',
   };
 
-  // ── Utilities ──────────────────────────────────────────────────────────────
+  var HEALTH_TABLES = [
+    'agent_tasks', 'agent_registry', 'users', 'sessions',
+    'community_posts', 'competitive_intel', 'meditation_library'
+  ];
+
+  // ── Utilities ────────────────────────────────────────────────────────────────
 
   function supaFetch(path) {
     return fetch(SUPABASE_URL + '/rest/v1/' + path, { headers: HEADERS })
-      .then(function(r) { return r.json(); });
+      .then(function(r) {
+        if (!r.ok) return [];
+        return r.json().catch(function() { return []; });
+      })
+      .catch(function() { return []; });
+  }
+
+  function supaCount(table) {
+    return fetch(SUPABASE_URL + '/rest/v1/' + table + '?select=id', {
+      method: 'HEAD',
+      headers: Object.assign({}, HEADERS, { 'Prefer': 'count=exact' })
+    }).then(function(r) {
+      var cr = r.headers.get('content-range');
+      if (!cr) return '?';
+      var parts = cr.split('/');
+      return (parts[1] !== undefined && parts[1] !== '*') ? parseInt(parts[1], 10) : '?';
+    }).catch(function() { return 'ERR'; });
   }
 
   function fmtTime(iso) {
@@ -734,7 +541,7 @@
   function truncate(str, n) {
     if (!str) return '--';
     str = String(str);
-    return str.length > n ? str.slice(0, n) + '...' : str;
+    return str.length > n ? str.slice(0, n) + '…' : str;
   }
 
   function escape(str) {
@@ -758,44 +565,51 @@
     var el = document.getElementById(id);
     if (el) el.style.display = 'block';
   }
-
   function hideLoading(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   }
 
-  // ── Clock ──────────────────────────────────────────────────────────────────
+  // ── Clock ────────────────────────────────────────────────────────────────────
 
   function updateClock() {
-    var now = new Date();
-    document.getElementById('clock').textContent = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    document.getElementById('clock').textContent =
+      new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
   }
   updateClock();
   setInterval(updateClock, 1000);
 
-  // ── 1. Agent Status ────────────────────────────────────────────────────────
+  // ── 1. Agent Status (from agent_registry) ───────────────────────────────────
 
-  var agentLastSeen = {};
-  var agentActiveTasks = {};
+  var registryByNode = {};
 
   function renderAgents() {
     var grid = document.getElementById('agents-grid');
     var html = '';
     for (var i = 0; i < AGENTS.length; i++) {
       var a = AGENTS[i];
-      var lastSeen = agentLastSeen[a.id] || null;
-      var task = agentActiveTasks[a.id] || null;
+      var reg = registryByNode[a.id] || null;
+      var lastSeen = reg ? reg.last_heartbeat : null;
+      var currentTask = reg ? reg.current_task : null;
+      var regStatus = reg ? (reg.status || '') : '';
       var statusClass = agentStatusClass(lastSeen);
+      // if registry says explicitly active/busy, override to active
+      if (regStatus === 'active' || regStatus === 'busy') statusClass = 'status-active';
+      if (regStatus === 'idle') statusClass = 'status-warm';
+      if (regStatus === 'offline') statusClass = 'status-stale';
+
       html += '<div class="agent-card ' + statusClass + '">';
       html += '<div class="agent-card-header">';
       html += '<span class="agent-emoji">' + a.emoji + '</span>';
       html += '<span class="status-indicator"></span>';
       html += '</div>';
       html += '<div class="agent-name">' + escape(a.name) + '</div>';
-      if (task) {
-        html += '<div class="agent-task has-task">' + escape(truncate(task.task_type || task.description || 'active task', 28)) + '</div>';
+      if (currentTask) {
+        html += '<div class="agent-task has-task">' + escape(truncate(currentTask, 28)) + '</div>';
+      } else if (regStatus) {
+        html += '<div class="agent-task">' + escape(regStatus) + '</div>';
       } else {
-        html += '<div class="agent-task">idle</div>';
+        html += '<div class="agent-task">not registered</div>';
       }
       html += '<div class="agent-time">' + escape(relTime(lastSeen)) + '</div>';
       html += '</div>';
@@ -805,50 +619,88 @@
 
   function loadAgentStatus() {
     showLoading('agents-loading');
-    var eventsPromise = supaFetch('agent_events?select=agent_id,created_at&order=created_at.desc&limit=200');
-    var tasksPromise = supaFetch('agent_tasks?select=agent_id,task_type,description,status&status=eq.in_progress&order=created_at.desc&limit=50');
-
-    Promise.all([eventsPromise, tasksPromise]).then(function(results) {
-      var events = Array.isArray(results[0]) ? results[0] : [];
-      var tasks = Array.isArray(results[1]) ? results[1] : [];
-
-      // newest event per agent
-      agentLastSeen = {};
-      for (var i = 0; i < events.length; i++) {
-        var ev = events[i];
-        var aid = (ev.agent_id || '').toLowerCase();
-        if (!agentLastSeen[aid]) {
-          agentLastSeen[aid] = ev.created_at;
+    // agent_registry columns: id, node, status, current_task, capabilities, last_heartbeat, description
+    supaFetch('agent_registry?select=node,status,current_task,last_heartbeat,description&order=last_heartbeat.desc')
+      .then(function(rows) {
+        registryByNode = {};
+        if (Array.isArray(rows)) {
+          for (var i = 0; i < rows.length; i++) {
+            var r = rows[i];
+            if (r.node) registryByNode[r.node.toLowerCase()] = r;
+          }
         }
-      }
-
-      // active task per agent
-      agentActiveTasks = {};
-      for (var j = 0; j < tasks.length; j++) {
-        var t = tasks[j];
-        var bid = (t.agent_id || '').toLowerCase();
-        if (!agentActiveTasks[bid]) {
-          agentActiveTasks[bid] = t;
-        }
-      }
-
-      renderAgents();
-      hideLoading('agents-loading');
-    }).catch(function() {
-      hideLoading('agents-loading');
-    });
+        renderAgents();
+        hideLoading('agents-loading');
+      });
   }
 
-  // ── 2. Tasks Feed ──────────────────────────────────────────────────────────
+  // ── 2. Task Queue by Agent ───────────────────────────────────────────────────
+
+  function loadTaskQueue() {
+    showLoading('queue-loading');
+    // pending + in_progress tasks grouped by to_agent
+    supaFetch('agent_tasks?select=id,to_agent,from_agent,task_type,status,priority,rationale,payload,created_at&status=in.(pending,in_progress)&order=priority.desc.nullslast,created_at.asc&limit=100')
+      .then(function(rows) {
+        hideLoading('queue-loading');
+        var container = document.getElementById('queue-container');
+        if (!Array.isArray(rows) || rows.length === 0) {
+          container.innerHTML = '<div class="empty-state card">No pending or in-progress tasks</div>';
+          return;
+        }
+
+        // group by to_agent
+        var byAgent = {};
+        var agentOrder = [];
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          var ag = r.to_agent || 'unassigned';
+          if (!byAgent[ag]) { byAgent[ag] = []; agentOrder.push(ag); }
+          byAgent[ag].push(r);
+        }
+
+        var html = '';
+        for (var j = 0; j < agentOrder.length; j++) {
+          var agent = agentOrder[j];
+          var tasks = byAgent[agent];
+          html += '<div class="queue-agent-block">';
+          html += '<div class="queue-agent-header">';
+          html += '<span class="queue-agent-name">' + escape(agent.toUpperCase()) + '</span>';
+          html += '<span class="queue-agent-count">' + tasks.length + ' task' + (tasks.length !== 1 ? 's' : '') + '</span>';
+          html += '</div>';
+          for (var k = 0; k < tasks.length; k++) {
+            var t = tasks[k];
+            var statusClass = t.status || 'pending';
+            var rationale = t.rationale || '';
+            if (!rationale && t.payload) {
+              try {
+                var p = typeof t.payload === 'string' ? JSON.parse(t.payload) : t.payload;
+                rationale = p.rationale || p.description || p.goal || '';
+              } catch(ex) { rationale = String(t.payload || ''); }
+            }
+            html += '<div class="queue-task-row">';
+            html += '<div class="qt-status"><span class="status-badge ' + escape(statusClass) + '">' + escape(statusClass) + '</span></div>';
+            html += '<div class="qt-type">' + escape(truncate(t.task_type || '--', 20)) + '</div>';
+            html += '<div class="qt-rationale">' + escape(truncate(rationale, 60)) + '</div>';
+            html += '<div class="qt-time">' + escape(relTime(t.created_at)) + '</div>';
+            html += '</div>';
+          }
+          html += '</div>';
+        }
+        container.innerHTML = html;
+      });
+  }
+
+  // ── 3. Tasks Feed ────────────────────────────────────────────────────────────
 
   function loadTasks() {
     showLoading('tasks-loading');
-    supaFetch('agent_tasks?select=created_at,agent_id,task_type,status,result&order=created_at.desc&limit=20')
+    // agent_tasks columns: id, from_agent, to_agent, task_type, payload, status, result, created_at, claimed_at, completed_at, priority, namespace, rationale
+    supaFetch('agent_tasks?select=created_at,to_agent,from_agent,task_type,priority,status,result&order=created_at.desc&limit=20')
       .then(function(rows) {
         hideLoading('tasks-loading');
         var tbody = document.getElementById('tasks-body');
         if (!Array.isArray(rows) || rows.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No tasks found</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No tasks found</td></tr>';
           return;
         }
         var html = '';
@@ -857,22 +709,82 @@
           var statusClass = r.status || 'pending';
           html += '<tr>';
           html += '<td class="td-time">' + escape(fmtTime(r.created_at)) + '</td>';
-          html += '<td class="td-agent">' + escape((r.agent_id || '--').toUpperCase()) + '</td>';
+          html += '<td class="td-agent">' + escape((r.to_agent || '--').toUpperCase()) + '</td>';
+          html += '<td class="td-from">' + escape((r.from_agent || '--').toUpperCase()) + '</td>';
           html += '<td class="td-type">' + escape(r.task_type || '--') + '</td>';
+          html += '<td class="td-priority">' + escape(r.priority != null ? r.priority : '--') + '</td>';
           html += '<td><span class="status-badge ' + escape(statusClass) + '">' + escape(statusClass) + '</span></td>';
           html += '<td class="td-result">' + escape(truncate(r.result, 100)) + '</td>';
           html += '</tr>';
         }
         tbody.innerHTML = html;
-      }).catch(function() {
-        hideLoading('tasks-loading');
       });
   }
 
-  // ── 3. Agent Memory ────────────────────────────────────────────────────────
+  // ── 4a. Completed Today ──────────────────────────────────────────────────────
+
+  function loadCompletedToday() {
+    showLoading('completed-loading');
+    var since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    supaFetch('agent_tasks?select=to_agent,completed_at&status=eq.completed&completed_at=gte.' + encodeURIComponent(since) + '&limit=500')
+      .then(function(rows) {
+        hideLoading('completed-loading');
+        var container = document.getElementById('completed-container');
+        if (!Array.isArray(rows) || rows.length === 0) {
+          container.innerHTML = '<div class="empty-state card">No completed tasks in last 24h</div>';
+          return;
+        }
+
+        // count per agent
+        var counts = {};
+        for (var i = 0; i < rows.length; i++) {
+          var ag = rows[i].to_agent || 'unassigned';
+          counts[ag] = (counts[ag] || 0) + 1;
+        }
+
+        // sort by count desc
+        var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+
+        var html = '<div class="completed-grid">';
+        for (var j = 0; j < sorted.length; j++) {
+          var agent = sorted[j];
+          html += '<div class="completed-card">';
+          html += '<div class="completed-agent">' + escape(agent.toUpperCase()) + '</div>';
+          html += '<div class="completed-count">' + counts[agent] + '</div>';
+          html += '<div class="completed-label">TASKS COMPLETED</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+        container.innerHTML = html;
+      });
+  }
+
+  // ── 4b. Supabase Health ──────────────────────────────────────────────────────
+
+  function loadHealth() {
+    showLoading('health-loading');
+    var promises = HEALTH_TABLES.map(function(t) { return supaCount(t); });
+    Promise.all(promises).then(function(counts) {
+      hideLoading('health-loading');
+      var html = '';
+      for (var i = 0; i < HEALTH_TABLES.length; i++) {
+        var count = counts[i];
+        var isErr = (count === 'ERR' || count === '?');
+        html += '<div class="health-card">';
+        html += '<div class="health-table-name">' + escape(HEALTH_TABLES[i]) + '</div>';
+        html += '<div class="health-count' + (isErr ? ' err' : '') + '">' + escape(String(count)) + '</div>';
+        html += '<div class="health-sub">ROWS</div>';
+        html += '</div>';
+      }
+      document.getElementById('health-grid').innerHTML = html;
+    });
+  }
+
+  // ── 5. Agent Memory ──────────────────────────────────────────────────────────
 
   function loadMemory() {
     showLoading('memory-loading');
+    // agent_memory columns: id, agent_id, key, value, created_at, updated_at
     supaFetch('agent_memory?select=agent_id,key,value,updated_at&order=updated_at.desc&limit=100')
       .then(function(rows) {
         hideLoading('memory-loading');
@@ -882,26 +794,20 @@
           return;
         }
 
-        // group by agent_id, max 10 per agent
         var byAgent = {};
         var agentOrder = [];
         for (var i = 0; i < rows.length; i++) {
           var r = rows[i];
           var aid = r.agent_id || 'unknown';
-          if (!byAgent[aid]) {
-            byAgent[aid] = [];
-            agentOrder.push(aid);
-          }
-          if (byAgent[aid].length < 10) {
-            byAgent[aid].push(r);
-          }
+          if (!byAgent[aid]) { byAgent[aid] = []; agentOrder.push(aid); }
+          if (byAgent[aid].length < 10) byAgent[aid].push(r);
         }
 
         var html = '';
         for (var j = 0; j < agentOrder.length; j++) {
           var agent = agentOrder[j];
           var entries = byAgent[agent];
-          html += '<div class="memory-block" style="margin-bottom:8px">';
+          html += '<div class="memory-block">';
           html += '<div class="memory-agent-header">' + escape(agent.toUpperCase()) + '</div>';
           html += '<div class="memory-scroll">';
           for (var k = 0; k < entries.length; k++) {
@@ -915,12 +821,10 @@
           html += '</div></div>';
         }
         container.innerHTML = html;
-      }).catch(function() {
-        hideLoading('memory-loading');
       });
   }
 
-  // ── 4. Sessions ────────────────────────────────────────────────────────────
+  // ── 6. Sessions ──────────────────────────────────────────────────────────────
 
   function loadSessions() {
     showLoading('sessions-loading');
@@ -933,11 +837,8 @@
         hideLoading('sessions-loading');
         if (!Array.isArray(rows)) rows = [];
 
-        var todayRows = rows.filter(function(r) {
-          return r.created_at && r.created_at >= iso;
-        });
+        var todayRows = rows.filter(function(r) { return r.created_at && r.created_at >= iso; });
 
-        // stats
         document.getElementById('stat-today').textContent = todayRows.length;
 
         var uniqueUsers = {};
@@ -950,50 +851,38 @@
           if (r.user_id) uniqueUsers[r.user_id] = true;
           if (r.hrv_delta != null) { hrvSum += parseFloat(r.hrv_delta) || 0; hrvCount++; }
           if (r.duration_minutes != null) { durSum += parseFloat(r.duration_minutes) || 0; durCount++; }
-          if (r.frequency) {
-            freqCount[r.frequency] = (freqCount[r.frequency] || 0) + 1;
-          }
+          if (r.frequency) freqCount[r.frequency] = (freqCount[r.frequency] || 0) + 1;
         }
 
         document.getElementById('stat-users').textContent = Object.keys(uniqueUsers).length;
         document.getElementById('stat-hrv').textContent = hrvCount > 0 ? (hrvSum / hrvCount).toFixed(1) : '--';
         document.getElementById('stat-dur').textContent = durCount > 0 ? (durSum / durCount).toFixed(0) : '--';
 
-        var topFreq = '--';
-        var topFreqCount = 0;
+        var topFreq = '--'; var topFreqCount = 0;
         for (var f in freqCount) {
           if (freqCount[f] > topFreqCount) { topFreqCount = freqCount[f]; topFreq = f; }
         }
         document.getElementById('stat-freq').textContent = topFreq;
 
-        // hourly chart (today)
         var hours = [];
         for (var h = 0; h < 24; h++) hours.push(0);
         for (var j = 0; j < todayRows.length; j++) {
-          var hr = new Date(todayRows[j].created_at).getUTCHours();
-          hours[hr]++;
+          hours[new Date(todayRows[j].created_at).getUTCHours()]++;
         }
         var maxH = Math.max.apply(null, hours) || 1;
-        var chartEl = document.getElementById('hourly-chart');
         var chartHtml = '';
         for (var hh = 0; hh < 24; hh++) {
           var pct = Math.round((hours[hh] / maxH) * 100);
           chartHtml += '<div class="bar-col">';
           chartHtml += '<div class="bar" style="height:' + pct + '%;"></div>';
-          if (hh % 6 === 0) {
-            chartHtml += '<div class="bar-tick">' + (hh === 0 ? '0' : hh) + '</div>';
-          } else {
-            chartHtml += '<div class="bar-tick"></div>';
-          }
+          chartHtml += '<div class="bar-tick">' + (hh % 6 === 0 ? hh : '') + '</div>';
           chartHtml += '</div>';
         }
-        chartEl.innerHTML = chartHtml;
-      }).catch(function() {
-        hideLoading('sessions-loading');
+        document.getElementById('hourly-chart').innerHTML = chartHtml;
       });
   }
 
-  // ── 5. Community Feed ──────────────────────────────────────────────────────
+  // ── 7. Community Feed ────────────────────────────────────────────────────────
 
   function loadCommunity() {
     showLoading('community-loading');
@@ -1017,12 +906,10 @@
           html += '</div>';
         }
         body.innerHTML = html;
-      }).catch(function() {
-        hideLoading('community-loading');
       });
   }
 
-  // ── 6. Events Log ──────────────────────────────────────────────────────────
+  // ── 8. Events Log ────────────────────────────────────────────────────────────
 
   var lastEventId = null;
   var allEvents = [];
@@ -1035,7 +922,6 @@
         if (!Array.isArray(rows)) rows = [];
 
         var logEl = document.getElementById('event-log');
-        var isAtBottom = (logEl.scrollHeight - logEl.clientHeight - logEl.scrollTop) < 40;
 
         if (rows.length === 0) {
           if (allEvents.length === 0) {
@@ -1044,7 +930,6 @@
           return;
         }
 
-        // find new entries
         var newIds = {};
         if (lastEventId) {
           for (var i = 0; i < rows.length; i++) {
@@ -1055,18 +940,14 @@
         lastEventId = rows[0].id;
         allEvents = rows;
 
-        // render newest-first
         var html = '';
         for (var j = 0; j < rows.length; j++) {
           var r = rows[j];
           var isNew = newIds[r.id] ? ' new-entry' : '';
           var dataStr = '';
           if (r.data) {
-            try {
-              dataStr = typeof r.data === 'string' ? r.data : JSON.stringify(r.data);
-            } catch(ex) {
-              dataStr = String(r.data);
-            }
+            try { dataStr = typeof r.data === 'string' ? r.data : JSON.stringify(r.data); }
+            catch(ex) { dataStr = String(r.data); }
           }
           html += '<div class="event-entry' + isNew + '">';
           html += '<div class="ev-time">' + escape(fmtTime(r.created_at)) + '</div>';
@@ -1076,42 +957,26 @@
           html += '</div>';
         }
         logEl.innerHTML = html;
-
-        if (isAtBottom) {
-          logEl.scrollTop = 0; // newest at top in this layout
-        }
-      }).catch(function() {
-        hideLoading('events-loading');
       });
   }
 
-  // ── Initial load + polling ─────────────────────────────────────────────────
+  // ── Load all + polling (10s for everything) ──────────────────────────────────
 
   function loadAll() {
     loadAgentStatus();
+    loadTaskQueue();
     loadTasks();
+    loadCompletedToday();
+    loadHealth();
     loadMemory();
     loadSessions();
     loadCommunity();
     loadEvents();
   }
 
-  // Initial render with placeholders
   renderAgents();
-
-  // Load everything
   loadAll();
-
-  // Polling intervals
-  setInterval(loadEvents, 10000);
-  setInterval(loadTasks, 15000);
-  setInterval(function() {
-    loadAgentStatus();
-    loadSessions();
-    loadCommunity();
-  }, 30000);
-  setInterval(loadMemory, 60000);
-
+  setInterval(loadAll, 10000);
 </script>
 </body>
 </html>
