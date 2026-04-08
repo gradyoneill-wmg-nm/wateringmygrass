@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NON MAGIC // COMMAND</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0C0C0A; color: #E8E8E0; font-family: 'Inter', sans-serif; min-height: 100vh; }
+.mono { font-family: 'Space Mono', monospace; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid #1E1E1C;
+  position: sticky; top: 0; background: #0C0C0A; z-index: 100;
+}
+.logo { font-family: 'Space Mono', monospace; font-size: 13px; color: #F5841F; letter-spacing: 2px; }
+.refresh-info { font-family: 'Space Mono', monospace; font-size: 11px; color: #555; }
+.refresh-btn { background: #F5841F; color: #000; border: none; padding: 6px 14px; font-family: 'Space Mono', monospace; font-size: 11px; cursor: pointer; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #1E1E1C; min-height: calc(100vh - 53px); }
+.panel { background: #0C0C0A; padding: 16px; overflow: hidden; }
+.panel.wide { grid-column: span 3; }
+.panel.half { grid-column: span 1; }
+
+.panel-title { font-family: 'Space Mono', monospace; font-size: 10px; color: #555; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.panel-title .count { color: #F5841F; }
+
+/* Agent cards */
+.agents-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.agent-card { background: #111; border: 1px solid #1E1E1C; padding: 12px; position: relative; }
+.agent-card.active { border-color: #4CBB17; }
+.agent-card.busy { border-color: #F5841F; }
+.agent-card.failed { border-color: #FF3B30; }
+.agent-name { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.agent-status { font-size: 10px; color: #555; margin-bottom: 8px; }
+.agent-task { font-size: 10px; color: #999; line-height: 1.4; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.dot-green { background: #4CBB17; box-shadow: 0 0 6px #4CBB17; }
+.dot-orange { background: #F5841F; animation: pulse 1.5s infinite; }
+.dot-red { background: #FF3B30; }
+.dot-gray { background: #444; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Task feed */
+.task-list { display: flex; flex-direction: column; gap: 4px; max-height: 400px; overflow-y: auto; }
+.task-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px; background: #111; border-left: 2px solid #1E1E1C; font-size: 11px; }
+.task-row.pending { border-left-color: #333; }
+.task-row.in_progress { border-left-color: #F5841F; }
+.task-row.completed { border-left-color: #4CBB17; }
+.task-row.failed { border-left-color: #FF3B30; }
+.task-agent { font-family: 'Space Mono', monospace; font-size: 10px; color: #F5841F; min-width: 70px; }
+.task-type { color: #ccc; flex: 1; }
+.task-status { font-family: 'Space Mono', monospace; font-size: 9px; padding: 2px 6px; }
+.status-pending { color: #555; background: #1a1a1a; }
+.status-in_progress { color: #F5841F; background: #1a0e00; }
+.status-completed { color: #4CBB17; background: #0a1a00; }
+.status-failed { color: #FF3B30; background: #1a0000; }
+.task-time { color: #444; font-family: 'Space Mono', monospace; font-size: 9px; min-width: 55px; text-align: right; }
+
+/* Stats */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: #111; border: 1px solid #1E1E1C; padding: 12px; }
+.stat-label { font-family: 'Space Mono', monospace; font-size: 9px; color: #555; letter-spacing: 1px; margin-bottom: 4px; }
+.stat-value { font-family: 'Space Mono', monospace; font-size: 22px; color: #F5841F; }
+.stat-value.green { color: #4CBB17; }
+
+/* Build status */
+.build-status { padding: 12px; background: #111; border: 1px solid #FF3B30; }
+.build-label { font-family: 'Space Mono', monospace; font-size: 10px; color: #FF3B30; margin-bottom: 4px; }
+.build-commit { font-family: 'Space Mono', monospace; font-size: 12px; color: #fff; }
+.build-time { font-size: 11px; color: #555; margin-top: 4px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #0C0C0A; } ::-webkit-scrollbar-thumb { background: #333; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">NON MAGIC // COMMAND CENTER</div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="refresh-info mono" id="lastUpdate">Loading...</div>
+    <button class="refresh-btn" onclick="loadAll()">REFRESH</button>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- AGENT STATUS ROW -->
+  <div class="panel wide">
+    <div class="panel-title">AGENT STATUS <span class="count" id="activeCount">—</span> ACTIVE</div>
+    <div class="agents-grid" id="agentGrid">Loading...</div>
+  </div>
+
+  <!-- ACTIVE TASKS -->
+  <div class="panel" style="grid-column:span 2">
+    <div class="panel-title">ACTIVE TASK QUEUE <span class="count" id="taskCount">—</span></div>
+    <div class="task-list" id="taskFeed">Loading...</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="panel">
+    <div class="panel-title">SYSTEM STATS</div>
+    <div class="stat-grid" id="statsGrid">
+      <div class="stat-box"><div class="stat-label">TOTAL TASKS</div><div class="stat-value" id="statTotal">—</div></div>
+      <div class="stat-box"><div class="stat-label">IN PROGRESS</div><div class="stat-value" id="statActive">—</div></div>
+      <div class="stat-box"><div class="stat-label">COMPLETED</div><div class="stat-value green" id="statDone">—</div></div>
+      <div class="stat-box"><div class="stat-label">FAILED</div><div class="stat-value" style="color:#FF3B30" id="statFailed">—</div></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="panel-title" style="margin-bottom:8px">LATEST BUILD</div>
+      <div class="build-status">
+        <div class="build-label" id="buildStatus">⚠ FAILED</div>
+        <div class="build-commit" id="buildCommit">753b5d3</div>
+        <div class="build-time" id="buildTime">Apr 8, 5:28am — iOS internal distribution</div>
+        <div style="margin-top:8px"><a href="https://expo.dev/accounts/gradyoneill/projects/nonmagic/builds" target="_blank" style="color:#F5841F;font-family:'Space Mono',monospace;font-size:10px;text-decoration:none;">VIEW BUILD LOGS →</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL TASK LOG -->
+  <div class="panel wide">
+    <div class="panel-title">ALL AGENT TASKS — LIVE FEED</div>
+    <div class="task-list" id="allTaskFeed" style="max-height:500px">Loading...</div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://sbeqrkvxgfymrsqgugqz.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZXFya3Z4Z2Z5bXJzcWd1Z3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQ1MTUsImV4cCI6MjA5MDc5MDUxNX0.UzlVmJc--MJMsDaXtG9TGJahTigc-TD1YVESpsWJCLw';
+const H = { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY };
+
+async function sb(table, params) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, { headers: H });
+    if (!r.ok) return [];
+    return await r.json();
+  } catch(e) { return []; }
+}
+
+function timeAgo(iso) {
+  if (!iso) return 'never';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  return Math.floor(m/60) + 'h ago';
+}
+
+const KNOWN_AGENTS = ['rat','roach','rooster','raccoon','reign','rove','rhino','rockbird','wren','reel','rosefinch','robin','rhino'];
+
+async function loadAgents(tasks) {
+  const byAgent = {};
+  for (const t of tasks) {
+    const a = t.to_agent || 'unknown';
+    if (!byAgent[a]) byAgent[a] = { pending: 0, in_progress: 0, completed: 0, failed: 0, latest: '' };
+    byAgent[a][t.status] = (byAgent[a][t.status] || 0) + 1;
+    if (!byAgent[a].latest) byAgent[a].latest = t.task_type;
+  }
+
+  const agents = ['rat','roach','rooster','raccoon','reign','rove','rhino','rockbird','wren','reel'];
+  let html = '';
+  let activeCount = 0;
+
+  for (const name of agents) {
+    const data = byAgent[name] || {};
+    const isActive = (data.in_progress || 0) > 0;
+    const hasFailed = (data.failed || 0) > 0 && !isActive;
+    const cls = isActive ? 'busy' : hasFailed ? 'failed' : (data.pending > 0 ? 'active' : '');
+    const dotCls = isActive ? 'dot-orange' : hasFailed ? 'dot-red' : (data.pending > 0 ? 'dot-green' : 'dot-gray');
+    if (isActive || data.pending > 0) activeCount++;
+
+    html += `<div class="agent-card ${cls}">
+      <div class="agent-name"><span class="status-dot ${dotCls}"></span>${name.toUpperCase()}</div>
+      <div class="agent-status">${data.in_progress||0} active · ${data.pending||0} pending · ${data.completed||0} done</div>
+      <div class="agent-task">${data.latest || 'idle'}</div>
+    </div>`;
+  }
+
+  document.getElementById('agentGrid').innerHTML = html;
+  document.getElementById('activeCount').textContent = activeCount;
+}
+
+async function loadTasks(tasks) {
+  const active = tasks.filter(t => t.status === 'in_progress' || t.status === 'pending').slice(0, 30);
+  document.getElementById('taskCount').textContent = active.length;
+
+  let html = '';
+  for (const t of active) {
+    html += `<div class="task-row ${t.status}">
+      <span class="task-agent">${(t.to_agent||'?').substring(0,8)}</span>
+      <span class="task-type">${t.task_type}</span>
+      <span class="task-status status-${t.status}">${t.status}</span>
+      <span class="task-time">${timeAgo(t.created_at)}</span>
+    </div>`;
+  }
+  document.getElementById('taskFeed').innerHTML = html || '<div style="color:#444;padding:8px;font-size:11px">No active tasks</div>';
+}
+
+async function loadAllTasks(tasks) {
+  let html = '';
+  for (const t of tasks.slice(0, 80)) {
+    html += `<div class="task-row ${t.status}">
+      <span class="task-agent">${(t.from_agent||'?').substring(0,5)}→${(t.to_agent||'?').substring(0,8)}</span>
+      <span class="task-type">${t.task_type}${t.rationale ? ' — '+t.rationale.substring(0,60) : ''}</span>
+      <span class="task-status status-${t.status}">${t.status}</span>
+      <span class="task-time">${timeAgo(t.created_at)}</span>
+    </div>`;
+  }
+  document.getElementById('allTaskFeed').innerHTML = html;
+}
+
+async function loadStats(tasks) {
+  document.getElementById('statTotal').textContent = tasks.length;
+  document.getElementById('statActive').textContent = tasks.filter(t=>t.status==='in_progress').length;
+  document.getElementById('statDone').textContent = tasks.filter(t=>t.status==='completed').length;
+  document.getElementById('statFailed').textContent = tasks.filter(t=>t.status==='failed').length;
+}
+
+async function loadAll() {
+  document.getElementById('lastUpdate').textContent = 'Refreshing...';
+  const tasks = await sb('agent_tasks', 'order=created_at.desc&limit=200&select=from_agent,to_agent,task_type,status,rationale,created_at');
+  await loadAgents(tasks);
+  await loadTasks(tasks);
+  await loadAllTasks(tasks);
+  await loadStats(tasks);
+  document.getElementById('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+loadAll();
+setInterval(loadAll, 15000);
+</script>
+</body>
+</html>
