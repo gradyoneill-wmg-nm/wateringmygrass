@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NON MAGIC — LAUNCH FILM</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; overflow: hidden; font-family: 'Space Mono', monospace; }
+canvas { display: block; }
+#overlay { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+#text-layer { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.caption { font-family: 'Georgia', serif; font-size: 0px; color: #fff; text-align: center; opacity: 0; letter-spacing: 2px; line-height: 1.3; transition: all 0.8s ease; max-width: 700px; padding: 0 40px; }
+.caption.active { opacity: 1; font-size: 36px; }
+.caption.small { font-size: 14px !important; color: #F5841F; letter-spacing: 4px; font-family: 'Courier New', monospace; }
+.caption em { color: #F5841F; font-style: normal; }
+#progress { position: fixed; bottom: 0; left: 0; height: 2px; background: #F5841F; z-index: 100; transition: width 0.1s linear; width: 0%; }
+#replay { position: fixed; bottom: 24px; right: 24px; font-family: 'Courier New', monospace; font-size: 11px; color: #333; cursor: pointer; letter-spacing: 2px; z-index: 100; border: 1px solid #333; padding: 8px 16px; }
+#replay:hover { color: #F5841F; border-color: #F5841F; }
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="overlay"></div>
+<div id="text-layer">
+  <div class="caption" id="cap"></div>
+</div>
+<div id="progress"></div>
+<button id="replay" onclick="startFilm()">↺ REPLAY</button>
+
+<script>
+const W = window.innerWidth, H = window.innerHeight;
+const canvas = document.getElementById('c');
+canvas.width = W; canvas.height = H;
+const ctx = canvas.getContext('2d');
+
+// ── SCENE DEFINITIONS ────────────────────────────────────────────────────────
+const TOTAL_DURATION = 62000; // 62 seconds
+
+const SCENES = [
+  // Scene 1: Black — nothing. 2 seconds.
+  { start: 0, end: 2000, type: 'black', text: '', textClass: '' },
+
+  // Scene 2: Single frequency sine wave draws itself slowly
+  { start: 2000, end: 6000, type: 'sinewave', hz: 7.83, color: '#F5841F', text: '', textClass: '' },
+
+  // Scene 3: Text appears — "Your nervous system has a frequency."
+  { start: 5000, end: 9500, type: 'sinewave', hz: 7.83, color: '#F5841F', text: 'Your nervous system has a frequency.', textClass: 'active' },
+
+  // Scene 4: More waves layer in, different Hz
+  { start: 9500, end: 13000, type: 'multilayer', text: '', textClass: '' },
+
+  // Scene 5: "Nobody has been using it."
+  { start: 12000, end: 16000, type: 'multilayer', text: 'Nobody has been using it.', textClass: 'active' },
+
+  // Scene 6: Brainwave explosion — all 5 bands appear
+  { start: 16000, end: 20000, type: 'brainwaves', text: '', textClass: '' },
+
+  // Scene 7: "Until now."
+  { start: 19000, end: 23000, type: 'brainwaves', text: 'Until <em>now.</em>', textClass: 'active' },
+
+  // Scene 8: Particle universe
+  { start: 23000, end: 27000, type: 'particles', text: '', textClass: '' },
+
+  // Scene 9: MIT citation
+  { start: 26000, end: 31000, type: 'particles', text: '40Hz GAMMA\nMIT Iaccarino et al., 2016', textClass: 'active small' },
+
+  // Scene 10: Body visualization
+  { start: 31000, end: 35000, type: 'body', text: '', textClass: '' },
+
+  // Scene 11: "Your wearable data drives the prescription."
+  { start: 34000, end: 39000, type: 'body', text: 'Your wearable data.\nYour prescription.', textClass: 'active' },
+
+  // Scene 12: Gyroscope nodes
+  { start: 39000, end: 43000, type: 'matrix', text: '', textClass: '' },
+
+  // Scene 13: Product name
+  { start: 43000, end: 49000, type: 'matrix', text: 'NON MAGIC', textClass: 'active' },
+
+  // Scene 14: April 18
+  { start: 49000, end: 54000, type: 'countdown', text: 'APRIL 18\n2PM ET\nGLOBAL SESSION', textClass: 'active small' },
+
+  // Scene 15: Final — just the logo on black
+  { start: 54000, end: 62000, type: 'final', text: 'NON MAGIC\nThis is not magic.\nIt\'s science.', textClass: 'active' },
+];
+
+// ── PARTICLE SYSTEM ──────────────────────────────────────────────────────────
+const particles = Array.from({ length: 200 }, () => ({
+  x: Math.random() * W, y: Math.random() * H,
+  vx: (Math.random() - 0.5) * 1.2, vy: (Math.random() - 0.5) * 1.2,
+  size: 0.5 + Math.random() * 2.5,
+  phase: Math.random() * Math.PI * 2,
+  layer: Math.floor(Math.random() * 3),
+}));
+
+// ── BRAINWAVE BANDS ───────────────────────────────────────────────────────────
+const BANDS = [
+  { name: 'DELTA', hz: 2, color: '#4499FF', y: 0.20 },
+  { name: 'THETA', hz: 6, color: '#CC44FF', y: 0.35 },
+  { name: 'ALPHA', hz: 10, color: '#4CBB17', y: 0.50 },
+  { name: 'BETA', hz: 20, color: '#FFD60A', y: 0.65 },
+  { name: 'GAMMA', hz: 40, color: '#F5841F', y: 0.80 },
+];
+
+// ── MATRIX NODES ──────────────────────────────────────────────────────────────
+const nodes = Array.from({ length: 24 }, (_, i) => ({
+  x: W * 0.1 + Math.random() * W * 0.8,
+  y: H * 0.1 + Math.random() * H * 0.8,
+  vx: (Math.random() - 0.5) * 0.8,
+  vy: (Math.random() - 0.5) * 0.8,
+  size: 4 + Math.random() * 20,
+  color: ['#F5841F', '#4CBB17', '#CC44FF', '#4499FF'][i % 4],
+  label: ['40Hz', '7.83Hz', 'BOX', 'WIM', '528Hz', 'GYAN', '10Hz', '2Hz', 'NADI', 'THETA'][i % 10],
+}));
+
+// ── BODY POINTS ───────────────────────────────────────────────────────────────
+const bodyPoints = [
+  { x: 0.5, y: 0.08, color: '#F5841F', label: 'BRAIN' },
+  { x: 0.42, y: 0.26, color: '#FF3B5C', label: 'HEART' },
+  { x: 0.5, y: 0.34, color: '#F5841F', label: 'SOLAR PLEXUS' },
+  { x: 0.5, y: 0.44, color: '#CC44FF', label: 'SACRAL' },
+  { x: 0.35, y: 0.52, color: '#4CBB17', label: 'L HIP' },
+  { x: 0.65, y: 0.52, color: '#4CBB17', label: 'R HIP' },
+  { x: 0.5, y: 0.14, color: '#4499FF', label: 'THROAT' },
+];
+
+// ── RENDER FUNCTIONS ──────────────────────────────────────────────────────────
+
+function renderBlack(t) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+}
+
+function renderSinewave(t, hz, color, alpha = 1) {
+  ctx.fillStyle = `rgba(0,0,0,${alpha > 0.8 ? 0.05 : 0})`;
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = alpha;
+  ctx.beginPath();
+  const amp = 60 + Math.sin(t * 0.001) * 20;
+  const freq = hz * 0.008;
+  for (let x = 0; x < W; x++) {
+    const y = H / 2 + Math.sin((x * freq) + t * 0.002 * hz) * amp;
+    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+function renderMultilayer(t) {
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, W, H);
+  const colors = ['#F5841F88', '#4CBB1766', '#CC44FF55'];
+  const hzArr = [7.83, 40, 6];
+  colors.forEach((col, i) => {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const amp = 40 + i * 25;
+    for (let x = 0; x < W; x++) {
+      const y = H / 2 + H * 0.1 * (i - 1) + Math.sin((x * hzArr[i] * 0.006) + t * 0.002 * hzArr[i]) * amp;
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  });
+}
+
+function renderBrainwaves(t, progress) {
+  ctx.fillStyle = 'rgba(0,0,0,0.06)';
+  ctx.fillRect(0, 0, W, H);
+  BANDS.forEach((band, i) => {
+    const visible = progress > i * 0.15;
+    if (!visible) return;
+    ctx.strokeStyle = band.color;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = Math.min(1, (progress - i * 0.15) * 5);
+    ctx.beginPath();
+    const amp = 18 + (4 - i) * 8;
+    const y0 = H * band.y;
+    for (let x = 0; x < W; x++) {
+      const y = y0 + Math.sin((x * band.hz * 0.012) + t * 0.003 * band.hz) * amp;
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = band.color;
+    ctx.font = '10px Courier New';
+    ctx.fillText(band.name + ' ' + band.hz + 'Hz', 20, y0 - 8);
+    ctx.globalAlpha = 1;
+  });
+}
+
+function renderParticles(t) {
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    const pulse = 0.4 + 0.6 * Math.abs(Math.sin(t * 0.001 + p.phase));
+    ctx.globalAlpha = pulse * 0.8;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = '#F5841F';
+    ctx.fill();
+  });
+  // Connect nearby
+  for (let i = 0; i < particles.length; i += 2) {
+    for (let j = i + 1; j < particles.length; j += 2) {
+      const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if (d < 80) {
+        ctx.globalAlpha = (1 - d / 80) * 0.12;
+        ctx.strokeStyle = '#F5841F';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function renderBody(t) {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(0, 0, W, H);
+  // Simple body silhouette
+  const cx = W / 2, cy = H / 2;
+  ctx.strokeStyle = '#1E1E1C';
+  ctx.lineWidth = 1;
+  // Head
+  ctx.beginPath(); ctx.arc(cx, cy - 180, 50, 0, Math.PI * 2); ctx.stroke();
+  // Body
+  ctx.beginPath(); ctx.moveTo(cx - 40, cy - 130); ctx.lineTo(cx - 60, cy - 20);
+  ctx.lineTo(cx - 50, cy + 120); ctx.lineTo(cx + 50, cy + 120);
+  ctx.lineTo(cx + 60, cy - 20); ctx.lineTo(cx + 40, cy - 130); ctx.closePath(); ctx.stroke();
+
+  // Pulse points
+  bodyPoints.forEach((p, i) => {
+    const px = W * p.x, py = cy - 200 + H * 0.4 * (i * 0.14);
+    const pulse = 0.5 + 0.5 * Math.sin(t * 0.003 + i * 0.8);
+    // Ripple
+    ctx.globalAlpha = pulse * 0.3;
+    ctx.beginPath();
+    ctx.arc(px, py + (i * 30), 20 + pulse * 15, 0, Math.PI * 2);
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Core dot
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.arc(px, py + (i * 30), 6, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+    // Label
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = p.color;
+    ctx.font = '9px Courier New';
+    ctx.fillText(p.label, px + 12, py + (i * 30) + 4);
+    ctx.globalAlpha = 1;
+  });
+}
+
+function renderMatrix(t) {
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, W, H);
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < 50 || n.x > W - 50) n.vx *= -1;
+    if (n.y < 50 || n.y > H - 50) n.vy *= -1;
+  });
+  // Lines
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      if (d < 150) {
+        ctx.globalAlpha = (1 - d / 150) * 0.15;
+        ctx.strokeStyle = nodes[i].color;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+      }
+    }
+  }
+  // Nodes
+  nodes.forEach(n => {
+    const pulse = 0.7 + 0.3 * Math.sin(t * 0.002 + n.x * 0.01);
+    ctx.globalAlpha = pulse;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.size / 2, 0, Math.PI * 2);
+    ctx.fillStyle = n.color + '33';
+    ctx.fill();
+    ctx.strokeStyle = n.color;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = n.color;
+    ctx.font = '9px Courier New';
+    ctx.fillText(n.label, n.x - 12, n.y + 3);
+    ctx.globalAlpha = 1;
+  });
+}
+
+function renderCountdown(t) {
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  ctx.fillRect(0, 0, W, H);
+  const target = new Date('2026-04-18T14:00:00-04:00').getTime();
+  const diff = Math.max(0, target - Date.now());
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const pulse = 0.7 + 0.3 * Math.sin(t * 0.004);
+  ctx.globalAlpha = pulse;
+  ctx.fillStyle = '#F5841F';
+  ctx.font = `bold ${Math.min(W / 6, 120)}px 'Courier New'`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${String(d).padStart(2,'0')}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`, W/2, H/2 + 20);
+  ctx.globalAlpha = 0.5;
+  ctx.font = '14px Courier New';
+  ctx.fillText('DAYS : HOURS : MINUTES : SECONDS', W/2, H/2 + 60);
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'left';
+}
+
+function renderFinal(t, progress) {
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  ctx.fillRect(0, 0, W, H);
+  // Subtle particles
+  particles.slice(0, 30).forEach(p => {
+    const pulse = 0.2 + 0.2 * Math.abs(Math.sin(t * 0.001 + p.phase));
+    ctx.globalAlpha = pulse;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#F5841F'; ctx.fill();
+    p.x += p.vx * 0.3; p.y += p.vy * 0.3;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+  });
+  ctx.globalAlpha = 1;
+}
+
+// ── ANIMATION LOOP ────────────────────────────────────────────────────────────
+let startTime = null;
+let animFrame = null;
+const capEl = document.getElementById('cap');
+const progressEl = document.getElementById('progress');
+
+function getCurrentScene(elapsed) {
+  for (let i = SCENES.length - 1; i >= 0; i--) {
+    if (elapsed >= SCENES[i].start) return SCENES[i];
+  }
+  return SCENES[0];
+}
+
+function animate(timestamp) {
+  if (!startTime) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+  const progress = Math.min(elapsed / TOTAL_DURATION, 1);
+  progressEl.style.width = (progress * 100) + '%';
+
+  const scene = getCurrentScene(elapsed);
+  const sceneProgress = Math.min((elapsed - scene.start) / (scene.end - scene.start), 1);
+
+  switch (scene.type) {
+    case 'black': renderBlack(elapsed); break;
+    case 'sinewave': renderSinewave(elapsed, scene.hz, scene.color); break;
+    case 'multilayer': renderMultilayer(elapsed); break;
+    case 'brainwaves': renderBrainwaves(elapsed, sceneProgress); break;
+    case 'particles': renderParticles(elapsed); break;
+    case 'body': renderBody(elapsed); break;
+    case 'matrix': renderMatrix(elapsed); break;
+    case 'countdown': renderCountdown(elapsed); break;
+    case 'final': renderFinal(elapsed, sceneProgress); break;
+  }
+
+  // Text
+  if (scene.text !== capEl.innerHTML || scene.textClass !== capEl.className.replace('caption ','')) {
+    capEl.style.opacity = '0';
+    setTimeout(() => {
+      capEl.innerHTML = scene.text.replace(/\n/g, '<br>');
+      capEl.className = 'caption ' + scene.textClass;
+    }, 400);
+  }
+
+  if (elapsed < TOTAL_DURATION) {
+    animFrame = requestAnimationFrame(animate);
+  } else {
+    capEl.innerHTML = '';
+    capEl.className = 'caption';
+  }
+}
+
+function startFilm() {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  startTime = null;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+  capEl.innerHTML = '';
+  capEl.className = 'caption';
+  progressEl.style.width = '0%';
+  animFrame = requestAnimationFrame(animate);
+}
+
+// Auto-start
+startFilm();
+</script>
+</body>
+</html>
