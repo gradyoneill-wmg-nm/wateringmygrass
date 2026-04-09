@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>April 18 — Non Magic x Watering My Grass</title>
+<meta name="description" content="1,000 people. Washington Square Park. April 18. The world's first synchronized frequency meditation. Free. Science-backed.">
+<meta property="og:title" content="1,000 People. Washington Square Park. April 18.">
+<meta property="og:description" content="The world's first synchronized frequency meditation. Free. Open to all.">
+<meta property="og:image" content="https://wateringmygrass-yk9a-ih6gfj8hd-nonmagic.vercel.app/april18-og.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0C0C0A;
+  --text: #E8E8E0;
+  --orange: #F5841F;
+  --green: #4CBB17;
+  --border: #1E1E1C;
+  --dim: #555;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 40px;
+  background: rgba(12,12,10,0.95);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+}
+.nav-logo { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--orange); letter-spacing: 3px; font-weight: 700; text-decoration: none; }
+.nav-date { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--green); letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 120px 40px 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(245,132,31,0.06) 0%, transparent 70%);
+}
+canvas#waveBg { position: absolute; inset: 0; z-index: 0; opacity: 0.4; }
+.hero-content { position: relative; z-index: 1; max-width: 900px; }
+.hero-tag {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--orange);
+  border: 1px solid rgba(245,132,31,0.3);
+  padding: 6px 16px;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+}
+.hero-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 1.0;
+  color: #fff;
+  margin-bottom: 24px;
+}
+.hero-headline span { color: var(--orange); }
+.hero-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(16px, 2.5vw, 22px);
+  color: #888;
+  font-weight: 300;
+  max-width: 600px;
+  margin: 0 auto 16px;
+  line-height: 1.6;
+}
+.hero-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 2px;
+  margin-bottom: 48px;
+}
+.hero-meta span { color: var(--orange); }
+
+/* COUNTDOWN */
+.countdown {
+  display: flex; gap: 32px; justify-content: center; margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+.countdown-unit { text-align: center; }
+.countdown-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  display: block;
+}
+.countdown-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  margin-top: 8px;
+  display: block;
+}
+
+/* CTA */
+.cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--orange);
+  color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 16px 40px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-primary:hover { background: #fff; transform: translateY(-2px); }
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 16px 40px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-secondary:hover { border-color: var(--orange); color: var(--orange); }
+
+/* SECTION */
+section { padding: 100px 40px; max-width: 1100px; margin: 0 auto; }
+.section-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--orange);
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+  line-height: 1.1;
+}
+.section-body {
+  font-size: 18px;
+  color: #888;
+  line-height: 1.8;
+  max-width: 680px;
+}
+
+/* WHAT IS THIS */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  margin-top: 64px;
+}
+.feature-card {
+  background: var(--bg);
+  padding: 40px 32px;
+}
+.feature-icon { font-size: 32px; margin-bottom: 16px; }
+.feature-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.feature-desc { font-size: 14px; color: var(--dim); line-height: 1.7; }
+
+/* SCHEDULE */
+.schedule { margin-top: 64px; }
+.schedule-item {
+  display: flex; gap: 32px; align-items: flex-start;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+}
+.schedule-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--orange);
+  letter-spacing: 1px;
+  min-width: 80px;
+  padding-top: 2px;
+}
+.schedule-content {}
+.schedule-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.schedule-desc { font-size: 14px; color: var(--dim); line-height: 1.6; }
+
+/* SCIENCE */
+.science-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-top: 64px;
+}
+.science-card {
+  border: 1px solid var(--border);
+  padding: 32px;
+  position: relative;
+}
+.science-hz {
+  font-family: 'Space Mono', monospace;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.science-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.science-desc { font-size: 14px; color: var(--dim); line-height: 1.7; margin-bottom: 16px; }
+.science-cite {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+/* FORM */
+.rsvp-form-section {
+  background: #0f0f0d;
+  border: 1px solid var(--border);
+  padding: 80px 60px;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+.form-group { margin-bottom: 16px; text-align: left; }
+.form-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--orange); }
+.form-input::placeholder { color: #333; }
+.form-select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  padding: 14px 16px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+.form-select:focus { border-color: var(--orange); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-submit {
+  width: 100%;
+  background: var(--orange);
+  color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 18px;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.form-submit:hover { background: #fff; }
+.form-note { font-size: 12px; color: #333; margin-top: 16px; line-height: 1.6; }
+.form-success { display: none; }
+.form-success.active { display: block; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 60px 40px;
+  border-top: 1px solid var(--border);
+}
+.footer-logo { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--orange); letter-spacing: 3px; margin-bottom: 16px; }
+.footer-text { font-size: 13px; color: #333; }
+.footer-links { display: flex; gap: 32px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+.footer-link { font-family: 'Space Mono', monospace; font-size: 10px; color: #333; letter-spacing: 2px; text-decoration: none; }
+.footer-link:hover { color: var(--orange); }
+
+/* TICKER */
+.ticker {
+  background: var(--orange);
+  color: #000;
+  padding: 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-inner { display: inline-block; animation: ticker 20s linear infinite; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.ticker-text {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  margin-right: 60px;
+}
+
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  section { padding: 60px 20px; }
+  .rsvp-form-section { padding: 48px 24px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .schedule-item { flex-direction: column; gap: 8px; }
+  .hero { padding: 100px 20px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">WATERING MY GRASS</a>
+  <div class="nav-date">
+    <span class="dot"></span>
+    <span>APR 18 // 1PM // WSP</span>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker" style="margin-top: 61px;">
+  <span class="ticker-inner">
+    <span class="ticker-text">APRIL 18 — WASHINGTON SQUARE PARK — FREE — 1PM — 1,000 PEOPLE — SYNCHRONIZED FREQUENCY MEDITATION — NYC</span>
+    <span class="ticker-text">APRIL 18 — WASHINGTON SQUARE PARK — FREE — 1PM — 1,000 PEOPLE — SYNCHRONIZED FREQUENCY MEDITATION — NYC</span>
+    <span class="ticker-text">APRIL 18 — WASHINGTON SQUARE PARK — FREE — 1PM — 1,000 PEOPLE — SYNCHRONIZED FREQUENCY MEDITATION — NYC</span>
+  </span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <canvas id="waveBg"></canvas>
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Free Public Event — NYC</div>
+    <h1 class="hero-headline">
+      1,000 People.<br>
+      <span>Washington Square Park.</span><br>
+      April 18.
+    </h1>
+    <p class="hero-sub">The world's first synchronized frequency meditation. Science-backed. Open to everyone.</p>
+    <div class="hero-meta">
+      SATURDAY APRIL 18, 2026 &nbsp;·&nbsp; <span>1:00 PM – 4:00 PM</span> &nbsp;·&nbsp; WASHINGTON SQUARE PARK, NYC
+    </div>
+    <div class="countdown" id="countdown">
+      <div class="countdown-unit"><span class="countdown-num" id="days">09</span><span class="countdown-label">DAYS</span></div>
+      <div class="countdown-unit"><span class="countdown-num" id="hours">00</span><span class="countdown-label">HOURS</span></div>
+      <div class="countdown-unit"><span class="countdown-num" id="mins">00</span><span class="countdown-label">MINUTES</span></div>
+      <div class="countdown-unit"><span class="countdown-num" id="secs">00</span><span class="countdown-label">SECONDS</span></div>
+    </div>
+    <div class="cta-group">
+      <a href="#rsvp" class="btn-primary">RSVP — It's Free →</a>
+      <a href="#what" class="btn-secondary">What Is This?</a>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- WHAT IS THIS -->
+<section id="what">
+  <div class="section-tag">The Event</div>
+  <h2 class="section-title">This is not a yoga class.<br>It's a scientific experiment.</h2>
+  <p class="section-body">We're bringing 1,000 people together in Washington Square Park to meditate at the same frequency, at the same time. Using the same brain-state science MIT researchers used to improve cognition in Alzheimer's patients. No crystals. No incense. Just neuroscience and a speaker system.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">40Hz Gamma Meditation</div>
+      <div class="feature-desc">Synchronized frequency audio that drives your brain into a focused, coherent state. MIT-researched. Never done at this scale.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-title">Non Magic App Launch</div>
+      <div class="feature-desc">The first AI-personalized frequency meditation app. Download free April 10–18. Goes paid on April 18. If you're here, you're a founding member.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💓</div>
+      <div class="feature-title">Live HRV Tracking</div>
+      <div class="feature-desc">Check your Heart Rate Variability before and after. See your nervous system change in real time. Real data. No vibes.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌿</div>
+      <div class="feature-title">Wellness Expo</div>
+      <div class="feature-desc">NYC's best wellness brands, breathwork practitioners, and sound healers. All free. All in one park.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SCHEDULE -->
+<section id="schedule">
+  <div class="section-tag">Run of Show</div>
+  <h2 class="section-title">What's happening, hour by hour.</h2>
+  <div class="schedule">
+    <div class="schedule-item">
+      <div class="schedule-time">12:30 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">Doors Open — Vendor Expo</div>
+        <div class="schedule-desc">Explore wellness brands, download the Non Magic app at onboarding stations, get your baseline HRV reading.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">1:00 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">Welcome + Origin Story</div>
+        <div class="schedule-desc">Grady O'Neill opens: 2 months as a monk in Thailand. 2 weeks in Papua New Guinea. Here's why this app exists.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">1:10 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">Breathwork Activation</div>
+        <div class="schedule-desc">10-minute group breathwork to prime the nervous system before the main session.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">1:20 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">The Science Briefing</div>
+        <div class="schedule-desc">What is 40Hz gamma? What is Schumann resonance? What's about to happen to your brain in the next 40 minutes?</div>
+      </div>
+    </div>
+    <div class="schedule-item" style="border-left: 2px solid var(--orange); padding-left: 24px;">
+      <div class="schedule-time">1:30 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name" style="color: var(--orange);">SYNCHRONIZED MEDITATION — 40 MINUTES</div>
+        <div class="schedule-desc">1,000 people. Same frequency. Same moment. Washington Square Park goes silent.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">2:10 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">60-Second Silence</div>
+        <div class="schedule-desc">After the session ends. Nothing is said. Just the city and 1,000 changed nervous systems.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">2:15 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">HRV Data Reveal</div>
+        <div class="schedule-desc">What happened to the aggregate HRV of 1,000 people in 40 minutes? We find out live.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">2:30 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">Community + Expo</div>
+        <div class="schedule-desc">Vendors open. Live app onboarding. Second optional 15-minute session. Community.</div>
+      </div>
+    </div>
+    <div class="schedule-item">
+      <div class="schedule-time">3:30 PM</div>
+      <div class="schedule-content">
+        <div class="schedule-name">Closing + Founding Member Announcement</div>
+        <div class="schedule-desc">Grady closes. Pricing reveal. Everyone here today is a founding member of Non Magic.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SCIENCE -->
+<section id="science">
+  <div class="section-tag">The Science</div>
+  <h2 class="section-title">This is not magic.<br>It's frequencies.</h2>
+  <p class="section-body">Every session uses specific Hz frequencies with documented research behind them. No claims beyond what the science supports.</p>
+  <div class="science-grid">
+    <div class="science-card">
+      <div class="science-hz">40Hz</div>
+      <div class="science-name">Gamma — Focus + Cognitive Activation</div>
+      <div class="science-desc">MIT researchers (Iaccarino et al., 2016) demonstrated 40Hz gamma entrainment reduces amyloid plaques in Alzheimer's mouse models. Also associated with heightened attention and information integration in healthy adults.</div>
+      <div class="science-cite">Iaccarino et al., Nature, 2016 · MIT Picower Institute</div>
+    </div>
+    <div class="science-card">
+      <div class="science-hz">7.83Hz</div>
+      <div class="science-name">Schumann Resonance — Grounding</div>
+      <div class="science-desc">Earth's electromagnetic resonance frequency. Preliminary research suggests entrainment at this frequency may support parasympathetic nervous system activity and reduce stress markers.</div>
+      <div class="science-cite">Schumann, 1952 · Pobachenko et al., Biophysics, 2006</div>
+    </div>
+    <div class="science-card">
+      <div class="science-hz">10Hz</div>
+      <div class="science-name">Alpha — Calm Focus</div>
+      <div class="science-desc">Alpha waves (8-12Hz) are the brain's signature of alert relaxation. Elevated in experienced meditators. Associated with flow states and reduced anxiety.</div>
+      <div class="science-cite">Neurofeedback research · Klimesch et al., Brain Research Reviews, 1999</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- RSVP FORM -->
+<section id="rsvp" style="max-width: 760px;">
+  <div class="section-tag">Reserve Your Spot</div>
+  <h2 class="section-title">It's free.<br>Be there.</h2>
+  <p class="section-body" style="margin-bottom: 48px;">RSVP to get location details, day-of updates, and early access to the Non Magic app (free April 10–18).</p>
+
+  <div class="rsvp-form-section">
+    <div id="form-view">
+      <form id="rsvpForm" onsubmit="handleSubmit(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" placeholder="Grady" required id="firstName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" placeholder="O'Neill" id="lastName">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="you@email.com" required id="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">How did you hear about this?</label>
+          <select class="form-select" id="source">
+            <option value="">Select...</option>
+            <option value="tiktok">TikTok</option>
+            <option value="instagram">Instagram</option>
+            <option value="twitter">Twitter / X</option>
+            <option value="friend">Friend / Word of mouth</option>
+            <option value="wmg">Watering My Grass newsletter</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Are you bringing anyone?</label>
+          <select class="form-select" id="guests">
+            <option value="just_me">Just me</option>
+            <option value="1">Me + 1 person</option>
+            <option value="2">Me + 2 people</option>
+            <option value="3plus">Me + 3 or more</option>
+          </select>
+        </div>
+        <button type="submit" class="form-submit">RSVP — I'm Coming →</button>
+        <p class="form-note">Free. No ticket needed. Location: Washington Square Park, Manhattan (exact meeting point sent by email). Questions? hello@wateringmygrass.com</p>
+      </form>
+    </div>
+
+    <div class="form-success" id="successView">
+      <div style="font-size: 48px; margin-bottom: 24px;">✓</div>
+      <div style="font-family: 'Space Mono', monospace; font-size: 14px; color: var(--orange); letter-spacing: 2px; margin-bottom: 16px;">YOU'RE IN.</div>
+      <div style="font-family: 'Playfair Display', serif; font-size: 28px; color: #fff; margin-bottom: 16px;">See you at Washington Square Park.</div>
+      <p style="font-size: 15px; color: #888; line-height: 1.7; margin-bottom: 32px;">Check your email for confirmation and location details. The Non Magic app is free to download April 10–18 — start your first session before the event.</p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="https://apps.apple.com/app/nonmagic" class="btn-primary" style="font-size: 11px; padding: 12px 24px;">Download on iOS →</a>
+        <a href="https://twitter.com/intent/tweet?text=I'm+going+to+the+world's+first+synchronized+frequency+meditation+in+Washington+Square+Park+on+April+18.+Free.+1,000+people.+Non+Magic.+wateringmygrass.com/april18" target="_blank" class="btn-secondary" style="font-size: 11px; padding: 12px 24px;">Share on Twitter →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-tag">Who Built This</div>
+  <h2 class="section-title">A gym bro who went<br>to a monastery.</h2>
+  <p class="section-body">Grady O'Neill started meditating to lower his heart rate as a competitive triathlete. He wasn't broken. He was optimizing. Two months as a monk in Thailand. Two weeks with a Papua New Guinea tribe. He came back and built Non Magic — not because meditation is magic, but because the science is real and nobody was taking it seriously.</p>
+  <p class="section-body" style="margin-top: 24px;">Watering My Grass is the publication covering the intersection of science, wellness, and culture. The journalism the wellness industry doesn't want you to read.</p>
+  <div style="margin-top: 48px; display: flex; gap: 16px; flex-wrap: wrap;">
+    <a href="/" class="btn-secondary">Read Watering My Grass →</a>
+    <a href="#rsvp" class="btn-primary">RSVP for April 18 →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">WATERING MY GRASS</div>
+  <div class="footer-text">The wellness journalism you actually need. Published in New York.</div>
+  <div class="footer-links">
+    <a href="/" class="footer-link">Home</a>
+    <a href="/privacy.html" class="footer-link">Privacy</a>
+    <a href="mailto:hello@wateringmygrass.com" class="footer-link">Contact</a>
+    <a href="#rsvp" class="footer-link">RSVP April 18</a>
+  </div>
+  <div style="margin-top: 32px; font-family: 'Space Mono', monospace; font-size: 10px; color: #222; letter-spacing: 2px;">
+    © 2026 WATERING MY GRASS · NON MAGIC, INC.
+  </div>
+</footer>
+
+<script>
+// Countdown timer
+function updateCountdown() {
+  const event = new Date('2026-04-18T13:00:00-04:00');
+  const now = new Date();
+  const diff = event - now;
+  if (diff <= 0) {
+    document.getElementById('countdown').innerHTML = '<div style="font-family:Space Mono,monospace;font-size:24px;color:var(--orange);letter-spacing:3px;">HAPPENING NOW</div>';
+    return;
+  }
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  document.getElementById('days').textContent = String(days).padStart(2,'0');
+  document.getElementById('hours').textContent = String(hours).padStart(2,'0');
+  document.getElementById('mins').textContent = String(mins).padStart(2,'0');
+  document.getElementById('secs').textContent = String(secs).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// Wave background
+const canvas = document.getElementById('waveBg');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+let t = 0;
+function drawWaves() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const waves = [
+    { amp: 40, freq: 0.008, speed: 0.02, color: 'rgba(245,132,31,0.15)', y: canvas.height * 0.5 },
+    { amp: 25, freq: 0.012, speed: 0.015, color: 'rgba(76,187,23,0.08)', y: canvas.height * 0.6 },
+    { amp: 60, freq: 0.005, speed: 0.01, color: 'rgba(245,132,31,0.06)', y: canvas.height * 0.4 },
+  ];
+  waves.forEach(w => {
+    ctx.beginPath();
+    for (let x = 0; x <= canvas.width; x += 4) {
+      const y = w.y + Math.sin(x * w.freq + t * w.speed) * w.amp;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = w.color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+  t++;
+  requestAnimationFrame(drawWaves);
+}
+drawWaves();
+
+// Form submit
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.querySelector('.form-submit');
+  btn.textContent = 'SUBMITTING...';
+  btn.disabled = true;
+
+  const data = {
+    firstName: document.getElementById('firstName').value,
+    lastName: document.getElementById('lastName').value,
+    email: document.getElementById('email').value,
+    source: document.getElementById('source').value,
+    guests: document.getElementById('guests').value,
+    timestamp: new Date().toISOString(),
+    event: 'april18_wsp'
+  };
+
+  // Store locally and show success
+  // TODO: Wire to Supabase or Beehiiv
+  console.log('RSVP:', data);
+
+  setTimeout(() => {
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('successView').classList.add('active');
+  }, 800);
+}
+</script>
+</body>
+</html>
