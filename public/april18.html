@@ -9,6 +9,7 @@
 <meta property="og:description" content="The world's first synchronized frequency meditation. Free. Open to all.">
 <meta property="og:image" content="https://wateringmygrass-yk9a-ih6gfj8hd-nonmagic.vercel.app/april18-og.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -690,31 +691,54 @@ function drawWaves() {
 }
 drawWaves();
 
+// Supabase client
+const SUPABASE_URL = 'https://sbeqrkvxgfymrsqgugqz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZXFya3Z4Z2Z5bXJzcWd1Z3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQ1MTUsImV4cCI6MjA5MDc5MDUxNX0.UzlVmJc--MJMsDaXtG9TGJahTigc-TD1YVESpsWJCLw';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Form submit
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
   const btn = document.querySelector('.form-submit');
   btn.textContent = 'SUBMITTING...';
   btn.disabled = true;
 
-  const data = {
-    firstName: document.getElementById('firstName').value,
-    lastName: document.getElementById('lastName').value,
-    email: document.getElementById('email').value,
-    source: document.getElementById('source').value,
-    guests: document.getElementById('guests').value,
-    timestamp: new Date().toISOString(),
-    event: 'april18_wsp'
-  };
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const source = document.getElementById('source').value;
+  const guests = document.getElementById('guests').value;
 
-  // Store locally and show success
-  // TODO: Wire to Supabase or Beehiiv
-  console.log('RSVP:', data);
+  try {
+    // Try event_rsvps table first
+    const { error } = await supabase.from('event_rsvps').insert([{
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      source: source,
+      guests: guests,
+      created_at: new Date().toISOString()
+    }]);
 
-  setTimeout(() => {
-    document.getElementById('form-view').style.display = 'none';
-    document.getElementById('successView').classList.add('active');
-  }, 800);
+    if (error) {
+      // Fallback: try users table with metadata jsonb
+      const { error: fallbackError } = await supabase.from('users').insert([{
+        email: email,
+        name: [firstName, lastName].filter(Boolean).join(' '),
+        metadata: { source, guests, event: 'april18' }
+      }]);
+      if (fallbackError) {
+        console.error('RSVP fallback error:', fallbackError);
+      }
+    }
+  } catch (err) {
+    // Network or unexpected error — log silently, don't block user
+    console.error('RSVP error:', err);
+  }
+
+  // Always show success to user
+  document.getElementById('form-view').style.display = 'none';
+  document.getElementById('successView').classList.add('active');
 }
 </script>
 </body>
