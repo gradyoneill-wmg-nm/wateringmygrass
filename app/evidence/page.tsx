@@ -340,7 +340,7 @@ export default function EvidencePage() {
       nodeGrp.attr('transform', d => `translate(${d.x},${d.y})`);
     });
 
-    return () => sim.stop();
+    return () => { sim.stop(); };
   }, []);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
