@@ -5,6 +5,7 @@ import {
   April18Countdown,
   ParticipantCounter,
 } from "./MeditationCountdown";
+import SessionFlow from "./SessionFlow";
 
 export const metadata: Metadata = {
   title: "5 AM Meditation — Watering My Grass",
@@ -178,6 +179,11 @@ export default function MeditationPage() {
           The livestream goes live at 5:00 AM EST each morning. Missed it? Past
           sessions are archived below.
         </p>
+      </section>
+
+      {/* Mood check-in / session flow */}
+      <section className="max-w-4xl mx-auto px-6 pb-16">
+        <SessionFlow />
       </section>
 
       <div className="border-t border-[#222222]" />
