@@ -22,7 +22,7 @@ interface Contact {
   joinedDaysAgo: number;
   tmCompleted: boolean;
   notes?: string;
-  apr18: boolean;
+  apr18?: boolean;
 }
 
 // ── Mock contacts ─────────────────────────────────────────────────────────────
