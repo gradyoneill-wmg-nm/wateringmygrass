@@ -32,10 +32,12 @@ interface Agent {
 // lastSeen / startedAt are expressed as offsets so the response is always
 // fresh relative to request time. We compute them in GET().
 
-const AGENT_DEFS: Omit<Agent, "lastSeen" | "currentTask"> & {
+type AgentDef = Omit<Agent, "lastSeen" | "currentTask"> & {
   lastSeenMinutesAgo: number;
   task: (Omit<AgentTask, "startedAt"> & { startedMinutesAgo: number }) | null;
-}[] = [
+};
+
+const AGENT_DEFS: AgentDef[] = [
   {
     id: "rat",
     name: "Rat",
