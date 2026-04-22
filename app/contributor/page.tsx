@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ContributorForm from "./ContributorForm";
 
 export const metadata: Metadata = {
   title: "Contribute — Watering My Grass",
@@ -146,115 +147,7 @@ export default function ContributorPage() {
               Tell us about your work.
             </h2>
 
-            <form className="flex flex-col gap-6" action="#" method="POST">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    className="bg-[#111111] border border-[#333333] text-white text-sm px-4 py-3 focus:outline-none focus:border-[#888888] placeholder:text-[#444444]"
-                    placeholder="Your full name"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    className="bg-[#111111] border border-[#333333] text-white text-sm px-4 py-3 focus:outline-none focus:border-[#888888] placeholder:text-[#444444]"
-                    placeholder="you@domain.com"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                  Proposed Article Title & Format
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  className="bg-[#111111] border border-[#333333] text-white text-sm px-4 py-3 focus:outline-none focus:border-[#888888] placeholder:text-[#444444]"
-                  placeholder="e.g. 'The Wim Hof Protocols: What the Data Actually Shows' (Deep Dive)"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                  Your Practice / Background
-                </label>
-                <textarea
-                  name="background"
-                  required
-                  rows={4}
-                  className="bg-[#111111] border border-[#333333] text-white text-sm px-4 py-3 focus:outline-none focus:border-[#888888] placeholder:text-[#444444] resize-none"
-                  placeholder="How long have you been practicing? What's your relevant expertise or lived experience? What gives you the standing to write this piece?"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                  Pitch (3–5 sentences)
-                </label>
-                <textarea
-                  name="pitch"
-                  required
-                  rows={5}
-                  className="bg-[#111111] border border-[#333333] text-white text-sm px-4 py-3 focus:outline-none focus:border-[#888888] placeholder:text-[#444444] resize-none"
-                  placeholder="What's the piece about? What specific angle are you taking? What will the reader know or understand differently when they're done? What primary sources or research will you cite?"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                  Links to Previous Work (optional)
-                </label>
-                <input
-                  type="text"
-                  name="links"
-                  className="bg-[#111111] border border-[#333333] text-white text-sm px-4 py-3 focus:outline-none focus:border-[#888888] placeholder:text-[#444444]"
-                  placeholder="Substack, blog, academic profile, published articles..."
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] tracking-[0.2em] uppercase text-[#555555]">
-                  Relevant Tags (select all that apply)
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {["TM", "Gamma", "HRV", "Frequency", "Breathwork", "Personal", "Beginner", "Analysis", "Research", "Community"].map((tag) => (
-                    <label key={tag} className="flex items-center gap-2 cursor-pointer group">
-                      <input type="checkbox" name="tags" value={tag} className="sr-only peer" />
-                      <span className="text-[9px] tracking-[0.25em] uppercase border border-[#333333] text-[#555555] px-2 py-1 peer-checked:border-white peer-checked:text-white transition-colors group-hover:border-[#888888] cursor-pointer">
-                        {tag}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="px-8 py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors"
-                >
-                  Submit Application →
-                </button>
-                <p className="text-[10px] text-[#444444] mt-4 leading-relaxed">
-                  We review every application and respond within 7–10 business days.
-                  If your pitch is accepted, you'll receive editorial guidelines,
-                  a style guide, and a publication timeline.
-                </p>
-              </div>
-            </form>
+            <ContributorForm />
           </div>
         </div>
       </section>

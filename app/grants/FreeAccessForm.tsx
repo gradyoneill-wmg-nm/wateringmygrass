@@ -6,7 +6,12 @@ type Category = "veteran" | "low-income" | "school" | "";
 
 export default function FreeAccessForm() {
   const [category, setCategory] = useState<Category>("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (submitted) {
     return (
@@ -23,14 +28,34 @@ export default function FreeAccessForm() {
     );
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!category) return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/grants/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, category, message }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Submission failed. Please try again.");
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
-      className="space-y-5"
-    >
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className="block text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-2">
           Full Name
@@ -38,6 +63,8 @@ export default function FreeAccessForm() {
         <input
           type="text"
           required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Your name"
           className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666]"
         />
@@ -50,6 +77,8 @@ export default function FreeAccessForm() {
         <input
           type="email"
           required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
           className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666]"
         />
@@ -83,42 +112,6 @@ export default function FreeAccessForm() {
         </div>
       </div>
 
-      {category === "veteran" && (
-        <div>
-          <label className="block text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-2">
-            Branch of Service
-          </label>
-          <select
-            className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white focus:outline-none focus:border-[#666666]"
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Select branch
-            </option>
-            <option>Army</option>
-            <option>Navy</option>
-            <option>Marine Corps</option>
-            <option>Air Force</option>
-            <option>Space Force</option>
-            <option>Coast Guard</option>
-            <option>National Guard / Reserves</option>
-          </select>
-        </div>
-      )}
-
-      {category === "school" && (
-        <div>
-          <label className="block text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-2">
-            Organization Name
-          </label>
-          <input
-            type="text"
-            placeholder="School, clinic, or organization"
-            className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666]"
-          />
-        </div>
-      )}
-
       <div>
         <label className="block text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-2">
           How will you use Non Magic?
@@ -126,37 +119,23 @@ export default function FreeAccessForm() {
         <textarea
           required
           rows={4}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Tell us about your situation and how free access would help."
           className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666] resize-none"
         />
       </div>
 
-      <div>
-        <label className="block text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-2">
-          How did you hear about us?
-        </label>
-        <select
-          className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white focus:outline-none focus:border-[#666666]"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select one
-          </option>
-          <option>Friend or community member</option>
-          <option>Social media</option>
-          <option>Article or press</option>
-          <option>April 18 global event</option>
-          <option>Non Magic app</option>
-          <option>Other</option>
-        </select>
-      </div>
+      {error && (
+        <p className="text-red-400 text-xs">{error}</p>
+      )}
 
       <button
         type="submit"
-        disabled={!category}
+        disabled={!category || loading}
         className="w-full py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        Submit Application
+        {loading ? "Submitting…" : "Submit Application"}
       </button>
 
       <p className="text-[#444444] text-[10px] leading-relaxed text-center">

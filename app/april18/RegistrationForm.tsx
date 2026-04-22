@@ -6,7 +6,12 @@ type AttendanceType = "remote" | "nyc";
 
 export default function RegistrationForm() {
   const [attendance, setAttendance] = useState<AttendanceType>("remote");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [timezone, setTimezone] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (submitted) {
     return (
@@ -24,14 +29,33 @@ export default function RegistrationForm() {
     );
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, timezone, attendance }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Registration failed. Please try again.");
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSubmitted(true);
-      }}
-      className="space-y-4"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-[9px] tracking-[0.25em] uppercase text-[#555555] mb-2">
           Name
@@ -39,6 +63,8 @@ export default function RegistrationForm() {
         <input
           type="text"
           required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Your name"
           className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666]"
         />
@@ -51,6 +77,8 @@ export default function RegistrationForm() {
         <input
           type="email"
           required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
           className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white placeholder-[#444444] focus:outline-none focus:border-[#666666]"
         />
@@ -62,8 +90,9 @@ export default function RegistrationForm() {
         </label>
         <select
           required
+          value={timezone}
+          onChange={(e) => setTimezone(e.target.value)}
           className="w-full bg-[#111111] border border-[#333333] px-4 py-3 text-sm text-white focus:outline-none focus:border-[#666666]"
-          defaultValue=""
         >
           <option value="" disabled>
             Select your timezone
@@ -125,11 +154,16 @@ export default function RegistrationForm() {
         </p>
       )}
 
+      {error && (
+        <p className="text-red-400 text-xs">{error}</p>
+      )}
+
       <button
         type="submit"
-        className="w-full py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors mt-2"
+        disabled={loading}
+        className="w-full py-3 bg-white text-black text-xs tracking-[0.15em] uppercase hover:bg-[#e0e0e0] transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Register — It&apos;s Free
+        {loading ? "Registering…" : "Register — It's Free"}
       </button>
     </form>
   );
